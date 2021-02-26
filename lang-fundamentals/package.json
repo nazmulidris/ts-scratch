@@ -1,0 +1,30 @@
+{
+  "name": "ts-scratch",
+  "version": "1.0.0",
+  "description": "This project contains a bunch of TypeScript experiments, in the process of learning the language.",
+  "private": true,
+  "dependencies": {
+    "awesome-typescript-loader": "^5.2.1",
+    "source-map-loader": "^1.1.0"
+  },
+  "devDependencies": {
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  },
+  "scripts": {
+    "build": "npx webpack",
+    "start": "node ./dist/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nazmulidris/ts-scratch.git"
+  },
+  "author": "Nazmul Idris",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nazmulidris/ts-scratch/issues"
+  },
+  "homepage": "https://github.com/nazmulidris/ts-scratch#readme"
+}
