@@ -3,6 +3,13 @@
 This project contains a bunch of TypeScript experiments, in the process of learning the language. The project is built
 using webpack, and is a command line project.
 
+## Upgrade node packages
+
+```shell
+npm install --force
+npx npm-check-updates -u
+```
+
 ## Docs
 
 - Language guide
