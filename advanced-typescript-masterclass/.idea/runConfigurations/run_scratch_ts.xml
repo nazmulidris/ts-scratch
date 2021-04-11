@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run scratch.ts" type="NodeJSConfigurationType" path-to-node="/usr/bin/ts-node-dev" path-to-js-file="scratch.ts" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
