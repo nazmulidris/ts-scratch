@@ -1,0 +1,23 @@
+### This should return JSON content.
+
+GET http://localhost:3000/dummy-json?name=maret
+Accept: application/json
+
+### This should return HTML content.
+
+GET http://localhost:3000/dummy-html?name=nazmul
+Accept: application/html
+
+### This should return an error (text content).
+
+GET http://localhost:3000/
+Accept: text/plain
+
+### This should echo the query params (text content).
+
+GET http://localhost:3000/echo?location=mountain-view&time=evening
+Accept: text/plain
+
+###
+
+

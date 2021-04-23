@@ -20,7 +20,7 @@
 
 Learnings from Node.js: The Complete Course for Beginners
 
-- [TS Master class](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/xV5YWR3DGq3)
+- [Node.js: The complete course for beginners](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/xV5YWR3DGq3)
 
 # Node.js project setup using IDEA
 
