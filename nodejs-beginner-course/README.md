@@ -350,3 +350,5 @@ async function main() {
 
 main()
 ```
+
+# User input and output via stdin, stdout
