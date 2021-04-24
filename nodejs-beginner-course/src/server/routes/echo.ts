@@ -1,14 +1,14 @@
-import { Content, ProcessRequestFunc, Route, ValidContentTypes } from "../types";
+import {ContentGeneratorFnType, Route, ValidContentTypes} from "../types"
 
 export class Echo implements Route {
-  pathname: string = "/echo";
+  pathname: string = `/${Echo.name}`
 
-  func: ProcessRequestFunc = (query: Object): Content => {
-    const queryText = JSON.stringify(query);
-    const textToDisplay = `Echo payload will return query key/value pairs to here: ${queryText}`;
+  generateContentFn: ContentGeneratorFnType = (queryParams?) => {
+    const queryText = JSON.stringify(queryParams)
+    const textToDisplay = `Echo payload will return query key/value pairs to here: ${queryText}`
     return {
       payload: textToDisplay,
       type: ValidContentTypes.Text,
-    };
-  };
+    }
+  }
 }

@@ -1,9 +1,9 @@
-import { Content, ProcessRequestFunc, ValidContentTypes } from "../types";
+import {ContentGeneratorFnType, ValidContentTypes} from "../types"
 
-const noRouteFoundFunction: ProcessRequestFunc = (query: Object): Content => {
+const noRouteFoundContentFn: ContentGeneratorFnType = () => {
   return {
-    payload: "Error - No route found!",
+    payload: "No route found!",
     type: ValidContentTypes.Text,
-  };
-};
-export { noRouteFoundFunction };
+  }
+}
+export {noRouteFoundContentFn}

@@ -1,21 +1,21 @@
-interface Route {
-  pathname: string;
-  func: ProcessRequestFunc;
+import {ParsedUrlQuery} from "querystring"
+
+export type ContentGeneratorFnType = (queryParams?: ParsedUrlQuery) => Content
+
+export interface Route {
+  pathname: string
+  generateContentFn: ContentGeneratorFnType
 }
 
-interface ProcessRequestFunc {
-  (queryParams: Object): Content;
-}
-
-interface Content {
-  payload: string;
-  type: ValidContentTypes;
-}
-
-enum ValidContentTypes {
+export enum ValidContentTypes {
   Text = "text/plain",
   JSON = "application/json",
   HTML = "text/html",
 }
 
-export { ProcessRequestFunc, Content, Route, ValidContentTypes };
+export interface Content {
+  payload: string
+  type: ValidContentTypes
+}
+
+export type Optional<T> =  T | undefined | null

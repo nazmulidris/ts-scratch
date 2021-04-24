@@ -19,46 +19,46 @@ enum Messages {
   userPrompt = "Type something",
 }
 
-type ReadlineWaiterCallbackFnType = (whatTheUserTyped: string) => void
+type ConsoleInterfaceCallbackFn = (whatTheUserTyped: string) => void
 
-function promptUserForInputViaReadline() {
-  const processWhatTheUserTyped: ReadlineWaiterCallbackFnType = (whatTheUserTyped) =>
+function promptUserForInputViaConsoleInterface() {
+  const processWhatTheUserTyped: ConsoleInterfaceCallbackFn = (whatTheUserTyped) =>
     userInputHandler(whatTheUserTyped.toLowerCase())
-
-  ourReadlineWaiter.question(chalk.green(`${Messages.userPrompt}: `), processWhatTheUserTyped)
+  ourConsoleInterface.question(chalk.green(`${Messages.userPrompt}: `), processWhatTheUserTyped)
 }
 
 function userInputHandler(userInput: string) {
   // closeCommand issued. Stop the program by shutting the waiter down.
-  if (userInput == Messages.closeCommand) {
-    ourReadlineWaiter.close()
+  if (userInput === Messages.closeCommand) {
+    ourConsoleInterface.close()
     return
   }
   console.log(`🚀 You typed: ${chalk.yellow(userInput)}`)
-  promptUserForInputViaReadline()
+  promptUserForInputViaConsoleInterface()
 }
 
 /**
  * https://nodejs.org/en/knowledge/command-line/how-to-prompt-for-command-line-input/
+ * - `Interface` can be file or console.
  */
-function createReadlineWaiter(): readline.Interface {
+function createReadlineConsoleInterface(): readline.Interface {
   const onCloseRequest = () => {
     console.log(chalk.red("Goodbye!"))
-    readlineWaiter.close()
+    consoleInterface.close()
   }
-  const readlineWaiter: readline.Interface = readline.createInterface({
+  const consoleInterface: readline.Interface = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   })
-  readlineWaiter.on("close", onCloseRequest)
-  return readlineWaiter
+  consoleInterface.on("close", onCloseRequest)
+  return consoleInterface
 }
 
-const ourReadlineWaiter: readline.Interface = createReadlineWaiter()
+const ourConsoleInterface: readline.Interface = createReadlineConsoleInterface()
 
 const main = async (argv: Array<string>) => {
   console.log(`Please type "${Messages.closeCommand}" or ${chalk.red("Ctrl+C")} to exit 🐾`)
-  promptUserForInputViaReadline()
+  promptUserForInputViaConsoleInterface()
 }
 
 /**

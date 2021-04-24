@@ -15,6 +15,8 @@
   - [process.nextTick()](#processnexttick)
   - [ES6 Job Queue (for Promises)](#es6-job-queue-for-promises)
 - [Promises, async, await](#promises-async-await)
+- [never](#never)
+- [User input and output via stdin, stdout](#user-input-and-output-via-stdin-stdout)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -74,6 +76,7 @@ malicious input, neither your Event Loop nor your Workers will block.
       issues.
     - Avoid variable time complexity callbacks, try and keep them `O(n)`. Here are some strategies
       to accomplish this.
+
       1. _Partitioning_: You can use `setImmediate` and chunk the long operation into smaller
          pieces.
       2. _Offloading_: The only drawback here is that the main thread is in a different "namespace"
@@ -83,6 +86,7 @@ malicious input, neither your Event Loop nor your Workers will block.
          they both have to be approached differently. However, if your app relies heavily on complex
          calculations, you should think about whether Node.js is really a good fit. Node.js excels
          for I/O-bound work, but for expensive computation it might not be the best option.
+
       - You have [**two choices**](#worker-threads-api-for-js-code) to run CPU intensive JS code in
         the thread pool without writing a C/C++ addon.
       - You can create a C/C++ addon using [N-API](https://nodejs.org/api/n-api.html).
@@ -349,6 +353,55 @@ async function main() {
 }
 
 main()
+```
+
+# never
+
+1. `never` is a bottom type (which is `Nothing` in Kotlin).
+2. The opposite of "top" type like `Object` in Java, and `any` in TypeScript or Kotlin.
+
+```typescript
+function foo(param: boolean) {
+  if (param) {
+  } else if (!param) {
+  } else {
+    // WTF?! param is never and this code is unreachable!
+    if (param) {
+    }
+  }
+}
+```
+
+```typescript
+/* @throws(Error) */
+function getContentFromRoute(parsedUrl: ParsedUrl, routes: Array<Route>): Content {
+  const matchingRoute: Optional<Route> = routes.find(
+    (it: Route) => it.pathname === parsedUrl.pathname
+  )
+  return matchingRoute?.generateContentFn(parsedUrl.query) ?? this.error("no route found")
+}
+
+function error(message: string): never {
+  throw new Error(message)
+}
+```
+
+```typescript
+/* @throws(Error) */
+function getContentFromRoute(parsedUrl: ParsedUrl, routes: Array<Route>): Content {
+  const matchingRoute: Optional<Route> = routes.find(
+    (it: Route) => it.pathname === parsedUrl.pathname
+  )
+
+  this.error("bam! 🎇 🧯 🚒 💣")
+
+  // This line is unreachable.
+  return matchingRoute?.generateContentFn(parsedUrl.query) ?? this.error("no route found")
+}
+
+function error(message: string): never {
+  throw new Error(message)
+}
 ```
 
 # User input and output via stdin, stdout

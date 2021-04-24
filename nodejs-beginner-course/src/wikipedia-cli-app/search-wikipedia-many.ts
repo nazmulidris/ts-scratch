@@ -11,81 +11,81 @@
    - More about `she-bang`: https://en.wikipedia.org/wiki/Shebang_(Unix)
 */
 
-import {createInterface, Interface} from "readline";
+import * as chalk from "chalk"
+import * as readline from "readline"
 import {
   getSearchResultsFromWikipediaAsynchronously,
   saveStringToFileAsynchronously,
-} from "./wikipedia-api-utils";
+} from "./wikipedia-api-utils"
 
-const closeCommand: string = "close!";
-const searchWikipediaPrompt: string = "Search Wikipedia: ";
-
-const promptUserForSearchTermAsynchronous = (myWaiter: Interface) => {
-  myWaiter.question(searchWikipediaPrompt, (whatTheUserTyped: string) =>
-    onSearchWikipediaRequest(whatTheUserTyped.toLowerCase(), myWaiter)
-  );
-};
-
-const onSearchWikipediaRequest = async (searchTerm: string, myWaiter: Interface) => {
-  // closeCommand issued. Stop the program by shutting the waiter down.
-  if (searchTerm === closeCommand) {
-    myWaiter.close();
-    return;
-  }
-  
-  // NON BLOCKING (🐾 RESPONSE)
-  // const promiseForTheResponse: Promise<string> = getSearchResultsFromWikipediaAsynchronously(
-  //   searchTerm
-  // );
-  // promiseForTheResponse.then((actualResponse) => {
-  //   console.log(actualResponse);
-  // });
-  
-  // BLOCKING (🐾 RESPONSE)
-  const response: string = await getSearchResultsFromWikipediaAsynchronously(searchTerm);
-  console.log(`🚀 Got response from Wikipedia API: ${response}`);
-  const filename = `${searchTerm.replace(" ", "-")}.json`;
-  
-  // BLOCKING (WRITE DATA TO FILE)
-  await saveStringToFileAsynchronously(response, filename);
-  console.log(`🚀 Saved file ${filename} 🧚`);
-  
-  // NON BLOCKING
-  // const myPromise: Promise<void> = saveStringToFileAsynchronously(
-  //   response,
-  //   filename
-  // );
-  // myPromise.then((bla) => {
-  //   console.log(bla);
-  // });
-  
-  promptUserForSearchTermAsynchronous(myWaiter);
-};
-
-/**
- * https://nodejs.org/en/knowledge/command-line/how-to-prompt-for-command-line-input/
- */
-function createReadlineWaiter(): Interface {
-  const onCloseRequest = () => {
-    console.log("Goodbye!");
-    process.exit();
-  };
-  const waiter: Interface = createInterface({
-                                              input: process.stdin,
-                                              output: process.stdout,
-                                            });
-  waiter.on("close", onCloseRequest);
-  return waiter;
+enum UIStrings {
+  closeCommand = "exit",
+  searchWikipediaPrompt = "Search Wikipedia: "
 }
 
-const main = async (argv: Array<string>) => {
-  console.log(`Please type "${closeCommand}" or "Ctrl+C" in order to exit this app 🐾`);
-  const myWaiter: Interface = createReadlineWaiter();
-  promptUserForSearchTermAsynchronous(myWaiter);
-};
+class CommandShell {
+  readonly ourWaiter: readline.Interface
+  readonly ourArgs: string[]
+  
+  constructor() {
+    this.ourArgs = process.argv.splice(2)
+    
+    this.ourWaiter = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    })
+    this.setupReadlineWaiter()
+    
+    console.log(`Type "${chalk.red(UIStrings.closeCommand)}" or ${chalk.red("Ctrl+C")} to exit 🐾`)
+    console.log(`Command line args passed: ${chalk.yellow(this.ourArgs)}`)
+    
+    this.promptUserForSearchTermAsynchronous()
+  }
+  
+  /**
+   * https://nodejs.org/en/knowledge/command-line/how-to-prompt-for-command-line-input/
+   */
+  setupReadlineWaiter = () => {
+    const handleOnCloseRequest = () => {
+      console.log(chalk.yellow("Goodbye!"))
+      this.ourWaiter.close()
+    }
+    this.ourWaiter.on("close", handleOnCloseRequest)
+  }
+  
+  promptUserForSearchTermAsynchronous = () => {
+    const handleWhatUserTyped = (whatTheUserTyped: string) =>
+      this.onSearchWikipediaRequest(whatTheUserTyped.toLowerCase())
+    this.ourWaiter.question(UIStrings.searchWikipediaPrompt, handleWhatUserTyped)
+  }
+  
+  onSearchWikipediaRequest = async (searchTerm: string) => {
+    // closeCommand issued. Stop the program by shutting the waiter down.
+    if (searchTerm === UIStrings.closeCommand) {
+      this.ourWaiter.close()
+      return
+    }
+    
+    // BLOCKING (RESPONSE)
+    const response: string = await getSearchResultsFromWikipediaAsynchronously(searchTerm)
+    console.log(`🚀 Got response from Wikipedia API: ${response} 💪`)
+    const filename = `${searchTerm.replace(" ", "-")}.json`
+    
+    // BLOCKING (WRITE DATA TO FILE)
+    await saveStringToFileAsynchronously(response, filename)
+    console.log(`🚀 Saved file ${filename} 🧚`)
+    
+    this.promptUserForSearchTermAsynchronous()
+  }
+  
+}
+
+const main = async () => {
+  new CommandShell()
+}
 
 /**
  * Dump all the command line arguments to console.
  * More info: https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/
  */
-main(process.argv.splice(2));
+main()

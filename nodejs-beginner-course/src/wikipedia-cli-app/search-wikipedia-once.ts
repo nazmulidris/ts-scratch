@@ -14,27 +14,27 @@
 import {
   getSearchResultsFromWikipediaAsynchronously,
   saveStringToFileAsynchronously,
-} from "./wikipedia-api-utils";
+} from "./wikipedia-api-utils"
 
 const main = async (argv: Array<string>) => {
   if (argv.length === 0) {
-    console.log("⚠️ Please pass the search term as an argument!");
-    process.exit(1);
+    console.log("⚠️ Please pass the search term as an argument!")
+    process.exit(1)
   }
   const searchTerm = argv.join(" ")
-                         .toLowerCase();
-  console.log(searchTerm);
-  const response: string = await getSearchResultsFromWikipediaAsynchronously(searchTerm);
-  
-  console.log(`🚀 Got response from Wikipedia API: ${response}`);
-  const filename = `${searchTerm.replace(" ", "-")}.json`;
-  
-  await saveStringToFileAsynchronously(response, filename);
-  console.log(`🚀 Saved file ${filename} 🧚`);
-};
+  .toLowerCase()
+  console.log(searchTerm)
+  const response: string = await getSearchResultsFromWikipediaAsynchronously(searchTerm)
+
+  console.log(`🚀 Got response from Wikipedia API: ${response}`)
+  const filename = `${searchTerm.replace(" ", "-")}.json`
+
+  await saveStringToFileAsynchronously(response, filename)
+  console.log(`🚀 Saved file ${filename} 🧚`)
+}
 
 /**
  * Dump all the command line arguments to console.
  * More info: https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/
  */
-main(process.argv.splice(2));
+main(process.argv.splice(2))
