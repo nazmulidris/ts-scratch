@@ -17,6 +17,10 @@
 - [Promises, async, await](#promises-async-await)
 - [never](#never)
 - [User input and output via stdin, stdout](#user-input-and-output-via-stdin-stdout)
+  - [console](#console)
+  - [Global console object](#global-console-object)
+  - [Console class (and simple logging)](#console-class-and-simple-logging)
+  - [readline from console](#readline-from-console)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -405,3 +409,230 @@ function error(message: string): never {
 ```
 
 # User input and output via stdin, stdout
+
+## Global console object
+
+There's a global `console` object that is configured to write to `process.stdout` and
+`process.stderr`. The interesting thing is that you can pass an `Error` to `console.error()` in
+order to get a stack trace. You can also use the `trace()` method. Here are examples.
+
+```typescript
+console.log("Hello World")
+console.warn("This is a warning!")
+console.error("This is an error")
+console.error(new Error("🐛 This captures the stack trace here!"))
+console.trace("🐛 This also captures the stack trace here!")
+```
+
+Another useful feature of console is `console.time(string)` and `console.timeEnd(string)`. The first
+method starts a time (with the given string as key). A call to the second method with the same key
+prints the elapsed time.
+
+```typescript
+const timerName = "For loop time"
+console.time() // Does not print anything. Starts the timer.
+for (let i = 0; i < 100; i++) {
+  /* ... */
+}
+console.timeEnd(timerName) // Prints the time that has passed, eg "For loop time:0.123ms".
+```
+
+Yet another useful feature is the `console.table()` method which prints an array of objects that is
+passed to it. Here's an example.
+
+```typescript
+console.table([
+  { name: "john", age: 12 },
+  { name: "jane", age: 15 },
+])
+```
+
+Here's the output it produces.
+
+```text
+┌─────────┬─────────┬──────────┐
+│ (index) │  Name   │ Age      │
+├─────────┼─────────┼──────────┤
+│    0    │ 'john'  │    12    │
+│    1    │ 'jane'  │    15    │
+└─────────┴─────────┴──────────┘
+```
+
+## Console class (and simple logging)
+
+- [Sample code](src/basics/logger.ts)
+
+You can use the `Console` class to write to files, instead of using the global `console` object that
+is tied to `process.stderr` and `process.stdout`. Here's an example of a simple logger that writes
+errors to files.
+
+```typescript
+const fs = require("fs")
+const { Console } = require("console")
+
+const output = fs.createWriteStream("./stdout.log")
+const errorOutput = fs.createWriteStream("./stderr.log")
+
+const logger = new Console({ stdout: output, stderr: errorOutput })
+
+const number = 5
+logger.log("number:", number)
+// In stdout.log: number 5
+const code = 9
+logger.error("error code:", code)
+```
+
+## readline from (global) console
+
+- [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/gkj79gjxYo9)
+- [Sample code](src/basics/cli-fp.ts)
+
+The `readline` module needs an interface to work. This interface can be a file or the console. We
+want to get input from the console and output some information on the console, via `readline`.
+
+1. In Node.js, the `process` object has two properties that can help us:
+
+- 👉 `stdout` for output - Prompts to the user are displayed via this.
+- 👈 `stdin` for input - User input is captured via this.
+
+2. We use the `createInterface` method to create a new `readline.Interface` instance that we can use
+   to:
+
+- First, prompt the user for input as well (via `question`).
+- Second, read user input from the console (via callback to `question`).
+
+3. Finally, when it is time to end the CLI, `close` must be called on the `readline.Interface`
+   otherwise the Node.js process will be waiting on the console's `stdin` (even w/out being in the
+   middle of executing the `question` method). That's just the way the Node.js
+   [threading model works](#nodejs-threading-model).
+
+### FP example using question (w/out using "line" event)
+
+The following are examples of functions to demonstrate the above. Here's a function that kicks off
+the CLI Node.js sample.
+
+```typescript
+const main = async (argv: Array<string>) => {
+  console.log(`Please type "${Messages.closeCommand}" or ${chalk.red("Ctrl+C")} to exit 🐾`)
+  promptUserForInputViaConsoleInterface()
+}
+// https://nodejs.org/en/knowledge/command-line/how-to-parse-command-line-arguments/
+main(process.argv.splice(2))
+```
+
+Here's a function that creates a `readline` interface connected to the console.
+
+```typescript
+function createReadlineConsoleInterface(): readline.Interface {
+  const onCloseRequest = () => {
+    console.log(chalk.red("Goodbye!"))
+    consoleInterface.close()
+  }
+  const consoleInterface: readline.Interface = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  consoleInterface.on("close", onCloseRequest)
+  return consoleInterface
+}
+
+const ourConsoleInterface: readline.Interface = createReadlineConsoleInterface()
+```
+
+Here's a function that uses the `readline` console interface to prompt the user (via
+`process.stdout`) for some input, and process their response (from `process.stdin`).
+
+```typescript
+enum Messages {
+  closeCommand = "quit",
+  userPrompt = "Type something",
+}
+
+type ConsoleInterfaceCallbackFn = (whatTheUserTyped: string) => void
+
+function promptUserForInputViaConsoleInterface() {
+  const processWhatTheUserTyped: ConsoleInterfaceCallbackFn = (whatTheUserTyped) =>
+    userInputHandler(whatTheUserTyped.toLowerCase())
+  ourConsoleInterface.question(chalk.green(`${Messages.userPrompt}: `), processWhatTheUserTyped)
+}
+```
+
+Here's a function that processes what the user typed.
+
+```typescript
+function userInputHandler(userInput: string) {
+  // closeCommand issued. Stop the program by shutting the waiter down.
+  if (userInput === Messages.closeCommand) {
+    ourConsoleInterface.close()
+    return
+  }
+  console.log(`🚀 You typed: ${chalk.yellow(userInput)}`)
+  promptUserForInputViaConsoleInterface()
+}
+```
+
+### OOP example using "line" event (w/out using question)
+
+Instead of using the `question` method, we can simply rely on the `line` event, just like we rely on
+the `close` event (which is fired when the user presses `Ctrl+C`).
+
+Here's an OOP version of the code above that uses this pattern (I think the code is much cleaner
+w/out using `question`).
+
+```typescript
+class UIStrings {
+  public static readonly closeCommand = "quit"
+  public static readonly userPrompt = `> Please type "${UIStrings.closeCommand}" or ${chalk.red(
+    "Ctrl+C"
+  )} to exit 🐾`
+}
+
+class CommandLineInterface {
+  private readonly consoleInterface: readline.Interface
+
+  constructor(message: string) {
+    this.consoleInterface = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    })
+    this.consoleInterface.on("line", this.onLineEntered)
+    this.consoleInterface.on("close", this.onControlCPressed)
+    this.setPrompt(message)
+  }
+
+  stop = () => {
+    this.consoleInterface.close()
+  }
+
+  start = () => {
+    this.consoleInterface.prompt()
+  }
+
+  setPrompt = (message: string) => {
+    this.consoleInterface.setPrompt(message)
+  }
+
+  private onLineEntered = (line: string) => {
+    switch (line) {
+      case UIStrings.closeCommand:
+        this.stop()
+        return
+      default:
+        console.log(`> 🚀 You typed: ${chalk.yellow(line)}`)
+        this.start()
+    }
+  }
+
+  private onControlCPressed = () => {
+    console.log(chalk.red("Goodbye!"))
+    this.stop()
+  }
+}
+
+const main = async (argv: Array<string>) => {
+  const cli = new CommandLineInterface(UIStrings.userPrompt)
+  cli.start()
+}
+
+main(process.argv.splice(2))
+```
