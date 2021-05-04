@@ -14,13 +14,22 @@
   - [Message Queue and setTimeout(), setImmediate()](#message-queue-and-settimeout-setimmediate)
   - [process.nextTick()](#processnexttick)
   - [ES6 Job Queue (for Promises)](#es6-job-queue-for-promises)
-- [Promises, async, await](#promises-async-await)
-- [never](#never)
+- [TypeScript and JavaScript language](#typescript-and-javascript-language)
+  - [Promises, async, await](#promises-async-await)
+  - [Use strict=true in tsconfig.json options](#use-stricttrue-in-tsconfigjson-options)
+  - [Use unknown over any](#use-unknown-over-any)
+  - [User defined type guards](#user-defined-type-guards)
+  - [never](#never)
+  - [TypeScript JSDocs](#typescript-jsdocs)
+  - [this keyword and Kotlin scoping functions](#this-keyword-and-kotlin-scoping-functions)
 - [User input and output via stdin, stdout](#user-input-and-output-via-stdin-stdout)
-  - [console](#console)
   - [Global console object](#global-console-object)
   - [Console class (and simple logging)](#console-class-and-simple-logging)
-  - [readline from console](#readline-from-console)
+  - [readline from (global) console](#readline-from-global-console)
+    - [FP example using question (w/out using "line" event)](#fp-example-using-question-wout-using-line-event)
+    - [OOP example using "line" event (w/out using question)](#oop-example-using-line-event-wout-using-question)
+- [Buffer](#buffer)
+- [Events](#events)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -238,7 +247,9 @@ foo()
 
 ![Call stack for the code above](https://nodejs.dev/907f18a0288ad303ad59c035397a6f7e/call-stack-third-example.svg)
 
-# Promises, async, await
+# TypeScript and JavaScript language
+
+## Promises, async, await
 
 It is relatively simple to reason about using promises, as a way to eliminate callback hell. It is
 also relatively simple to
@@ -359,7 +370,183 @@ async function main() {
 main()
 ```
 
-# never
+## Use strict=true in tsconfig.json options
+
+Always set [`"strict"=true`](https://www.typescriptlang.org/tsconfig#strict)
+
+## Use unknown over any
+
+Because it does not propagate:
+
+```javascript
+function foo1(bar: any) {
+  const a: string = bar // no error
+  const b: number = bar // no error
+  const c: { name: string } = bar // no error
+}
+
+function foo2(bar: unknown) {
+  const a: string = bar // 🔴 Type 'unknown' is not assignable to type 'string'.(2322)
+  const b: number = bar // 🔴 Type 'unknown' is not assignable to type 'number'.(2322)
+  const c: { name: string } = bar // 🔴 Type 'unknown' is not assignable to type '{ name: string; }'.(2322)
+}
+```
+
+## User defined type guards
+
+A guard is not a type, but a mechanism that narrows types.
+
+Here are some examples of built-in type guards.
+
+1. `typeof` guard - This only works for JS primitive types that are checked at runtime (string,
+   number, undefined, null, Boolean, and Symbol). It does not work for interfaces because that
+   information is erased at runtime.
+
+   ```typescript
+   class Properties {
+     width: number = 0
+
+     setWidth(width: number | string) {
+       if (typeof width === "number") {
+         this.width = width
+       } else {
+         this.width = parseInt(width)
+       }
+     }
+   }
+   ```
+
+2. `instanceof` guard - This works with classes, but not interfaces. Type information for classes is
+   retained at runtime by JS, but not interfaces.
+
+   ```typescript
+   class Person {
+     constructor(public name: string) {}
+   }
+
+   function greet(obj: any) {
+     if (obj instanceof Person) {
+       console.log(obj.name)
+     }
+   }
+   ```
+
+3. A custom type guard is a Boolean-returning function that can additionally assert something about
+   the type of its parameter. You can create user defined type guards to test if an object has the
+   shape of an interface.
+
+- [Docs](https://www.typescriptlang.org/docs/handbook/advanced-types.html#using-type-predicates)
+- [Course](https://www.educative.io/courses/advanced-typescript-masterclass/g77AxgkEQG3#overview)
+
+The following code does **not work**.
+
+```typescript
+interface Article {
+  title: string
+  body: string
+}
+
+function doSomething(bar: unknown) {
+  const title: string = bar.title // 🔴 Error!
+  const body: number = bar.body // 🔴 Error!
+  console.log(title, body)
+}
+
+doSomething({ title: "t", body: "b" })
+doSomething({ foo: "t", bar: "b" })
+```
+
+**First** try at using user defined type guards. It doesn't narrow automatically!
+
+```typescript
+interface Article {
+  title: string
+  body: string
+}
+
+function isArticle(param: unknown): boolean {
+  const myParam = param as Article
+  // 👍 One way of writing this without using string literals.
+  if (myParam.title != undefined && myParam.body != undefined) {
+    // The following works too.
+    // if ("title" in myParam && "body" in myParam) {
+    return true
+  }
+  return false
+}
+
+function doSomething(bar: unknown) {
+  if (isArticle(bar)) {
+    // 👎 You have to cast bar to Article as it does not narrow automatically.
+    const article = bar as Article
+    console.log("Article interface type: ", article.title, article.body)
+  } else {
+    console.log("unknown type", bar)
+  }
+}
+
+doSomething({ title: "t", body: "b" })
+doSomething({ foo: "t", bar: "b" })
+```
+
+**Second** try at writing this. Have to use string literals for the properties!
+
+```typescript
+interface Article {
+  title: string
+  body: string
+}
+
+function isArticle(param: any): param is Article {
+  // 👎 You lose the ability to autocomplete title and body (as shown above), string literals are
+  // needed, which could be a problem with keeping things in sync.
+  return "title" in param && "body" in param
+}
+
+function doSomething(bar: unknown) {
+  if (isArticle(bar)) {
+    // 👍 You don't have to cast bar to Article! It is automatically narrowed!
+    console.log("Article interface type: ", bar.title, bar.body)
+  } else {
+    console.log("unknown type", bar)
+  }
+}
+
+doSomething({ title: "t", body: "b" })
+doSomething({ foo: "t", bar: "b" })
+```
+
+**Third** and best try, which solves both problems with previous tries.
+
+```typescript
+interface Article {
+  title: string
+  body: string
+}
+
+function isArticle(param: any): param is Article {
+  const myParam = param as Article
+  return (
+    myParam.title != undefined &&
+    myParam.body != undefined &&
+    typeof myParam.title == "string" &&
+    typeof myParam.body == "string"
+  )
+}
+
+function doSomething(bar: unknown) {
+  if (isArticle(bar)) {
+    console.log("Article interface type: ", bar.title, bar.body)
+  } else {
+    console.log("unknown type", bar)
+  }
+}
+
+doSomething({ title: "t", body: "b" })
+doSomething({ foo: "t", bar: "b" })
+```
+
+## never
 
 1. `never` is a bottom type (which is `Nothing` in Kotlin).
 2. The opposite of "top" type like `Object` in Java, and `any` in TypeScript or Kotlin.
@@ -405,6 +592,87 @@ function getContentFromRoute(parsedUrl: ParsedUrl, routes: Array<Route>): Conten
 
 function error(message: string): never {
   throw new Error(message)
+}
+```
+
+## TypeScript JSDocs
+
+Here's more information on
+[TypeScript specific JSDocs](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
+.
+
+Here are some examples.
+
+```typescript
+/**
+ * @param contextObject value of `it`
+ * @param block lambda that accepts `it`
+ * @return contextObject return the contextObject that is passed
+ */
+export const _also = <T>(contextObject: T, block: Receiver<T>): T => {
+  block(contextObject)
+  return contextObject
+}
+
+/**
+ * @param contextObject value of `this`
+ * @param lambda lambda that accepts `this`
+ * @return contextObject return the result of the lambda
+ */
+export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn<T, R>): R {
+  return lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
+}
+```
+
+## this keyword and Kotlin scoping functions
+
+To understand advanced things about TypeScript, I decided to write the
+[Kotlin scoping functions](https://kotlinlang.org/docs/scope-functions.html#function-selection)
+(with, apply, let, run, etc) in TypeScript.
+
+- [Sample code - Kotlin Scoping Functions](src/lang-utils/kotlin.ts)
+- [Sample code - Test for above](src/lang-utils/test-kt-lang-utils.ts)
+
+Here are some references:
+
+- [Kotlin context and `this` rebinding](https://developerlife.com/2020/04/05/kotlin-dsl-intro/#context-and-rebinding-this)
+- [TypeScript handling `this` parameters](https://www.typescriptlang.org/docs/handbook/functions.html#this-parameters)
+- [TypeScript utility types for `this`](https://www.typescriptlang.org/docs/handbook/utility-types.html#thistypetype)
+- [JavaScript `bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call)
+- [JavaScript `call`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind)
+
+It is more complicated to handle "implicit" `this` scenario, since in TypeScript, there is no such
+thing. So we use `this` explicitly but even so, in a given lambda rebinding `this` poses a
+challenge. This is why I created an interface that describes the shape of an object which has a
+function. And for this object, `this` can be bound to the `contextObject`. The `this` keyword then
+works inside this object that is passed to `_with` and `_apply` shown below.
+
+```typescript
+interface ImplicitReceiver<T> {
+  blockWithReboundThis: (this: T) => void
+}
+
+interface ImplicitReceiverWithReturn<T, R> {
+  blockWithReboundThis: (this: T) => R
+}
+
+/**
+ * @param contextObject value of `this`
+ * @param lambda lambda that accepts `this`
+ * @return contextObject return the contextObject that is passed
+ */
+export function _apply<T>(contextObject: T, lambda: ImplicitReceiver<T>): T {
+  lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
+  return contextObject
+}
+
+/**
+ * @param contextObject value of `this`
+ * @param lambda lambda that accepts `this`
+ * @return contextObject return the result of the lambda
+ */
+export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn<T, R>): R {
+  return lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
 }
 ```
 
@@ -636,3 +904,23 @@ const main = async (argv: Array<string>) => {
 
 main(process.argv.splice(2))
 ```
+
+# Buffer
+
+- [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/7nKRnv8Q9lQ#buffer-in-nodejs)
+- [Sample code](src/basics/buffer.ts)
+
+Node.js has a `Buffer` class that provides us with the functionality we discussed above. This
+`Buffer` class is an array of bytes that is used to represent binary data. Streams, and other file
+system operations, are usually carried out with binary data, making buffers the ideal candidates for
+them.
+
+The `Buffer` class is based on JavaScript’s `Uint8Array`. To put it simply, we can think of `Buffer`
+objects as arrays that only contain integers from `0` to `255`. One distinction is that `Buffer`
+objects correspond to fixed-sized blocks of memory, which cannot be changed after they are created.
+There is no explicit way of deleting a buffer, but setting it to null will do the job. The memory
+will be handled by the garbage collector.
+
+# Events
+
+- [Sample code](src/basics/events.ts)
