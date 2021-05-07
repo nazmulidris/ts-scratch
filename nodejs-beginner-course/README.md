@@ -924,3 +924,62 @@ will be handled by the garbage collector.
 # Events
 
 - [Sample code](src/basics/events.ts)
+- [EventEmitter Docs](https://nodejs.org/api/events.html#events_emitter_emit_eventname_args)
+- [TypeScript varargs](https://www.damirscorner.com/blog/posts/20180216-VariableNumberOfArgumentsInTypescript.html)
+
+Some interesting things to note:
+
+- There's a default `error` event that you can pass to an `EventEmitter`.
+- When you call `emit` you can pass varargs as the last argument. You have to be careful about
+  receiving that in the event listener in the correct way.
+
+```typescript
+class Events {
+  static readonly TimerName = "EventsTimer"
+  static readonly Error = "error" /* Special Node.js error name. */
+  static readonly Event1 = Symbol()
+  static readonly Event2 = Symbol()
+}
+
+_kt._let(new EventEmitter(), (emitter) => {
+  // Start Timer.
+  console.time(Events.TimerName)
+
+  // Handle Event1.
+  emitter.on(Events.Event1, (...args: any[]) => {
+    console.log(chalk.blue(`emitter.on -> Event1, args: ${JSON.stringify(args)}`))
+    console.timeLog(Events.TimerName)
+  })
+
+  // Handle Error.
+  emitter.on("error", (...errorArgs: any[]) => {
+    console.error(chalk.red(`emitter.on('error') -> errorArgs: ${JSON.stringify(errorArgs)}`))
+    console.timeLog(Events.TimerName)
+  })
+
+  // Fire Event1.
+  _kt._let(Events.Event1, (event) => {
+    fireEvent(emitter, event, 100, "🐵", { foo: "bar" })
+    fireEvent(emitter, event, 200)
+  })
+
+  // Fire Error.
+  fireError(emitter)
+  fireError(emitter, 200, "💣", { errorCode: 50 })
+})
+
+const fireEvent = (
+  emitter: EventEmitter,
+  eventType: symbol | string,
+  delayMs: number = 100,
+  ...args: any[]
+) =>
+  setTimeout(() => {
+    emitter.emit(eventType, ...args)
+  }, delayMs)
+
+const fireError = (emitter: EventEmitter, delayMs: number = 100, ...errorArgs: any[]) =>
+  setTimeout(() => {
+    emitter.emit(Events.Error, ...errorArgs)
+  }, delayMs)
+```
