@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 
 import * as chalk from "chalk"
-import * as _kt from "./kotlin"
+import * as _kt from "./kotlin-lang-utils"
 
 // Testing the main Kotlin scope function inspired functions (in TypeScript).
 // https://kotlinlang.org/docs/scope-functions.html#function-selection

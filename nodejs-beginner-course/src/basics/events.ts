@@ -1,8 +1,9 @@
 #!/usr/bin/env ts-node
 
 import * as chalk from "chalk"
-import * as _kt from "../lang-utils/kotlin"
+import * as _kt from "../core-utils/kotlin-lang-utils"
 import { EventEmitter } from "events"
+import { printHeader } from "../core-utils/console-utils"
 
 class Events {
   static readonly TimerName = "EventsTimer"
@@ -14,7 +15,7 @@ class Events {
 // EventEmitter - https://nodejs.org/api/events.html#events_emitter_emit_eventname_args
 
 function main() {
-  console.log(chalk.black.bgYellow("Events"))
+  printHeader("Events")
 
   // Start timer.
   console.time(Events.TimerName)
@@ -39,18 +40,21 @@ function main() {
     })
 
     // Fire Event1.
+    printHeader("Fire Event1")
     _kt._let(Events.Event1, (event) => {
       fireEvent(emitter, event, 100, "🐵", { foo: "bar" })
       fireEvent(emitter, event, 200)
     })
 
     // Fire Event2.
+    printHeader("Fire Event2")
     _kt._let(Events.Event2, (event) => {
       fireEvent(emitter, event)
       fireEvent(emitter, event)
     })
 
     // Fire Error.
+    printHeader("Fire Error")
     fireError(emitter)
     fireError(emitter, 200, "💣", { errorCode: 50 })
   })
@@ -59,7 +63,11 @@ function main() {
 // TypeScript varargs -
 // https://www.damirscorner.com/blog/posts/20180216-VariableNumberOfArgumentsInTypescript.html
 
-const fireError = (emitter: EventEmitter, delayMs: number = 100, ...errorArgs: any[]) =>
+const fireError = (
+  emitter: EventEmitter,
+  delayMs: number = 100,
+  ...errorArgs: (string | object)[]
+) =>
   setTimeout(() => {
     emitter.emit(Events.Error, ...errorArgs)
   }, delayMs)
@@ -68,7 +76,7 @@ const fireEvent = (
   emitter: EventEmitter,
   eventType: symbol | string,
   delayMs: number = 100,
-  ...args: any[]
+  ...args: (string | object)[]
 ) =>
   setTimeout(() => {
     emitter.emit(eventType, ...args)

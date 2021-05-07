@@ -30,6 +30,8 @@
     - [OOP example using "line" event (w/out using question)](#oop-example-using-line-event-wout-using-question)
 - [Buffer](#buffer)
 - [Events](#events)
+- [Files](#files)
+- [Testing](#testing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -630,8 +632,8 @@ To understand advanced things about TypeScript, I decided to write the
 [Kotlin scoping functions](https://kotlinlang.org/docs/scope-functions.html#function-selection)
 (with, apply, let, run, etc) in TypeScript.
 
-- [Sample code - Kotlin Scoping Functions](src/lang-utils/kotlin.ts)
-- [Sample code - Test for above](src/lang-utils/test-kt-lang-utils.ts)
+- [Sample code - Kotlin Scoping Functions](src/core-utils/kotlin-lang-utils.ts)
+- [Sample code - Test for above](src/core-utils/test-kt-lang-utils.ts)
 
 Here are some references:
 
@@ -728,7 +730,7 @@ Here's the output it produces.
 
 ## Console class (and simple logging)
 
-- [Sample code](src/basics/logger.ts)
+- [Sample code](src/basics/console-log-to-file.ts)
 
 You can use the `Console` class to write to files, instead of using the global `console` object that
 is tied to `process.stderr` and `process.stdout`. Here's an example of a simple logger that writes
@@ -968,18 +970,43 @@ _kt._let(new EventEmitter(), (emitter) => {
   fireError(emitter, 200, "💣", { errorCode: 50 })
 })
 
+// TypeScript varargs -
+// https://www.damirscorner.com/blog/posts/20180216-VariableNumberOfArgumentsInTypescript.html
+
+const fireError = (
+  emitter: EventEmitter,
+  delayMs: number = 100,
+  ...errorArgs: (string | object)[]
+) =>
+  setTimeout(() => {
+    emitter.emit(Events.Error, ...errorArgs)
+  }, delayMs)
+
 const fireEvent = (
   emitter: EventEmitter,
   eventType: symbol | string,
   delayMs: number = 100,
-  ...args: any[]
+  ...args: (string | object)[]
 ) =>
   setTimeout(() => {
     emitter.emit(eventType, ...args)
   }, delayMs)
-
-const fireError = (emitter: EventEmitter, delayMs: number = 100, ...errorArgs: any[]) =>
-  setTimeout(() => {
-    emitter.emit(Events.Error, ...errorArgs)
-  }, delayMs)
 ```
+
+# Files
+
+# Testing
+
+Use Jest framework (made by Facebook). It is not tied to React development.
+
+- [ts-jest](https://github.com/kulshekhar/ts-jest)
+- [jest](https://jestjs.io/)
+- [Getting started w/ Node.js and jest](https://jestjs.io/docs/getting-started)
+
+1. Jest itself is built on top of Jasmine. Jest is fast, when compared to Karma (which is a test
+   runner that uses a real browser and has to be paired w/ something like Jasmine for the actual
+   test running).
+2. Jest does not use a real DOM (it uses `js-dom`) which makes it much faster compared to Karma.
+3. Given the speed of Jest, the huge developer adoption and support it has, along with its
+   multiplatform testing capabilities (Vanilla JS, Node.js, React), and it works w/ React (via
+   `ts-jest`), it is the testing platform of choice.
