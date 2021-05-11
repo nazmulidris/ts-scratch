@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="basics/test-kt-lang-utils.ts" type="NodeJSConfigurationType" path-to-js-file="$PROJECT_DIR$/src/core-utils/test-kt-lang-utils.ts" working-dir="$PROJECT_DIR$">
-    <method v="2" />
-  </configuration>
-</component>

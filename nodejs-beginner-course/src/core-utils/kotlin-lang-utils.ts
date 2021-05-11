@@ -17,51 +17,60 @@
  * https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
  */
 
-export type Receiver<T> = (it: T) => void
-export type ReceiverWithReturn<T, R> = (it: T) => R
+export type ReceiverFn<T> = (it: T) => void
+export type ReceiverFnWithReturn<T, R> = (it: T) => R
 
 /**
  * @param contextObject value of `it`
- * @param block lambda that accepts `it`
+ * @param receiverFn lambda that accepts `it`
  * @return contextObject return the contextObject that is passed
  */
-export const _also = <T>(contextObject: T, block: Receiver<T>): T => {
-  block(contextObject)
+export const _also = <T>(contextObject: T, receiverFn: ReceiverFn<T>): T => {
+  receiverFn(contextObject)
   return contextObject
 }
 
 /**
  * @param contextObject value of `it`
- * @param block lambda that accepts `it`
- * @return contextObject return the result of the block (lambda)
+ * @param receiverFnWithReturn lambda that accepts `it`
+ * @return contextObject return the result of the receiverFnWithReturn (lambda)
  */
-export const _let = <T, R>(contextObject: T, block: ReceiverWithReturn<T, R>): R => {
-  return block(contextObject)
+export const _let = <T, R>(
+  contextObject: T,
+  receiverFnWithReturn: ReceiverFnWithReturn<T, R>
+): R => {
+  return receiverFnWithReturn(contextObject)
 }
 
-interface ImplicitReceiver<T> {
-  blockWithReboundThis: (this: T) => void
+export interface ImplicitReceiverObject<T> {
+  fnWithReboundThis: (this: T) => void
 }
 
-interface ImplicitReceiverWithReturn<T, R> {
-  blockWithReboundThis: (this: T) => R
+export interface ImplicitReceiverObjectWithReturn<T, R> {
+  fnWithReboundThis: (this: T) => R
 }
 
 /**
- * @param contextObject value of `this`
- * @param lambda lambda that accepts `this`
+ * @param contextObject value of `this` (in the `blockWithReboundThis` function)
+ * @param objectContainingFnWithReboundThis object containing function `blockWithReboundThis`
+ * which accepts contextObject (aka `this`)
  * @return contextObject return the contextObject that is passed
  */
-export function _apply<T>(contextObject: T, lambda: ImplicitReceiver<T>): T {
-  lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
+export const _apply = <T>(
+  contextObject: T,
+  objectContainingFnWithReboundThis: ImplicitReceiverObject<T>
+): T => {
+  objectContainingFnWithReboundThis.fnWithReboundThis.bind(contextObject).call(contextObject)
   return contextObject
 }
 
 /**
- * @param contextObject value of `this`
- * @param lambda lambda that accepts `this`
- * @return contextObject return the result of the lambda
+ * @param contextObject value of `this` (in the `blockWithReboundThis` function)
+ * @param objectContainingFnWithReboundThis object containing function `blockWithReboundThis`
+ * which accepts contextObject (aka `this`)
+ * @return contextObject return the result of the `blockWithReboundThis` function
  */
-export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn<T, R>): R {
-  return lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
-}
+export const _with = <T, R>(
+  contextObject: T,
+  objectContainingFnWithReboundThis: ImplicitReceiverObjectWithReturn<T, R>
+): R => objectContainingFnWithReboundThis.fnWithReboundThis.bind(contextObject).call(contextObject)

@@ -31,7 +31,11 @@
 - [Buffer](#buffer)
 - [Events](#events)
 - [Files](#files)
-- [Testing](#testing)
+- [Testing with Jest](#testing-with-jest)
+  - [Setting up Jest and TypeScript](#setting-up-jest-and-typescript)
+    - [Step 1 - Install Jest and types](#step-1---install-jest-and-types)
+    - [Step 2 - Create a new jest.config.ts file](#step-2---create-a-new-jestconfigts-file)
+    - [Step 3 - Create test files](#step-3---create-test-files)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -633,7 +637,7 @@ To understand advanced things about TypeScript, I decided to write the
 (with, apply, let, run, etc) in TypeScript.
 
 - [Sample code - Kotlin Scoping Functions](src/core-utils/kotlin-lang-utils.ts)
-- [Sample code - Test for above](src/core-utils/test-kt-lang-utils.ts)
+- [Sample code - Test for above](src/core-utils/__test__/kotlin-lang-utils.test.ts)
 
 Here are some references:
 
@@ -677,6 +681,79 @@ export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn
   return lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
 }
 ```
+
+# Testing with Jest
+
+Use Jest framework (made by Facebook). It is not tied to React development.
+
+- [ts-jest](https://github.com/kulshekhar/ts-jest)
+- [jest](https://jestjs.io/)
+- [Getting started w/ Node.js and jest](https://jestjs.io/docs/getting-started)
+
+1. Jest itself is built on top of Jasmine. Jest is fast, when compared to Karma (which is a test
+   runner that uses a real browser and has to be paired w/ something like Jasmine for the actual
+   test running).
+2. Jest does not use a real DOM (it uses `js-dom`) which makes it much faster compared to Karma.
+3. Given the speed of Jest, the huge developer adoption and support it has, along with its
+   multiplatform testing capabilities (Vanilla JS, Node.js, React), and it works w/ React (via
+   `ts-jest`), it is the testing platform of choice.
+
+## Setting up Jest and TypeScript
+
+It is a little complicated to set this up for TypeScript. The following instructions on the
+[Jest getting started with TypeScript](https://jestjs.io/docs/getting-started#using-typescript) are
+not complete.
+
+### Step 1 - Install Jest and types
+
+Run the following to get Jest and its TypeScript bindings installed, along with `ts-test` which is a
+plugin that allows Jest to work directly w/ TypeScript files.
+
+```shell
+npm i -D jest ts-jest @types/jest
+```
+
+### Step 2 - Create a new jest.config.ts file
+
+This is a very important step, since this `jest.config.ts` file (which can't be a `.js` file) will
+tell Jest how to "deal" with TypeScript files. Once this is configured, everything else (running
+tests from the command line using `jest` or IDEA "just work"). Remember that you won't actually run
+`js-test` but use `jest` instead; `js-test` is just a plugin for `jest` which has be configured
+correctly.
+
+```typescript
+export default {
+  preset: "ts-jest", // Tell Jest to use `ts-jest` plugin.
+  testEnvironment: "node", // Execution environment (can't be `ts-node`).
+  testMatch: ["<rootDir>/**/*.test.ts"], // Test files must end in `*.test.ts`.
+  testPathIgnorePatterns: ["/node_modules/"], // Don't search for tests inside `node_modules`.
+}
+```
+
+For information on what each of these keys mean, check out
+[Configuring Jest](https://jestjs.io/docs/configuration#testmatch-arraystring).
+
+### Step 3 - Create test files
+
+Finally, you can create a `.test.ts` file. And then IDEA should be able to run it. Here's an
+example.
+
+```typescript
+describe("my test suite", () => {
+  it("a spec with an expectation", () => {
+    expect(true).toBe(true)
+  })
+
+  it("another spec with a different expectation", () => {
+    expect(false).toBe(false)
+  })
+})
+```
+
+To learn how to write tests using Jasmine, check out these links.
+
+- [Jasmine Manual - writing tests using describe, it, spyOn, etc](https://jasmine.github.io/2.1/introduction)
+- [Jasmine tutorial](https://howtodoinjava.com/javascript/jasmine-unit-testing-tutorial/)
 
 # User input and output via stdin, stdout
 
@@ -994,19 +1071,3 @@ const fireEvent = (
 ```
 
 # Files
-
-# Testing
-
-Use Jest framework (made by Facebook). It is not tied to React development.
-
-- [ts-jest](https://github.com/kulshekhar/ts-jest)
-- [jest](https://jestjs.io/)
-- [Getting started w/ Node.js and jest](https://jestjs.io/docs/getting-started)
-
-1. Jest itself is built on top of Jasmine. Jest is fast, when compared to Karma (which is a test
-   runner that uses a real browser and has to be paired w/ something like Jasmine for the actual
-   test running).
-2. Jest does not use a real DOM (it uses `js-dom`) which makes it much faster compared to Karma.
-3. Given the speed of Jest, the huge developer adoption and support it has, along with its
-   multiplatform testing capabilities (Vanilla JS, Node.js, React), and it works w/ React (via
-   `ts-jest`), it is the testing platform of choice.

@@ -12,7 +12,7 @@ const main = () => {
 
   printHeader(`FileReadExample...`)
   _with(new FileReadExample(), {
-    blockWithReboundThis(): void {
+    fnWithReboundThis: function (): void {
       this.asyncFileRead()
       this.syncFileRead()
     },
@@ -25,17 +25,18 @@ class FileReadExample {
   readonly encoding = "utf-8"
 
   asyncFileRead = () => {
-    const _processRead = (err: NodeJS.ErrnoException | null, data: string) => {
+    const _handleRead = (err: NodeJS.ErrnoException | null, data: string) => {
       _.isNil(err) ? console.log(textStyle1(data)) : console.error(textStyle2(err.message))
     }
+
     fs.readFile(this.validFilePath, this.encoding, (err, data) => {
       printHeader(`asyncFileRead...valid file`)
-      _processRead(err, data)
+      _handleRead(err, data)
     })
 
     fs.readFile(this.invalidFilePath, this.encoding, (err, data) => {
       printHeader(`asyncFileRead...invalid file`)
-      _processRead(err, data)
+      _handleRead(err, data)
     })
   }
 
