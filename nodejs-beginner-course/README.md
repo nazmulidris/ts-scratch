@@ -22,6 +22,11 @@
   - [never](#never)
   - [TypeScript JSDocs](#typescript-jsdocs)
   - [this keyword and Kotlin scoping functions](#this-keyword-and-kotlin-scoping-functions)
+- [Testing with Jest](#testing-with-jest)
+  - [Setting up Jest and TypeScript](#setting-up-jest-and-typescript)
+    - [Step 1 - Install Jest and types](#step-1---install-jest-and-types)
+    - [Step 2 - Create a new jest.config.ts file](#step-2---create-a-new-jestconfigts-file)
+    - [Step 3 - Create test files](#step-3---create-test-files)
 - [User input and output via stdin, stdout](#user-input-and-output-via-stdin-stdout)
   - [Global console object](#global-console-object)
   - [Console class (and simple logging)](#console-class-and-simple-logging)
@@ -31,11 +36,6 @@
 - [Buffer](#buffer)
 - [Events](#events)
 - [Files](#files)
-- [Testing with Jest](#testing-with-jest)
-  - [Setting up Jest and TypeScript](#setting-up-jest-and-typescript)
-    - [Step 1 - Install Jest and types](#step-1---install-jest-and-types)
-    - [Step 2 - Create a new jest.config.ts file](#step-2---create-a-new-jestconfigts-file)
-    - [Step 3 - Create test files](#step-3---create-test-files)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -1071,3 +1071,6 @@ const fireEvent = (
 ```
 
 # Files
+
+- [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/YQorL9rDQEW)
+- [Sample code](src/basics/files.ts)
