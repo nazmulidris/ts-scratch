@@ -36,6 +36,7 @@
 - [Buffer](#buffer)
 - [Events](#events)
 - [Files](#files)
+- [Modules](#modules)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -1074,3 +1075,13 @@ const fireEvent = (
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/YQorL9rDQEW)
 - [Sample code](src/basics/files.ts)
+
+# Modules
+
+- [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/m25YKr666wE)
+
+1. Unlike browsers, global in Node.js is scoped to each module. So each module in Node.js has its
+   own `global` object. And there is no such thing as the concept of a browser "global".
+2. Each TS or JS file is considered a "module" by Node.js.
+3. A Node.js `package` is not the same as a `module`. Modules are related to exports and imports.
+   Packages are things that are published to npm and added to other packages as deps.
