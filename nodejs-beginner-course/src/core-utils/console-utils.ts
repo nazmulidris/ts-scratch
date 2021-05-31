@@ -1,5 +1,6 @@
 import * as _kt from "./kotlin-lang-utils"
 import * as chalk from "chalk"
+import { Chalk } from "chalk"
 
 const maxWidth = 100 / 3
 const defaultRepeatChar = "-"
@@ -39,8 +40,36 @@ export const printHeader = (message: string, postFix = defaultPostFix) => {
   console.log(output + postFix)
 }
 
+const textStyleHeaderUnderline = chalk.underline.black.bgWhiteBright
+const textStyleHeader = chalk.black.bgWhiteBright
+const textStyleHeaderBody = chalk.bold.black.bgYellow
+
+export class ConsoleLog {
+  private readonly myStyle: Chalk
+  private myText: string = ""
+
+  constructor(style: Chalk) {
+    this.myStyle = style
+  }
+
+  apply = (text: string): ConsoleLog => {
+    this.myText = text
+    return this
+  }
+
+  consoleLog = () => {
+    console.log(this.toString())
+  }
+  
+  consoleError = () => {
+    console.error(this.toString())
+  }
+
+  toString = () => this.myStyle(this.myText)
+}
+
 export const textStyle1 = chalk.bold.yellow.bgBlack
 export const textStyle2 = chalk.underline.cyan.bgGray
-export const textStyleHeaderUnderline = chalk.underline.black.bgWhiteBright
-export const textStyleHeader = chalk.black.bgWhiteBright
-export const textStyleHeaderBody = chalk.bold.black.bgYellow
+
+export const textStylerPrimary = new ConsoleLog(chalk.bold.yellow.bgBlack)
+export const textStylerSecondary = new ConsoleLog(chalk.underline.cyan.bgGray)

@@ -11,8 +11,8 @@
   - [N-API for native addons](#n-api-for-native-addons)
   - [Kotlin Native and C interop](#kotlin-native-and-c-interop)
 - [Message Queue and ES6 Job Queue](#message-queue-and-es6-job-queue)
-  - [Message Queue and setTimeout(), setImmediate()](#message-queue-and-settimeout-setimmediate)
-  - [process.nextTick()](#processnexttick)
+  - [Message Queue and setTimeout(), setImmediate() - execute at next tick](#message-queue-and-settimeout-setimmediate---execute-at-next-tick)
+  - [process.nextTick() - execute at the end of this tick](#processnexttick---execute-at-the-end-of-this-tick)
   - [ES6 Job Queue (for Promises)](#es6-job-queue-for-promises)
 - [TypeScript and JavaScript language](#typescript-and-javascript-language)
   - [Promises, async, await](#promises-async-await)
@@ -37,6 +37,10 @@
 - [Events](#events)
 - [Files](#files)
 - [Modules](#modules)
+- [OS, process, network, etc.](#os-process-network-etc)
+  - [OS](#os)
+  - [Process](#process)
+  - [Child process & streams](#child-process--streams)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -167,11 +171,10 @@ pool without writing a C/C++ addon.
 
 # Message Queue and ES6 Job Queue
 
-## Message Queue and setTimeout(), setImmediate()
+## Message Queue and setTimeout(), setImmediate() - execute at next tick
 
 Read the official Node.js docs about
-[event loop and message queue](https://nodejs.dev/learn/the-nodejs-event-loop#the-message-queue:~:text=The%20Message%20Queue,-When)
-.
+[event loop and message queue](https://nodejs.dev/learn/the-nodejs-event-loop#the-message-queue:~:text=The%20Message%20Queue,-When).
 
 When `setTimeout(()=>{}, 0)` is called, the Browser or Node.js starts the timer. Once the timer
 expires, in this case immediately as we put `0` as the timeout, the callback function is put in the
@@ -187,14 +190,14 @@ expires, in this case immediately as we put `0` as the timeout, the callback fun
   if you set the `setTimeout` timeout to 2 seconds, you don't have to wait 2 seconds - the wait
   happens elsewhere (in the worker thread pool).
 
-A `setTimeout()` callback with a 0ms delay is very similar to `setImmediate()`. The execution order
-will depend on various factors, but they will be both run in the next iteration of the event loop.
+A `setTimeout()` callback with a `0ms` delay is very similar to `setImmediate()`. The execution
+order will depend on various factors, but they will be both run in the next iteration of the event
+loop.
 
-## process.nextTick()
+## process.nextTick() - execute at the end of this tick
 
 Read the official Node.js docs about
-[process.nextTick()](https://nodejs.dev/learn/understanding-process-nexttick#link-nodejs-with-typescript:~:text=When%20we%20pass%20a%20function%20to,the%20next%20event%20loop%20tick%20starts%3A)
-.
+[process.nextTick()](https://nodejs.dev/learn/understanding-process-nexttick#link-nodejs-with-typescript:~:text=When%20we%20pass%20a%20function%20to,the%20next%20event%20loop%20tick%20starts%3A).
 
 Every time the event loop takes a full trip, we call it a `tick`. When we pass a function to
 `process.nextTick()`, we instruct the engine to invoke this function at the end of the current
@@ -207,12 +210,12 @@ process.nextTick(() => {
 ```
 
 - The event loop is busy processing the current function code.
-- When this operation ends, the JS engine runs all the functions passed to nextTick calls during
+- When this operation ends, the JS engine runs all the functions passed to `nextTick` calls during
   that operation.
 - It's the way we can tell the JS engine to process a function asynchronously (after the current
   function), but as soon as possible, not queue it. Calling `setTimeout(() => {}, 0)` will execute
-  the function at the end of next tick, much later than when using `nextTick()` which prioritizes
-  the call and executes it just before the beginning of the next tick.
+  the function at the end of next tick, **much later** than when using `nextTick()` which
+  prioritizes the call and executes it just **before** the beginning of the next tick.
 
 Use `nextTick()` when you want to make sure that in the next event loop iteration that code is
 already executed.
@@ -1085,3 +1088,27 @@ const fireEvent = (
 2. Each TS or JS file is considered a "module" by Node.js.
 3. A Node.js `package` is not the same as a `module`. Modules are related to exports and imports.
    Packages are things that are published to npm and added to other packages as deps.
+
+# OS, process, network, etc.
+
+## OS
+
+- [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/N8qMPx1ZAzD)
+- [Sample code](src/basics/os.ts)
+
+## Process
+
+You can listen to various events fired by the `process` global object (which is also an
+`EventEmitter` instance). Here are some common ones: `beforeExit`, `exit`, and `uncaughtException`.
+Refer`to the sample code listed below for more details.
+
+- [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/xlxR82ozxxE)
+- [Sample code](src/basics/process.ts)
+- [Node.js docs - Process](https://nodejs.org/api/process.html#process_process_channel)
+
+## Child process & streams
+
+- [Node.js docs - Child process](https://nodejs.org/api/child_process.html)
+- [Tutorial - Child process](https://www.freecodecamp.org/news/node-js-child-processes-everything-you-need-to-know-e69498fe970a/)
+- [Tutorial - Streams](https://www.freecodecamp.org/news/node-js-streams-everything-you-need-to-know-c9141306be93/)
+- [Sample code](src/basics/child-process.ts)

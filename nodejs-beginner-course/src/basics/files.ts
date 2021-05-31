@@ -2,9 +2,10 @@
 
 import { printHeader, textStyle1, textStyle2 } from "../core-utils/console-utils"
 import * as fs from "fs"
+import { Stats } from "fs"
 import { isNil } from "lodash"
 import { _with } from "../core-utils/kotlin-lang-utils"
-import { Stats, statSync } from "fs"
+import { sleep } from "../core-utils/misc"
 
 const main = async () => {
   printHeader(`Files...`)
@@ -35,8 +36,6 @@ const main = async () => {
     },
   })
 }
-
-const sleep = (ms: number = 500) => new Promise((resolve) => setTimeout(resolve, ms))
 
 class FileReadExample {
   readonly validFilePath = `${process.env.HOME}/github/ts-scratch/nodejs-beginner-course/test/test-read-file.txt`
