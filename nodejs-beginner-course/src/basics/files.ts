@@ -1,11 +1,11 @@
 #!/usr/bin/env ts-node
 
-import { printHeader, textStyle1, textStyle2 } from "../core-utils/console-utils"
+import { printHeader, textStyle1, textStyle2 } from "../core-utils/color-console-utils"
 import * as fs from "fs"
 import { Stats } from "fs"
 import { isNil } from "lodash"
 import { _with } from "../core-utils/kotlin-lang-utils"
-import { sleep } from "../core-utils/misc"
+import { sleep } from "../core-utils/misc-utils"
 
 const main = async () => {
   printHeader(`Files...`)
@@ -45,9 +45,11 @@ class FileReadExample {
   syncFileRead = () => {
     try {
       printHeader(`Read valid file 👍`)
+      // Must specify encoding, otherwise readFileSync returns a Buffer!
       console.log(textStyle1(fs.readFileSync(this.validFilePath, this.encoding)))
 
       printHeader(`Can't read invalid file! ⛔`)
+      // Must specify encoding, otherwise readFileSync returns a Buffer!
       console.log(textStyle1(fs.readFileSync(this.invalidFilePath, this.encoding)))
     } catch (err) {
       console.error(textStyle2(err.message))

@@ -3,7 +3,7 @@
 import * as chalk from "chalk"
 import * as _kt from "../core-utils/kotlin-lang-utils"
 import { EventEmitter } from "events"
-import { printHeader } from "../core-utils/console-utils"
+import { printHeader } from "../core-utils/color-console-utils"
 
 class Events {
   static readonly TimerName = "EventsTimer"

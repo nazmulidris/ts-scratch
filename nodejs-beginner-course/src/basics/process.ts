@@ -5,7 +5,7 @@ import {
   textStyle2,
   textStylerPrimary,
   textStylerSecondary,
-} from "../core-utils/console-utils"
+} from "../core-utils/color-console-utils"
 import * as _ from "lodash"
 import { _also, _apply } from "../core-utils/kotlin-lang-utils"
 

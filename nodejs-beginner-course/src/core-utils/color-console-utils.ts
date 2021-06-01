@@ -44,32 +44,57 @@ const textStyleHeaderUnderline = chalk.underline.black.bgWhiteBright
 const textStyleHeader = chalk.black.bgWhiteBright
 const textStyleHeaderBody = chalk.bold.black.bgYellow
 
-export class ConsoleLog {
+export interface ColorConsoleIF {
+  (text: string): ColorConsole
+  call(text: string): ColorConsole
+  apply(text: string): ColorConsole
+  consoleLog(): void
+  consoleError(): void
+  toString(): string
+}
+
+export class ColorConsole {
   private readonly myStyle: Chalk
   private myText: string = ""
+
+  static create(style: Chalk): ColorConsoleIF {
+    const instance = new ColorConsole(style)
+    return Object.assign((text: string) => instance.call(text))
+  }
 
   constructor(style: Chalk) {
     this.myStyle = style
   }
 
-  apply = (text: string): ConsoleLog => {
+  call = (text: string): ColorConsole => this.apply(text)
+
+  apply = (text: string): ColorConsole => {
     this.myText = text
     return this
   }
 
-  consoleLog = () => {
+  consoleLog = (prefixWithNewline: boolean = false): void => {
+    prefixWithNewline ? console.log() : null
     console.log(this.toString())
   }
-  
-  consoleError = () => {
+
+  // https://gist.githubusercontent.com/narenaryan/a2f4f8a3559d49ee2380aa17e7dc1dea/raw/d777cf7fad282d6bf1b00a0ec474e6430151b07f/streams_copy_basic.js
+  consoleLogInPlace = (printNewline: boolean = false): void => {
+    process.stdout.clearLine(-1)
+    process.stdout.cursorTo(0)
+    process.stdout.write(textStyle1.red(this.toString()))
+    printNewline ? process.stdout.write("\n") : null
+  }
+
+  consoleError = (): void => {
     console.error(this.toString())
   }
 
-  toString = () => this.myStyle(this.myText)
+  toString = (): string => this.myStyle(this.myText)
 }
 
 export const textStyle1 = chalk.bold.yellow.bgBlack
 export const textStyle2 = chalk.underline.cyan.bgGray
 
-export const textStylerPrimary = new ConsoleLog(chalk.bold.yellow.bgBlack)
-export const textStylerSecondary = new ConsoleLog(chalk.underline.cyan.bgGray)
+export const textStylerPrimary = new ColorConsole(chalk.bold.yellow.bgBlack)
+export const textStylerSecondary = new ColorConsole(chalk.underline.cyan.bgGray)

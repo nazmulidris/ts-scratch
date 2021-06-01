@@ -19,9 +19,10 @@
   - [Use strict=true in tsconfig.json options](#use-stricttrue-in-tsconfigjson-options)
   - [Use unknown over any](#use-unknown-over-any)
   - [User defined type guards](#user-defined-type-guards)
-  - [never](#never)
+  - [never "bottom" type](#never-bottom-type)
   - [TypeScript JSDocs](#typescript-jsdocs)
   - [this keyword and Kotlin scoping functions](#this-keyword-and-kotlin-scoping-functions)
+  - [Callable interfaces and implementations in TypeScript](#callable-interfaces-and-implementations-in-typescript)
 - [Testing with Jest](#testing-with-jest)
   - [Setting up Jest and TypeScript](#setting-up-jest-and-typescript)
     - [Step 1 - Install Jest and types](#step-1---install-jest-and-types)
@@ -37,10 +38,13 @@
 - [Events](#events)
 - [Files](#files)
 - [Modules](#modules)
-- [OS, process, network, etc.](#os-process-network-etc)
+- [OS, streams, process, network, etc.](#os-streams-process-network-etc)
   - [OS](#os)
   - [Process](#process)
-  - [Child process & streams](#child-process--streams)
+  - [Streams, backpressure, pipes, files](#streams-backpressure-pipes-files)
+    - [pipe](#pipe)
+    - [pipeline, transform stream, and errors](#pipeline-transform-stream-and-errors)
+  - [Child process](#child-process)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -53,8 +57,8 @@ Learnings from Node.js: The Complete Course for Beginners
 1. Using IDEA (Ultimate or Webstorm) create a new Node.js project.
 2. Use the `ts-node-dev` Node.js interpreter (not the default), which is located in
    `/usr/bin/ts-node/dev`.
-3. In the `package.json` add the following dev dep (`npm i --save-dev @types/node`). Other dev deps
-   will be added when you start importing various modules in your code.
+3. In the `package.json` add the following dev dep (`npm i --save-dev @types/node@latest`). Other
+   dev deps will be added when you start importing various modules in your code.
 4. When creating a `.ts` file, in order to make it executable, you can do the following:
 5. Add `#!/usr/bin/env ts-node` to the top of the `.ts` file.
 6. Mark the file executable using `chmod +x *.ts`.
@@ -246,9 +250,9 @@ const baz = () => console.log("baz")
 const foo = () => {
   console.log("foo")
   setTimeout(bar, 0)
-  new Promise((resolve, reject) =>
-    resolve("should be right after baz, before bar")
-  ).then((resolve) => console.log(resolve))
+  new Promise((resolve, reject) => resolve("should be right after baz, before bar")).then(
+    (resolve) => console.log(resolve)
+  )
   baz()
 }
 
@@ -556,10 +560,12 @@ doSomething({ title: "t", body: "b" })
 doSomething({ foo: "t", bar: "b" })
 ```
 
-## never
+## never "bottom" type
 
 1. `never` is a bottom type (which is `Nothing` in Kotlin).
 2. The opposite of "top" type like `Object` in Java, and `any` in TypeScript or Kotlin.
+
+Here's an example.
 
 ```typescript
 function foo(param: boolean) {
@@ -573,19 +579,7 @@ function foo(param: boolean) {
 }
 ```
 
-```typescript
-/* @throws(Error) */
-function getContentFromRoute(parsedUrl: ParsedUrl, routes: Array<Route>): Content {
-  const matchingRoute: Optional<Route> = routes.find(
-    (it: Route) => it.pathname === parsedUrl.pathname
-  )
-  return matchingRoute?.generateContentFn(parsedUrl.query) ?? this.error("no route found")
-}
-
-function error(message: string): never {
-  throw new Error(message)
-}
-```
+Another example.
 
 ```typescript
 /* @throws(Error) */
@@ -608,8 +602,7 @@ function error(message: string): never {
 ## TypeScript JSDocs
 
 Here's more information on
-[TypeScript specific JSDocs](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
-.
+[TypeScript specific JSDocs](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html).
 
 Here are some examples.
 
@@ -684,6 +677,35 @@ export function _apply<T>(contextObject: T, lambda: ImplicitReceiver<T>): T {
 export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn<T, R>): R {
   return lambda.blockWithReboundThis.bind(contextObject).call(contextObject)
 }
+```
+
+## Callable interfaces and implementations in TypeScript
+
+More info:
+
+- [Callable interface](https://basarat.gitbook.io/typescript/type-system/callable)
+- [Implementing Callable interface in TypeScript](https://stackoverflow.com/questions/12769636/how-to-make-a-class-implement-a-call-signature-in-typescript)
+- [Sample code - ColorConsole class and ColorConsoleIF interface in utils](src/core-utils/color-console-utils.ts)
+
+```typescript
+interface CallableIF {
+  (text: string): string
+}
+const myCallableFn: CallableIF = (text: string) => "hello" + text
+
+class MyCallableClass {
+  // This is the method that actually ends up getting called.
+  call(text: string): string {
+    return "hello" + foo
+  }
+  // Factory method is actually what implements the callable interface.
+  static create(): CallableIF {
+    const instance = new MyClass()
+    return Object.assign((text: string) => instance.call(text))
+  }
+}
+const myObj = MyCallableClass.create()
+console.log(myObj("foo"))
 ```
 
 # Testing with Jest
@@ -1079,6 +1101,9 @@ const fireEvent = (
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/YQorL9rDQEW)
 - [Sample code](src/basics/files.ts)
 
+There are many `fs` APIs - async, sync, and promises. Use the `fs.promises` API so that it works
+well with async / await and promises.
+
 # Modules
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/m25YKr666wE)
@@ -1089,7 +1114,7 @@ const fireEvent = (
 3. A Node.js `package` is not the same as a `module`. Modules are related to exports and imports.
    Packages are things that are published to npm and added to other packages as deps.
 
-# OS, process, network, etc.
+# OS, streams, process, network, etc.
 
 ## OS
 
@@ -1105,10 +1130,124 @@ Refer`to the sample code listed below for more details.
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/xlxR82ozxxE)
 - [Sample code](src/basics/process.ts)
 - [Node.js docs - Process](https://nodejs.org/api/process.html#process_process_channel)
+- [Tutorial - Node.js memory model](https://www.dynatrace.com/news/blog/understanding-garbage-collection-and-hunting-memory-leaks-in-node-js/)
 
-## Child process & streams
+## Streams, backpressure, pipes, files
+
+- [Node.js docs - Stream](https://nodejs.org/api/stream.html)
+- [Node.js docs - Backpressure and pipes](https://nodejs.org/en/docs/guides/backpressuring-in-streams/)
+- [Node.js docs - pipeline](https://nodejs.org/api/stream.html#stream_stream_pipeline_streams_callback/)
+- [Tutorial - Stream](https://jscomplete.com/learn/node-beyond-basics/node-streams)
+- [Tutorial - Streams, large file IO, and memory usage](https://medium.com/dev-bits/writing-memory-efficient-software-applications-in-node-js-5575f646b67f)
+- [Article - GC and memory leaks in Node.js](https://www.dynatrace.com/news/blog/understanding-garbage-collection-and-hunting-memory-leaks-in-node-js/)
+- [Discussion - Difference between pipe and pipeline](https://stackoverflow.com/a/60459320/2085356)
+- [Discussion - Get latest version of Node.js TS bindings](https://stackoverflow.com/a/67435044/2085356)
+- [Discussion - Latest version of Node.js and stream promises](https://github.com/nodejs/node/issues/35731)
+- [Sample code](src/streams/stream.ts)
+
+All streams are instances of `EventEmitter`. They emit events that can be used to read and write
+data. However, we can consume streams data in a simpler way using the `pipe()` method. This method
+also handles errors, end-of-files, and the cases when one stream is slower or faster than the other
+(backpressure).
+
+### pipe
+
+Here's some pseudocode to demonstrate how all this fits together.
+
+```javascript
+readableSrc.pipe(writableDest)
+```
+
+And in more complex cases.
+
+```javascript
+readableSrc.pipe(transformStream1).pipe(transformStream2).pipe(finalWrtitableDest)
+```
+
+Using a Linux analogy.
+
+```shell
+$ a | b | c | d
+```
+
+Is equivalent to.
+
+```javascript
+a.pipe(b).pipe(c).pipe(d)
+
+// Which is equivalent to:
+a.pipe(b)
+b.pipe(c)
+c.pipe(d)
+```
+
+The sample code has a lot to digest. There are some big concepts with streams and files. The async
+nature of Node.js really shows itself here. Here are some interesting things to note.
+
+1. Without backpressure, the memory load is really high when writing a file "inefficiently". This
+   also has the result of making the gc work even harder, and the CPU even harder dealing w/ memory
+   management. Piping and backpressure resolve this issue and the results are stark!
+2. File writes using a stream are async, but they also buffer in the OS file system. Linux will
+   buffer the file and delay write it, even though Node.js will report that the file write is
+   complete. This means that running `fs.stat()` immediately after the file write will result in
+   incorrect file size being reported, since the size on disk is still growing.
+3. There are [multiple ways](https://stackoverflow.com/a/21583831/2085356) of creating your own
+   `Writeable` and `Readable` streams. You can use the simplified constructor API or use classes
+   instead.
+4. The `console` global object is just a `Writeable` stream! This makes it possible to overwrite the
+   output that has already been written w/out generating a new line! This is handy for showing long
+   running progress. Take a look at [color-console-utils.kt](src/core-utils/color-console-utils.ts)
+   `consoleLogInPlace` method.
+5. Piping is an incredibly powerful feature for working with streams in a high performance and
+   memory efficient way. Read the docs and tutorials above for details.
+6. File reads are asynchronous by nature. So when the `pipe()` function is called on a stream that
+   happens asynchronously so there's no waiting for it to finish. `pipe()` returns an
+   `EventEmitter`.
+
+### pipeline, transform stream, and errors
+
+`pipe` does not report errors. `pipeline` is what you must use when it comes to detecting error
+conditions. Here's an example using a transform stream (which performs `gzip` compression).
+
+Here's a snippet that uses a `gzip` transform stream in between a read and write stream, with the
+use of backpressure, in other words:
+
+- `Reader(UncompressedFile)` -> `gzip` transform -> `Writer(NewCompressedFile)`
+
+Or:
+
+- `Reader(UncompressedFile)` | `gzip` transform | `Writer(NewCompressedFile)`
+
+Note - The promisified version of `pipline` on only works on Node.JS v15 and higher.
+
+```typescript
+export class CompressLargeFileEfficiently {
+  performCompression = async (): Promise<void> => {
+    await this.actuallyCompress().catch(console.error)
+
+    // Wait for disk flush.
+    ColorConsole.create(textStyle1.blue)(
+      "Waiting for disk to flush the write to file for 5s..."
+    ).consoleLog()
+    await sleep(5000)
+  }
+
+  private actuallyCompress = async (): Promise<void> => {
+    const uncompressedSrcFileReader = fs.createReadStream(Constants.filePath)
+    const compressedDestFileWriter = fs.createWriteStream(Constants.compressedFilePath)
+
+    const gzipTransformer = zlib.createGzip()
+
+    ColorConsole.create(textStyle1)(`Using pipeline() to compress file`).consoleLog()
+    await pipeline(uncompressedSrcFileReader, gzipTransformer, compressedDestFileWriter)
+  }
+}
+
+await new CompressLargeFileEfficiently().performCompression().catch(console.error)
+```
+
+## Child process
 
 - [Node.js docs - Child process](https://nodejs.org/api/child_process.html)
-- [Tutorial - Child process](https://www.freecodecamp.org/news/node-js-child-processes-everything-you-need-to-know-e69498fe970a/)
-- [Tutorial - Streams](https://www.freecodecamp.org/news/node-js-streams-everything-you-need-to-know-c9141306be93/)
+- [Tutorial - Child process](https://jscomplete.com/learn/node-beyond-basics/child-processes)
 - [Sample code](src/basics/child-process.ts)
