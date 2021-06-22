@@ -1,6 +1,8 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [Node.js (v16.3.0) Handbook using TypeScript (v4.3.4)](#nodejs-v1630-handbook-using-typescript-v434)
+- [Node.js installation on Linux (from brew)](#nodejs-installation-on-linux-from-brew)
 - [Node.js project setup using IDEA](#nodejs-project-setup-using-idea)
 - [Node.js threading model](#nodejs-threading-model)
   - [Overview](#overview)
@@ -45,16 +47,77 @@
     - [pipe](#pipe)
     - [pipeline, transform stream, and errors](#pipeline-transform-stream-and-errors)
   - [Child process](#child-process)
+    - [Deep dive into spawn()](#deep-dive-into-spawn)
+      - [Example 1 - spawn a child process to execute a command](#example-1---spawn-a-child-process-to-execute-a-command)
+      - ["stdio" streams for getting input to and output from child process commands](#stdio-streams-for-getting-input-to-and-output-from-child-process-commands)
+      - [Example 2 - pipe process.stdin into child process command](#example-2---pipe-processstdin-into-child-process-command)
+      - [Example 3 - pipe the output of one child process command into another one](#example-3---pipe-the-output-of-one-child-process-command-into-another-one)
+      - [Example 4 - ugly code to redirect the output of one child process command to another one](#example-4---ugly-code-to-redirect-the-output-of-one-child-process-command-to-another-one)
+    - [Killing or aborting a child process](#killing-or-aborting-a-child-process)
+    - [Brief exploration of exec()](#brief-exploration-of-exec)
+    - [Brief exploration of fork()](#brief-exploration-of-fork)
+    - [Example of replacing a fish script using spawn](#example-of-replacing-a-fish-script-using-spawn)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Learnings from Node.js: The Complete Course for Beginners
+## Node.js (v16.3.0) Handbook using TypeScript (v4.3.4)
+
+This handbook will use TypeScript to take you thru using Node.js. IDEA Ultimate / Webstorm project
+files are provided in [this github repo][gh-repo]. The table of contents has a list of topics that
+are covered in this handbook. You can easily jump to the section that is relevant to you or read
+them in any order that you like.
+
+[gh-repo]: https://github.com/nazmulidris/ts-scratch/tree/main/nodejs-beginner-course
+
+Additionally, here are some great resources to use a reference for your journey into Node.js.
 
 - [Node.js: The complete course for beginners](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/xV5YWR3DGq3)
+- [Tutorials](https://jscomplete.com/learn/node-beyond-basics/child-processes)
+- [Official docs](https://nodejs.org/api)
 
-# Node.js project setup using IDEA
+## Node.js installation on Linux (from brew)
 
-1. Using IDEA (Ultimate or Webstorm) create a new Node.js project.
+You can get the latest version of Node.js using `brew`, which is available on Linux and MacOS. Once
+you have `brew` installed, simply run `brew install node`.
+
+> Note that on Linux, when using `apt` instead of `brew`, the package is called `nodejs` and not
+> `node`! So the `brew` package name is actually the "right" one.
+
+Unlike `apt`, the binaries for any global npm packages that you install will end up in
+`/usr/local/bin`. Also you won't need to use `sudo` anymore to install npm packages globally!
+
+I usually install the following packages globally after installing node using
+`npm i -g prettier doctoc typescript ts-node ts-node-dev`, so to follow along, you can do the same.
+
+For package `$XYZ`, here's the pattern:
+
+- Symlinked binary is at `/usr/local/bin/$XYZ`
+- Actual binary is at `/home/linuxbrew/.linuxbrew/bin/$XYZ`
+
+As an example, the `prettier` binary is available at `/usr/local/bin/prettier`, however this is just
+a symlink. The actual binary is located at `/home/linuxbrew/.linuxbrew/bin/prettier`.
+
+If you run into issue w/ IDEA not picking up your `$PATH` variable contents (for `linuxbrew`) in
+your File Watchers, you might need to add the following lines to your `~/.profile` file, so that
+GNOME session can pick it up when your desktop session starts (vs when this is set in your
+terminal/shell initialization script).
+
+```shell
+# Set PATH so it includes linuxbrew for all child processes spawned by the Gnome shell.
+# - https://superuser.com/a/398881/1102870
+# - https://askubuntu.com/a/356973/872482
+# - https://help.ubuntu.com/community/EnvironmentVariables
+if [ -d "/home/linuxbrew/.linuxbrew" ] ; then
+    PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+fi
+```
+
+## Node.js project setup using IDEA
+
+The [github repo][gh-repo] for this handbook has an IDEA / Webstorm project in it, so you can open
+it right away. These are the steps that I followed to create this project.
+
+1. Use IDEA (Ultimate or Webstorm) create a new Node.js project.
 2. Use the `ts-node-dev` Node.js interpreter (not the default), which is located in
    `/usr/bin/ts-node/dev`.
 3. In the `package.json` add the following dev dep (`npm i --save-dev @types/node@latest`). Other
@@ -63,12 +126,25 @@ Learnings from Node.js: The Complete Course for Beginners
 5. Add `#!/usr/bin/env ts-node` to the top of the `.ts` file.
 6. Mark the file executable using `chmod +x *.ts`.
 7. Add a [`tsconfig.json`](tsconfig.json) file which enables strict mode, and dumps compiled output
-   to a `build` folder. Also compile TypeScript files located in the `src` folder and its subfolders
-   only.
+   to a `build` folder. Also compile TypeScript files located in the `src` folder and its
+   sub-folders only.
+   ```json5
+   {
+     exclude: ["node_modules"],
+     include: ["./src/**/*"],
+     compilerOptions: {
+       strict: true,
+       module: "CommonJS",
+       target: "ES6",
+       sourceMap: true,
+       outDir: "build", // More info https://stackoverflow.com/a/49687441/2085356
+     },
+   }
+   ```
 
-# Node.js threading model
+## Node.js threading model
 
-## Overview
+### Overview
 
 - [Course link](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/RMoNJwAKR2q)
   .
@@ -90,7 +166,7 @@ at worst.
 To write a high-throughput, more DoS-proof web server, you must ensure that on benign and on
 malicious input, neither your Event Loop nor your Workers will block.
 
-## Event loop
+### Event loop
 
 - [Node.js docs on event loop, workers, and best practices to avoid freezes](https://nodejs.org/en/docs/guides/dont-block-the-event-loop/)
 
@@ -121,7 +197,7 @@ malicious input, neither your Event Loop nor your Workers will block.
 
 - [Video on how the event loop works](https://youtu.be/P9csgxBgaZ8)
 
-## Worker threads API for JS code
+### Worker threads API for JS code
 
 Without writing a [C/C++ addon using N-API](#n-api-for-native-addons), you can use either of the
 following.
@@ -132,12 +208,12 @@ following.
 - You can use the new [WebWorker Threads library](https://www.npmjs.com/package/webworker-threads)
   to run the JS code in the thread pool without writing a C/C++ addon.
 
-## Streaming and high performance JSON APIs
+### Streaming and high performance JSON APIs
 
 - You can use [stream APIs](https://www.npmjs.com/package/JSONStream) for JSON.
 - Or you can use [async versions of JSON parsing APIs](https://www.npmjs.com/package/bfj).
 
-## libuv and worker threads
+### libuv and worker threads
 
 `libuv` is a multiplatform C library for async IO based on event loops, which exposes a general task
 submission API. Node.js uses the thread pool to handle "expensive" tasks.
@@ -159,26 +235,27 @@ pool without writing a C/C++ addon.
 - [Threadpool API](http://docs.libuv.org/en/v1.x/threadpool.html)
 - [Differences w/ browser which uses `libevent`](https://blog.insiderattack.net/javascript-event-loop-vs-node-js-event-loop-aea2b1b85f5c)
 
-## N-API for native addons
+### N-API for native addons
 
 - [Video](https://youtu.be/-Oniup60Afs)
 - [GitHub repo](https://github.com/nodejs/node-addon-api)
 - [Tutorial on building Node.js native addons in 2020](https://nodejs.medium.com/building-modern-native-add-ons-for-node-js-in-2020-cd3992c68e0)
 - [Tutorial on using the N-API to create an addon in C/C++](https://tinyurl.com/yecfnkf9)
 
-## Kotlin Native and C interop
+### Kotlin Native and C interop
 
 - **Hypothesis** - It may be possible to use Kotlin Native to generate C interoperable code in order
   to write some native addons for Node.js.
 - [KT and C interop](https://kotlinlang.org/docs/native-c-interop.html#basic-interop-types)
 - [Random repo I found on github that claims to do this](https://github.com/datkt/node-addon-example)
 
-# Message Queue and ES6 Job Queue
+## Message Queue and ES6 Job Queue
 
-## Message Queue and setTimeout(), setImmediate() - execute at next tick
+### Message Queue and setTimeout(), setImmediate() - execute at next tick
 
 Read the official Node.js docs about
-[event loop and message queue](https://nodejs.dev/learn/the-nodejs-event-loop#the-message-queue:~:text=The%20Message%20Queue,-When).
+[event loop and message queue](https://nodejs.dev/learn/the-nodejs-event-loop#the-message-queue:~:text=The%20Message%20Queue,-When)
+.
 
 When `setTimeout(()=>{}, 0)` is called, the Browser or Node.js starts the timer. Once the timer
 expires, in this case immediately as we put `0` as the timeout, the callback function is put in the
@@ -198,10 +275,11 @@ A `setTimeout()` callback with a `0ms` delay is very similar to `setImmediate()`
 order will depend on various factors, but they will be both run in the next iteration of the event
 loop.
 
-## process.nextTick() - execute at the end of this tick
+### process.nextTick() - execute at the end of this tick
 
 Read the official Node.js docs about
-[process.nextTick()](https://nodejs.dev/learn/understanding-process-nexttick#link-nodejs-with-typescript:~:text=When%20we%20pass%20a%20function%20to,the%20next%20event%20loop%20tick%20starts%3A).
+[process.nextTick()](https://nodejs.dev/learn/understanding-process-nexttick#link-nodejs-with-typescript:~:text=When%20we%20pass%20a%20function%20to,the%20next%20event%20loop%20tick%20starts%3A)
+.
 
 Every time the event loop takes a full trip, we call it a `tick`. When we pass a function to
 `process.nextTick()`, we instruct the engine to invoke this function at the end of the current
@@ -224,7 +302,7 @@ process.nextTick(() => {
 Use `nextTick()` when you want to make sure that in the next event loop iteration that code is
 already executed.
 
-## ES6 Job Queue (for Promises)
+### ES6 Job Queue (for Promises)
 
 Read the official Node.js docs about the
 [ES6 job queue](https://nodejs.dev/learn/the-nodejs-event-loop#es6-job-queue:~:text=ES6%20Job%20Queue)
@@ -250,9 +328,9 @@ const baz = () => console.log("baz")
 const foo = () => {
   console.log("foo")
   setTimeout(bar, 0)
-  new Promise((resolve, reject) => resolve("should be right after baz, before bar")).then(
-    (resolve) => console.log(resolve)
-  )
+  new Promise((resolve, reject) =>
+    resolve("should be right after baz, before bar")
+  ).then((resolve) => console.log(resolve))
   baz()
 }
 
@@ -261,9 +339,9 @@ foo()
 
 ![Call stack for the code above](https://nodejs.dev/907f18a0288ad303ad59c035397a6f7e/call-stack-third-example.svg)
 
-# TypeScript and JavaScript language
+## TypeScript and JavaScript language
 
-## Promises, async, await
+### Promises, async, await
 
 It is relatively simple to reason about using promises, as a way to eliminate callback hell. It is
 also relatively simple to
@@ -384,11 +462,57 @@ async function main() {
 main()
 ```
 
-## Use strict=true in tsconfig.json options
+Here's another example of using top level `await` in a Node.js program, while mixing and matching
+the use of `async`, `await`, and promises.
+
+```typescript
+class SpawnCProcToRunLinuxCommandAndGetOutput {
+  readonly cmd = "find"
+  readonly args = [`${process.env.HOME}`, "-type", "f"]
+
+  run = async (): Promise<void> => {
+    const child: ChildProcess = spawn(this.cmd, this.args)
+
+    return new Promise<void>((resolveFn, rejectFn) => {
+      child.on("exit", function (code, signal) {
+        console.log(`Child process exited with code ${code} and signal ${signal}`)
+        resolveFn()
+      })
+      child.stdout?.on("data", (data: Buffer) => {
+        console.log(`Output : ${data.length}`)
+      })
+      child.stderr?.on("data", (data) => {
+        rejectFn()
+        console.log(`Error: ${data}`)
+      })
+    })
+  }
+}
+
+const main = async (): Promise<void> => {
+  console.log("start!")
+  await new SpawnCProcToRunLinuxCommandAndGetOutput().run()
+  console.log("done!")
+}
+
+main().catch(console.error)
+```
+
+Notes on the code above:
+
+- The call to `main()` at the very bottom of the snippet actually calls an function that returns a
+  `Promise`. The `catch()` section actually handles any top level exceptions that are thrown.
+- In the `main()`, which is an `async` function, which returns a `Promise`, `await` is used to wait
+  for the call to `run()` to actually complete. This is where promises and `async` / `await` are
+  used together.
+- In `run()` a `Promise` is created (which is returned by this method) which actually is fulfilled
+  when the child process actually completes, or is rejected when it encounters an error.
+
+### Use strict=true in tsconfig.json options
 
 Always set [`"strict"=true`](https://www.typescriptlang.org/tsconfig#strict)
 
-## Use unknown over any
+### Use unknown over any
 
 Because it does not propagate:
 
@@ -406,7 +530,7 @@ function foo2(bar: unknown) {
 }
 ```
 
-## User defined type guards
+### User defined type guards
 
 A guard is not a type, but a mechanism that narrows types.
 
@@ -560,7 +684,7 @@ doSomething({ title: "t", body: "b" })
 doSomething({ foo: "t", bar: "b" })
 ```
 
-## never "bottom" type
+### never "bottom" type
 
 1. `never` is a bottom type (which is `Nothing` in Kotlin).
 2. The opposite of "top" type like `Object` in Java, and `any` in TypeScript or Kotlin.
@@ -599,10 +723,11 @@ function error(message: string): never {
 }
 ```
 
-## TypeScript JSDocs
+### TypeScript JSDocs
 
 Here's more information on
-[TypeScript specific JSDocs](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html).
+[TypeScript specific JSDocs](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
+.
 
 Here are some examples.
 
@@ -627,7 +752,7 @@ export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn
 }
 ```
 
-## this keyword and Kotlin scoping functions
+### this keyword and Kotlin scoping functions
 
 To understand advanced things about TypeScript, I decided to write the
 [Kotlin scoping functions](https://kotlinlang.org/docs/scope-functions.html#function-selection)
@@ -679,7 +804,7 @@ export function _with<T, R>(contextObject: T, lambda: ImplicitReceiverWithReturn
 }
 ```
 
-## Callable interfaces and implementations in TypeScript
+### Callable interfaces and implementations in TypeScript
 
 More info:
 
@@ -691,6 +816,7 @@ More info:
 interface CallableIF {
   (text: string): string
 }
+
 const myCallableFn: CallableIF = (text: string) => "hello" + text
 
 class MyCallableClass {
@@ -698,17 +824,19 @@ class MyCallableClass {
   call(text: string): string {
     return "hello" + foo
   }
+
   // Factory method is actually what implements the callable interface.
   static create(): CallableIF {
     const instance = new MyClass()
     return Object.assign((text: string) => instance.call(text))
   }
 }
+
 const myObj = MyCallableClass.create()
 console.log(myObj("foo"))
 ```
 
-# Testing with Jest
+## Testing with Jest
 
 Use Jest framework (made by Facebook). It is not tied to React development.
 
@@ -724,13 +852,13 @@ Use Jest framework (made by Facebook). It is not tied to React development.
    multiplatform testing capabilities (Vanilla JS, Node.js, React), and it works w/ React (via
    `ts-jest`), it is the testing platform of choice.
 
-## Setting up Jest and TypeScript
+### Setting up Jest and TypeScript
 
 It is a little complicated to set this up for TypeScript. The following instructions on the
 [Jest getting started with TypeScript](https://jestjs.io/docs/getting-started#using-typescript) are
 not complete.
 
-### Step 1 - Install Jest and types
+#### Step 1 - Install Jest and types
 
 Run the following to get Jest and its TypeScript bindings installed, along with `ts-test` which is a
 plugin that allows Jest to work directly w/ TypeScript files.
@@ -739,7 +867,7 @@ plugin that allows Jest to work directly w/ TypeScript files.
 npm i -D jest ts-jest @types/jest
 ```
 
-### Step 2 - Create a new jest.config.ts file
+#### Step 2 - Create a new jest.config.ts file
 
 This is a very important step, since this `jest.config.ts` file (which can't be a `.js` file) will
 tell Jest how to "deal" with TypeScript files. Once this is configured, everything else (running
@@ -759,7 +887,7 @@ export default {
 For information on what each of these keys mean, check out
 [Configuring Jest](https://jestjs.io/docs/configuration#testmatch-arraystring).
 
-### Step 3 - Create test files
+#### Step 3 - Create test files
 
 Finally, you can create a `.test.ts` file. And then IDEA should be able to run it. Here's an
 example.
@@ -781,9 +909,9 @@ To learn how to write tests using Jasmine, check out these links.
 - [Jasmine Manual - writing tests using describe, it, spyOn, etc](https://jasmine.github.io/2.1/introduction)
 - [Jasmine tutorial](https://howtodoinjava.com/javascript/jasmine-unit-testing-tutorial/)
 
-# User input and output via stdin, stdout
+## User input and output via stdin, stdout
 
-## Global console object
+### Global console object
 
 There's a global `console` object that is configured to write to `process.stdout` and
 `process.stderr`. The interesting thing is that you can pass an `Error` to `console.error()` in
@@ -831,7 +959,7 @@ Here's the output it produces.
 └─────────┴─────────┴──────────┘
 ```
 
-## Console class (and simple logging)
+### Console class (and simple logging)
 
 - [Sample code](src/basics/console-log-to-file.ts)
 
@@ -855,7 +983,7 @@ const code = 9
 logger.error("error code:", code)
 ```
 
-## readline from (global) console
+### readline from (global) console
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/gkj79gjxYo9)
 - [Sample code](src/basics/cli-fp.ts)
@@ -879,7 +1007,7 @@ want to get input from the console and output some information on the console, v
    middle of executing the `question` method). That's just the way the Node.js
    [threading model works](#nodejs-threading-model).
 
-### FP example using question (w/out using "line" event)
+#### FP example using question (w/out using "line" event)
 
 The following are examples of functions to demonstrate the above. Here's a function that kicks off
 the CLI Node.js sample.
@@ -944,7 +1072,7 @@ function userInputHandler(userInput: string) {
 }
 ```
 
-### OOP example using "line" event (w/out using question)
+#### OOP example using "line" event (w/out using question)
 
 Instead of using the `question` method, we can simply rely on the `line` event, just like we rely on
 the `close` event (which is fired when the user presses `Ctrl+C`).
@@ -1010,7 +1138,7 @@ const main = async (argv: Array<string>) => {
 main(process.argv.splice(2))
 ```
 
-# Buffer
+## Buffer
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/7nKRnv8Q9lQ#buffer-in-nodejs)
 - [Sample code](src/basics/buffer.ts)
@@ -1026,7 +1154,7 @@ objects correspond to fixed-sized blocks of memory, which cannot be changed afte
 There is no explicit way of deleting a buffer, but setting it to null will do the job. The memory
 will be handled by the garbage collector.
 
-# Events
+## Events
 
 - [Sample code](src/basics/events.ts)
 - [EventEmitter Docs](https://nodejs.org/api/events.html#events_emitter_emit_eventname_args)
@@ -1096,7 +1224,7 @@ const fireEvent = (
   }, delayMs)
 ```
 
-# Files
+## Files
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/YQorL9rDQEW)
 - [Sample code](src/basics/files.ts)
@@ -1104,7 +1232,7 @@ const fireEvent = (
 There are many `fs` APIs - async, sync, and promises. Use the `fs.promises` API so that it works
 well with async / await and promises.
 
-# Modules
+## Modules
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/m25YKr666wE)
 
@@ -1114,14 +1242,14 @@ well with async / await and promises.
 3. A Node.js `package` is not the same as a `module`. Modules are related to exports and imports.
    Packages are things that are published to npm and added to other packages as deps.
 
-# OS, streams, process, network, etc.
+## OS, streams, process, network, etc.
 
-## OS
+### OS
 
 - [Course](https://www.educative.io/courses/learn-nodejs-complete-course-for-beginners/N8qMPx1ZAzD)
 - [Sample code](src/basics/os.ts)
 
-## Process
+### Process
 
 You can listen to various events fired by the `process` global object (which is also an
 `EventEmitter` instance). Here are some common ones: `beforeExit`, `exit`, and `uncaughtException`.
@@ -1132,7 +1260,7 @@ Refer`to the sample code listed below for more details.
 - [Node.js docs - Process](https://nodejs.org/api/process.html#process_process_channel)
 - [Tutorial - Node.js memory model](https://www.dynatrace.com/news/blog/understanding-garbage-collection-and-hunting-memory-leaks-in-node-js/)
 
-## Streams, backpressure, pipes, files
+### Streams, backpressure, pipes, files
 
 - [Node.js docs - Stream](https://nodejs.org/api/stream.html)
 - [Node.js docs - Backpressure and pipes](https://nodejs.org/en/docs/guides/backpressuring-in-streams/)
@@ -1145,12 +1273,23 @@ Refer`to the sample code listed below for more details.
 - [Discussion - Latest version of Node.js and stream promises](https://github.com/nodejs/node/issues/35731)
 - [Sample code](src/streams/stream.ts)
 
-All streams are instances of `EventEmitter`. They emit events that can be used to read and write
-data. However, we can consume streams data in a simpler way using the `pipe()` method. This method
-also handles errors, end-of-files, and the cases when one stream is slower or faster than the other
-(backpressure).
+All streams are instances of [`EventEmitter`][stream-1]. They emit events that can be used to read
+and write data. However, we can consume streams data in a simpler way using the [`pipe()`][stream-2]
+method (defined in [`Stream`][stream-3]). This method also handles errors, end-of-files, and the
+cases when one stream is slower or faster than the other (backpressure).
 
-### pipe
+[stream-1]: https://nodejs.org/api/events.html#events_class_eventemitter
+[stream-2]: https://nodejs.org/en/knowledge/advanced/streams/how-to-use-stream-pipe
+[stream-3]: https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options
+
+> In other words:
+>
+> | Paradigm to work with Streams        | How to use                                              |
+> | ------------------------------------ | ------------------------------------------------------- |
+> | Events (stream is also EventEmitter) | Use EventEmitter and attach listeners for `data` etc    |
+> | Pipes (method defined on Stream)     | `pipe()`, which also handles errors, EOFs, backpressure |
+
+#### pipe
 
 Here's some pseudocode to demonstrate how all this fits together.
 
@@ -1181,32 +1320,33 @@ b.pipe(c)
 c.pipe(d)
 ```
 
-The sample code has a lot to digest. There are some big concepts with streams and files. The async
-nature of Node.js really shows itself here. Here are some interesting things to note.
+There is a lot to digest in the sample code above. There are some big concepts with streams and
+files. The async nature of Node.js really shows itself here. Here are some interesting things to
+note.
 
-1. Without backpressure, the memory load is really high when writing a file "inefficiently". This
+1. File reads are asynchronous by nature. So when the `pipe()` function is called on a stream that
+   happens asynchronously so there's no waiting for it to finish and it returns an `EventEmitter`.
+   That's how these calls can be chained together.
+2. Without backpressure, the memory load is really high when writing a file "inefficiently". This
    also has the result of making the gc work even harder, and the CPU even harder dealing w/ memory
    management. Piping and backpressure resolve this issue and the results are stark!
-2. File writes using a stream are async, but they also buffer in the OS file system. Linux will
+3. File writes using a stream are async, but they also buffer in the OS file system. Linux will
    buffer the file and delay write it, even though Node.js will report that the file write is
    complete. This means that running `fs.stat()` immediately after the file write will result in
    incorrect file size being reported, since the size on disk is still growing.
-3. There are [multiple ways](https://stackoverflow.com/a/21583831/2085356) of creating your own
-   `Writeable` and `Readable` streams. You can use the simplified constructor API or use classes
+4. There are [multiple ways](https://stackoverflow.com/a/21583831/2085356) of creating your own
+   `Writable` and `Readable` streams. You can use the simplified constructor API or use classes
    instead.
-4. The `console` global object is just a `Writeable` stream! This makes it possible to overwrite the
+5. The `console` global object is just a `Writable` stream! This makes it possible to overwrite the
    output that has already been written w/out generating a new line! This is handy for showing long
    running progress. Take a look at [color-console-utils.kt](src/core-utils/color-console-utils.ts)
    `consoleLogInPlace` method.
-5. Piping is an incredibly powerful feature for working with streams in a high performance and
+6. Piping is an incredibly powerful feature for working with streams in a high performance and
    memory efficient way. Read the docs and tutorials above for details.
-6. File reads are asynchronous by nature. So when the `pipe()` function is called on a stream that
-   happens asynchronously so there's no waiting for it to finish. `pipe()` returns an
-   `EventEmitter`.
 
-### pipeline, transform stream, and errors
+#### pipeline, transform stream, and errors
 
-`pipe` does not report errors. `pipeline` is what you must use when it comes to detecting error
+`pipe()` does not report errors. `pipeline()` is what you must use when it comes to detecting error
 conditions. Here's an example using a transform stream (which performs `gzip` compression).
 
 Here's a snippet that uses a `gzip` transform stream in between a read and write stream, with the
@@ -1246,8 +1386,478 @@ export class CompressLargeFileEfficiently {
 await new CompressLargeFileEfficiently().performCompression().catch(console.error)
 ```
 
-## Child process
+### Child process
 
 - [Node.js docs - Child process](https://nodejs.org/api/child_process.html)
 - [Tutorial - Child process](https://jscomplete.com/learn/node-beyond-basics/child-processes)
-- [Sample code](src/basics/child-process.ts)
+- [Sample code](src/cproc/child-process.ts)
+
+Node.js makes it easy to spawn other child processes (OS processes and other instances of itself) in
+order to scale or overcome its single threaded nature.
+
+> Only when spawning other instances of itself it does it use IPC to send messages back and forth
+> between these instances.
+
+When combined w/ streams and `pipe()` this creates an incredibly powerful way to run processes and
+manage process execution on your host OS.
+
+- A child process (`ChildProcess`) is also an `EventEmitter` (`ChildProcess` is a subclass).
+- It has 3 streams as well: `stdin`, `stdout`, `stderr`. You can use `pipe()` on them! Every
+  `Stream` is also an `EventEmitter`.
+
+There are four different ways to create a child process in Node:
+
+1. `spawn()` - this is what we will look deeply into in this section. It can be used to run any OS
+   command via a child process of the Node.js instance that executes this function.
+2. `fork()` - this is what spawns another Node.js instance and IPC is used to communicate between
+   the instances.
+3. `exec()` - this actually spawns a shell in order to execute the command that is passed. It has
+   one other major difference. It buffers the command’s generated output and passes the whole output
+   value to a callback function (instead of using streams, which is what `spawn` does).
+4. `execFile()` - this is like `exec()` except that it does not generate a shell before executing
+   the command.
+
+> - There are also sync versions of these functions that block the main thread.
+> - There is currently no promisified version, though you can use the
+>   [`util.promisify()`](https://nodejs.org/api/util.html#util_util_promisify_original)
+>   functionality of Node.js to use promises. Here's a
+>   [thread on SO](https://stackoverflow.com/a/67379845/2085356) that shows some samples of how to
+>   write the promises yourself using TypeScript.
+
+The examples in this section only look at the situation where you want to spawn a program on your OS
+in a child process of the Node.js process that you have started (and the other approaches are just
+skimmed).
+
+#### Deep dive into spawn()
+
+The `spawn` function launches a command in a new process and we can use it to pass that command any
+arguments. Here's an example.
+
+##### Example 1 - spawn a child process to execute a command
+
+```typescript
+class SpawnCProcToRunLinuxCommandAndGetOutput {
+  readonly cmd = "find"
+  readonly args = [`${process.env.HOME}`, "-type", "f"]
+
+  run = async (): Promise<void> => {
+    const child: ChildProcess = spawn(this.cmd, this.args)
+
+    return new Promise<void>((resolve) => {
+      child.on("exit", function (code, signal) {
+        console.log(`Child process exited with code ${code} and signal ${signal}`)
+        resolve()
+      })
+      child.stdout?.on("data", (data: Buffer) => {
+        console.log(`Output : ${data.length}`)
+      })
+      child.stderr?.on("data", (data) => {
+        console.log(`Error: ${data}`)
+      })
+    })
+  }
+}
+
+const main = async (): Promise<void> => {
+  await new SpawnCProcToRunLinuxCommandAndGetOutput().run()
+}
+
+main().catch(console.error)
+```
+
+Here are some notes on the code snippet above:
+
+- [`ChildProcess`][cp-eg1-1] is a subclass of [`EventEmitter`][cp-eg1-2].
+  - Events that we can register handlers for with the `ChildProcess` instances are:
+  - `disconnect`, `error`, `close`, and `message`.
+- To get a stream out of it, you can use the `stdin`, `stdout`, and `stderr` properties of the
+  `ChildProcess` instance, using:
+  - `child.stdin`, `child.stdout`, and `child.stderr`.
+  - When those streams get closed, the child process that was using them will emit the `close`
+    event. This `close` event is different than the `exit` event because multiple child processes
+    might share the same "stdio" streams, so one child process exiting does not mean that the
+    streams got closed.
+
+[cp-eg1-1]: https://nodejs.org/api/child_process.html#child_process_class_childprocess
+[cp-eg1-2]: https://nodejs.org/api/events.html#events_class_eventemitter
+
+##### "stdio" streams for getting input to and output from child process commands
+
+Child processes (used to execute commands) have streams that are `Readable` and `Writable`. We can
+use them to send data to commands and to get the output or error from the commands.
+
+> In a **child process**, this is the **inverse** of those types found in a **main process**.
+>
+> | Stream                  | R/W      |
+> | ----------------------- | -------- |
+> | [`process.stdin`][cp-1] | Readable |
+> | [`child.stdin`][cp-2]   | Writable |
+
+We can use the event driven approach to get data in and out of these child processes, they are
+[event emitters][cp-3]. We can listen to different events (eg: `data`) on those "stdio" streams that
+are attached to every child process.
+
+> In other words:
+>
+> | What you need from command | What to use               | Stream   |
+> | -------------------------- | ------------------------- | -------- |
+> | Output from command        | `child.stdout.on("data")` | Readable |
+> | Error from command         | `child.stderr.on("data")` | Readable |
+> | Input to command           | `child.stdin`             | Writable |
+
+[cp-1]: https://nodejs.org/api/process.html#process_process_stdin
+[cp-2]: https://nodejs.org/api/child_process.html#child_process_subprocess_stdin
+[cp-3]: https://nodejs.org/api/events.html#events_class_eventemitter
+
+However it is easier to use the
+
+- We can use the child process `stdin` which is a `Writable` stream.
+- Just like any `Writable` stream, the easiest way to consume it is using `pipe()`.
+- We simply pipe a `Readable` stream into a `Writable` stream.
+
+##### Example 2 - pipe process.stdin into child process command
+
+Since the main process `stdin` is a `Readable` stream, we can pipe that into a child process `stdin`
+stream. For example:
+
+```typescript
+import { ChildProcess, spawn } from "child_process"
+import { _notNil } from "../core-utils/kotlin-lang-utils"
+
+export class SpawnCProcAndPipeStdinToLinuxCommand {
+  run = async (): Promise<void> => {
+    console.log(`Type words, then press Ctrl+D to count them...`)
+
+    const wcCommand: ChildProcess = spawn("wc")
+
+    // Send input to command (from process.stdin), ie, process.stdin | wcCommand.stdin.
+    _notNil(wcCommand.stdin, (wcCommandStdin) => {
+      process.stdin.pipe(wcCommandStdin)
+    })
+
+    return new Promise<void>((resolveFn, rejectFn) => {
+      wcCommand.on("exit", function (code, signal) {
+        console.log(`Child process exited with code ${code} and signal ${signal}`)
+        resolveFn()
+      })
+      wcCommand.stdout?.on("data", (data: Buffer) => {
+        console.log(`Output: ${data}`)
+      })
+      wcCommand.stderr?.on("data", (data) => {
+        console.log(`Error: ${data}`)
+        rejectFn()
+      })
+    })
+  }
+}
+
+const main = async (): Promise<void> => {
+  await new SpawnCProcAndPipeStdinToLinuxCommand().run()
+}
+
+main().catch(console.error)
+```
+
+In the example above:
+
+- The child process invokes the `wc` command, which counts lines, words, and characters in Linux.
+- We then pipe the main process `stdin` (which is a `Readable` stream) into the child process
+  `stdin` (which is a `Writable` stream).
+- The result of this combination is that we get a standard input mode where we can type something,
+  and when we hit `Ctrl+D` what we typed will be used as the input of the `wc` command.
+
+##### Example 3 - pipe the output of one child process command into another one
+
+We can also pipe the standard input/output of multiple processes on each other, just like we can do
+with Linux commands. For example, we can pipe the `stdout` of the `find` command to the `stdin` of
+the `wc` command to count all the files in the current directory.
+
+```typescript
+import { ChildProcess, spawn } from "child_process"
+import { ColorConsole, textStyle1 } from "../core-utils/color-console-utils"
+import { _notNil } from "../core-utils/kotlin-lang-utils"
+
+export class SpawnCProcToPipeOutputOfOneLinuxCommandIntoAnother {
+  run = async (): Promise<void> => {
+    const findChildProcess: ChildProcess = spawn("find", [
+      `${process.env.HOME}/github/notes/`,
+      "-type",
+      "f",
+    ])
+
+    const wcChildProcess: ChildProcess = spawn("wc", ["-l"])
+
+    _notNil(findChildProcess.stdout, (find) =>
+      _notNil(wcChildProcess.stdin, (wc) => {
+        find.pipe(wc)
+      })
+    )
+
+    return new Promise<void>((resolveFn, rejectFn) => {
+      wcChildProcess.on("exit", function (code, signal) {
+        console.log(`Child process exited with code ${code} and signal ${signal}`)
+        resolveFn()
+      })
+      wcChildProcess.stdout?.on("data", (data: Buffer) => {
+        console.log(`Number of files ${data}`)
+      })
+      wcChildProcess.stderr?.on("data", (data) => {
+        console.log(`Error: ${data}`)
+        rejectFn()
+      })
+    })
+  }
+}
+```
+
+##### Example 4 - ugly code to redirect the output of one child process command to another one
+
+Without using `pipe()` the code would be pretty ugly.
+
+Let's convert the following shell script to Node.js w/out using `pipe()`.
+
+```shell
+ps ax | grep ssh
+```
+
+Here's the ugly code (using `pipe()` is far superior).
+
+```typescript
+const { spawn } = require("child_process")
+
+const ps = spawn("ps", ["ax"])
+const grep = spawn("grep", ["ssh"])
+
+ps.stdout.on("data", (data) => {
+  grep.stdin.write(data)
+})
+ps.stderr.on("data", (data) => {
+  console.error(`ps stderr: ${data}`)
+})
+ps.on("close", (code) => {
+  if (code !== 0) {
+    console.log(`ps process exited with code ${code}`)
+  }
+  grep.stdin.end()
+})
+
+grep.stdout.on("data", (data) => {
+  console.log(data.toString())
+})
+grep.stderr.on("data", (data) => {
+  onsole.error(`grep stderr: ${data}`)
+})
+grep.on("close", (code) => {
+  if (code !== 0) {
+    console.log(`grep process exited with code ${code}`)
+  }
+})
+```
+
+#### Killing or aborting a child process
+
+To kill a child process, you can call
+[`kill()`](https://nodejs.org/api/child_process.html#child_process_subprocess_kill_signal).
+
+If the `signal` option (of type `AbortSignal`) is enabled, calling `.abort()` on the corresponding
+`AbortController` is similar to calling `.kill()` on the child process except the error passed to
+the callback will be an `AbortError`.
+[Node.js docs](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)
+. For example:
+
+```typescript
+const { spawn } = require("child_process")
+const controller = new AbortController()
+const { signal } = controller
+
+const grep = spawn("grep", ["ssh"], { signal })
+grep.on("error", (err) => {
+  // This will be called with err being an AbortError if the controller aborts
+})
+controller.abort() // Stops the child process
+```
+
+#### Brief exploration of exec()
+
+Here's an example.
+
+```typescript
+const { exec } = require("child_process")
+
+exec("find . -type f | wc -l", (err, stdout, stderr) => {
+  if (err) {
+    console.error(`exec error: ${err}`)
+    return
+  }
+
+  console.log(`Number of files ${stdout}`)
+})
+```
+
+#### Brief exploration of fork()
+
+`fork()` is a variation of `spawn()` for spawning node processes. The biggest difference between
+`spawn` and `fork` is that a communication channel is established to the child process when using
+`fork`, so we can use `send()` on the forked process along with the global `process` object itself
+to exchange messages between the parent and forked processes.
+
+We do this through the `EventEmitter` module interface. Here’s an example:
+
+The parent file, `parent.js`:
+
+```typescript
+const { fork } = require("child_process")
+
+const forked = fork("child.js")
+
+forked.on("message", (msg) => {
+  console.log("Message from child", msg)
+})
+
+forked.send({ hello: "world" })
+```
+
+The child file, `child.js`:
+
+```typescript
+process.on("message", (msg) => {
+  console.log("Message from parent:", msg)
+})
+
+let counter = 0
+
+setInterval(() => {
+  process.send({ counter: counter++ })
+}, 1000)
+```
+
+#### Example of replacing a fish script using spawn
+
+Here's a simple fish script that looks for the path to `linuxbrew` in `$HOME/.profile` so that GNOME
+sessions can load it into their path. This is needed for processes that are spawned from GNOME shell
+to be able to use Node.js that is installed using Linuxbrew.
+
+```shell
+#!/usr/bin/env fish
+
+set searchString "linuxbrew"
+set dotProfileFile "$HOME/.profile"
+
+function _writeToDotProfileFile
+  echo >> $dotProfileFile '
+if [ -d "/home/linuxbrew/.linuxbrew" ] ; then
+  PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+fi
+'
+end
+
+function addLinuxbrewToGnomeSessionPath
+  set -l grepResponse (grep $searchString $dotProfileFile)
+
+  # echo "grepResponse: '$grepResponse'"
+
+  if test -n "$grepResponse"
+    echo "$searchString found in $dotProfileFile, nothing to do."
+  else
+    echo "$searchString not found in $dotProfileFile, make sure to add it."
+    _writeToDotProfileFile
+  end
+end
+
+if test (uname) = "Linux"
+  # This is Linux.
+  addLinuxbrewToGnomeSessionPath
+else
+  # This is macOS.
+end
+```
+
+Now, here's the equivalent script written in Node.js using `spawn()`.
+
+```typescript
+import { _also, Optional } from "../core-utils/kotlin-lang-utils"
+import * as fs from "fs"
+
+/**
+ * Using constant object instead of enum (better choice here since it allows computed values).
+ * More info:
+ * - https://www.typescriptlang.org/docs/handbook/enums.html#objects-vs-enums
+ * - https://blog.logrocket.com/const-assertions-are-the-killer-new-typescript-feature-b73451f35802/
+ */
+const MyConstants = {
+  gnomeDotProfileFile: process.env.HOME + ".profile",
+  linuxbrewSearchTerm: "linuxbrew",
+  defaultLinuxbrewPath: "/home/linuxbrew/.linuxbrew",
+} as const
+
+export class SpawnCProcToReplaceFunctionalityOfFishScript {
+  run = async (): Promise<void> => {
+    try {
+      const isFound = await this.doesGnomeProfileContainLinuxbrewPath()
+      if (isFound) {
+        console.log(
+          `Nothing to do, ${MyConstants.linuxbrewSearchTerm} is already in ${MyConstants.gnomeDotProfileFile}`
+        )
+        return
+      }
+      await this.addPathToGnomeProfileFile()
+    } catch (e) {
+      console.error(`Error: ${e}`)
+    }
+  }
+
+  // https://nodesource.com/blog/understanding-streams-in-nodejs/
+  doesGnomeProfileContainLinuxbrewPath = async (): Promise<boolean> => {
+    return new Promise<boolean>((resolveFn, rejectFn) => {
+      let isFound = false
+      _also(fs.createReadStream(MyConstants.gnomeDotProfileFile), (it) => {
+        it.on("data", (data: Buffer | string) => {
+          isFound = data.includes(MyConstants.linuxbrewSearchTerm)
+        })
+        it.on("end", () => {
+          resolveFn(isFound)
+        })
+        it.on("error", () => {
+          rejectFn()
+        })
+      })
+    })
+  }
+
+  addPathToGnomeProfileFile = async (): Promise<void> => {
+    const overriddenLinuxbrewPath: Optional<string> = process.env.PATH?.split(":")
+      .filter((pathElement) => pathElement.includes(MyConstants.linuxbrewSearchTerm))
+      .shift()
+    const linuxbrewPath: string = overriddenLinuxbrewPath ?? MyConstants.defaultLinuxbrewPath
+
+    console.log(`linuxbrewPath: ${linuxbrewPath}`)
+
+    const snippetToAppend = `if [ -d "${linuxbrewPath}" ] ; then
+  PATH="${linuxbrewPath}/bin:$PATH"
+fi`
+
+    console.log(`snippet: ${snippetToAppend}`)
+
+    return new Promise<void>((resolveFn, rejectFn) => {
+      fs.appendFile(
+        MyConstants.gnomeDotProfileFile,
+        snippetToAppend,
+        (err: NodeJS.ErrnoException | null) => {
+          if (err) {
+            console.error(`Problem appending file ${MyConstants.gnomeDotProfileFile}`)
+            rejectFn()
+          } else {
+            console.log(`Appended file ${MyConstants.gnomeDotProfileFile}`)
+            resolveFn()
+          }
+        )
+    })
+  }
+}
+
+const main = async () => {
+  await new SpawnCProcToReplaceFunctionalityOfFishScript().run()
+}
+
+main().catch(console.error)
+```

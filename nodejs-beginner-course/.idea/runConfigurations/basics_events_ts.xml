@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="basics/events.ts" type="NodeJSConfigurationType" path-to-js-file="src/basics/events.ts" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="basics/events.ts" type="NodeJSConfigurationType" path-to-node="/usr/bin/ts-node-dev" path-to-js-file="src/basics/events.ts" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>

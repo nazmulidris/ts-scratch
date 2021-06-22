@@ -4,7 +4,24 @@ import { _also } from "./kotlin-lang-utils"
 import * as _ from "lodash"
 import axios, { AxiosResponse } from "axios"
 
-export const sleep = (ms: number = 500) => new Promise((resolve) => setTimeout(resolve, ms))
+export const sleep = (ms: number = 500) => {
+  const sprites = ["-", "\\", "-", "/"]
+
+  let count = 0
+  const printDots: NodeJS.Timeout = setInterval(() => {
+    ColorConsole.create(textStyle1.cyan)(
+      "Sleep " + sprites[count++ % sprites.length]
+    ).consoleLogInPlace()
+  }, 100)
+
+  return new Promise<void>((resolveFn) => {
+    setTimeout(() => {
+      clearInterval(printDots)
+      console.log()
+      resolveFn()
+    }, ms)
+  })
+}
 
 /**
  * https://www.dynatrace.com/news/blog/understanding-garbage-collection-and-hunting-memory-leaks-in-node-js/
