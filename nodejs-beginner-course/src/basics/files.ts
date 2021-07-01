@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 
-import { printHeader, textStyle1, textStyle2 } from "../core-utils/color-console-utils"
+import { printHeader, Styles } from "../core-utils/color-console-utils"
 import * as fs from "fs"
 import { Stats } from "fs"
 import { isNil } from "lodash"
@@ -9,8 +9,8 @@ import { sleep } from "../core-utils/misc-utils"
 
 const main = async () => {
   printHeader(`Files...`)
-  console.log(`process.cwd: ${textStyle1(process.cwd())}`)
-  console.log(`process.env.HOME: ${textStyle1(process.env.HOME)}`)
+  console.log(`process.cwd: ${Styles.Primary(process.cwd())}`)
+  console.log(`process.env.HOME: ${Styles.Primary(process.env.HOME)}`)
 
   await _with(new FileReadExample(), {
     fnWithReboundThis: async function (): Promise<void> {
@@ -46,13 +46,13 @@ class FileReadExample {
     try {
       printHeader(`Read valid file 👍`)
       // Must specify encoding, otherwise readFileSync returns a Buffer!
-      console.log(textStyle1(fs.readFileSync(this.validFilePath, this.encoding)))
+      console.log(Styles.Primary(fs.readFileSync(this.validFilePath, this.encoding)))
 
       printHeader(`Can't read invalid file! ⛔`)
       // Must specify encoding, otherwise readFileSync returns a Buffer!
-      console.log(textStyle1(fs.readFileSync(this.invalidFilePath, this.encoding)))
+      console.log(Styles.Primary(fs.readFileSync(this.invalidFilePath, this.encoding)))
     } catch (err) {
-      console.error(textStyle2(err.message))
+      console.error(Styles.Secondary(err.message))
     }
   }
 
@@ -60,10 +60,10 @@ class FileReadExample {
     const _processDataOrError = (err: NodeJS.ErrnoException | null, data: string) => {
       if (isNil(err)) {
         printHeader("Reading valid file 👍")
-        console.log(textStyle1(data))
+        console.log(Styles.Primary(data))
       } else {
         printHeader("Can't read invalid file! ⛔")
-        console.error(textStyle2(err.message))
+        console.error(Styles.Secondary(err.message))
       }
     }
     for (const file of [this.validFilePath, this.invalidFilePath]) {
@@ -80,8 +80,8 @@ class FileWriteExample {
     // https://nodejs.org/api/fs.html#fs_file_system_flags
     fs.writeFile(this.validFilePath, this.content, { flag: "w" }, (err) => {
       isNil(err)
-        ? console.log(textStyle1(`Wrote file ${this.validFilePath} successfully. 👍`))
-        : console.log(textStyle2(`Failed to write ${this.validFilePath} file! ⛔`))
+        ? console.log(Styles.Primary(`Wrote file ${this.validFilePath} successfully. 👍`))
+        : console.error(Styles.Secondary(`Failed to write ${this.validFilePath} file! ⛔`))
     })
   }
 
@@ -89,9 +89,9 @@ class FileWriteExample {
     try {
       // https://nodejs.org/api/fs.html#fs_file_system_flags
       fs.writeFileSync(this.validFilePath, this.content, { flag: "w" })
-      console.log(textStyle1(`Wrote file ${this.validFilePath} successfully. 👍`))
+      console.log(Styles.Primary(`Wrote file ${this.validFilePath} successfully. 👍`))
     } catch (err) {
-      console.log(textStyle2(`Failed to write ${this.validFilePath} file! ⛔`))
+      console.error(Styles.Secondary(`Failed to write ${this.validFilePath} file! ⛔`))
     }
   }
 

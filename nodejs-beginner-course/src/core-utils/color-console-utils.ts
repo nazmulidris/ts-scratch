@@ -82,7 +82,7 @@ export class ColorConsole {
   consoleLogInPlace = (printNewline: boolean = false): void => {
     process.stdout.clearLine(-1)
     process.stdout.cursorTo(0)
-    process.stdout.write(textStyle1.red(this.toString()))
+    process.stdout.write(Styles.Primary.red(this.toString()))
     printNewline ? process.stdout.write("\n") : null
   }
 
@@ -93,8 +93,12 @@ export class ColorConsole {
   toString = (): string => this.myStyle(this.myText)
 }
 
-export const textStyle1 = chalk.bold.yellow.bgBlack
-export const textStyle2 = chalk.underline.cyan.bgGray
+export const Styles = {
+  Primary: chalk.bold.yellow.bgBlack,
+  Secondary: chalk.underline.cyan.bgGray,
+} as const
 
-export const textStylerPrimary = new ColorConsole(chalk.bold.yellow.bgBlack)
-export const textStylerSecondary = new ColorConsole(chalk.underline.cyan.bgGray)
+export const StyledColorConsole = {
+  Primary: ColorConsole.create(Styles.Primary),
+  Secondary: ColorConsole.create(Styles.Secondary),
+} as const

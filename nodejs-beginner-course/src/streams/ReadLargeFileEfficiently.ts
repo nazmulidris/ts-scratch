@@ -1,5 +1,5 @@
 import { Writable } from "stream"
-import { ColorConsole, textStyle1 } from "../core-utils/color-console-utils"
+import { ColorConsole, Styles } from "../core-utils/color-console-utils"
 import { ConsoleLogSkip, Constants } from "./Constants"
 import { _also } from "../core-utils/kotlin-lang-utils"
 import { sleep } from "../core-utils/misc-utils"
@@ -14,14 +14,14 @@ class DummyWritable extends Writable {
   constructor() {
     super()
     this.on("finish", () => {
-      ColorConsole.create(textStyle1.blue)("DummyWritable - finished writing").consoleLog()
+      ColorConsole.create(Styles.Primary.blue)("DummyWritable - finished writing").consoleLog()
     })
   }
 
   _write(data: any, encoding: BufferEncoding, callback: (error?: Error | null) => void) {
     this.totalCharsWritten += data.length
     if (this.totalCharsWritten % ConsoleLogSkip.DummyOutputStreamCharsWritten === 0) {
-      ColorConsole.create(textStyle1.red)(
+      ColorConsole.create(Styles.Primary.red)(
         `DummyOutputStream - written: ${this.totalCharsWritten} chars`
       ).consoleLog()
     }
@@ -51,7 +51,7 @@ export class ReadLargeFileEfficiently {
         totalBytesRead += data.length
         const percentCopied = Math.round((totalBytesRead / fileSizeInBytes) * 100)
         if (totalBytesRead % ConsoleLogSkip.ReadLargeFileEfficientlyBytesRead === 0) {
-          ColorConsole.create(textStyle1.green)(
+          ColorConsole.create(Styles.Primary.green)(
             `FileInputStream - Reading: ${percentCopied}%, data.length:${data.length}, totalBytesRead:${totalBytesRead}, fileSize:${fileSizeInBytes}`
           ).consoleLog()
         }
@@ -65,7 +65,9 @@ export class ReadLargeFileEfficiently {
     fileInputReadable.pipe(dummyWritable)
 
     // Wait for async pipe read to finish.
-    ColorConsole.create(textStyle1.blue)("Waiting for pipe read to finish for 5s...").consoleLog()
+    ColorConsole.create(Styles.Primary.blue)(
+      "Waiting for pipe read to finish for 5s..."
+    ).consoleLog()
     await sleep(5000)
   }
 }

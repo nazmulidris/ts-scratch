@@ -1,4 +1,4 @@
-import {ContentGeneratorFnType, ValidContentTypes} from "../types"
+import { ContentGeneratorFnType, ValidContentTypes } from "../types"
 
 const noRouteFoundContentFn: ContentGeneratorFnType = () => {
   return {
@@ -6,4 +6,4 @@ const noRouteFoundContentFn: ContentGeneratorFnType = () => {
     type: ValidContentTypes.Text,
   }
 }
-export {noRouteFoundContentFn}
+export { noRouteFoundContentFn }

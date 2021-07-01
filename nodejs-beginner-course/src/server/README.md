@@ -1,3 +1,12 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Architecture diagram of servers](#architecture-diagram-of-servers)
+- [References for HTTP Server](#references-for-http-server)
+- [Deployment to heroku](#deployment-to-heroku)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Architecture diagram of servers
 
 - [HTTP Server (Lucidspark)](https://lucid.app/lucidspark/67207bbd-8320-4909-8157-619cd6cb912e/edit?beaconFlowId=87124AEE05ACA6E4#)

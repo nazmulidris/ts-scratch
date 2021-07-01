@@ -1,4 +1,4 @@
-import {ContentGeneratorFnType, Route, ValidContentTypes} from "../types"
+import { ContentGeneratorFnType, Route, ValidContentTypes } from "../types"
 
 export class Echo implements Route {
   pathname: string = `/${Echo.name}`

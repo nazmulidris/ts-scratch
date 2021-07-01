@@ -2,15 +2,16 @@
 
 import {
   _also,
+  _apply,
   _let,
+  _with,
+  ImplicitReceiverObject,
+  ImplicitReceiverObjectWithReturn,
   ReceiverFn,
   ReceiverFnWithReturn,
-  ImplicitReceiverObjectWithReturn,
-  ImplicitReceiverObject,
-  _apply, _with,
 } from "../kotlin-lang-utils"
 
-it("_also() takes a contextObject, passes it to the Receiver, and returns the contextObject", () => {
+it("_also() takes a contextObject, passes it to the ReceiverFn, and returns the contextObject", () => {
   const contextObject: string = "_also"
 
   // https://jasmine.github.io/2.1/introduction#section-Spies:_%3Ccode%3Eand.callThrough%3C/code%3E
@@ -26,7 +27,7 @@ it("_also() takes a contextObject, passes it to the Receiver, and returns the co
   expect(spyObjectContainingFn.myReceiverFn).toHaveBeenCalled()
 })
 
-it("_let() takes a contextObject, passes it to the Receiver, and returns its return value", () => {
+it("_let() takes a contextObject, passes it to the ReceiverFnWithReturn, and returns its return value", () => {
   const contextObject: string = "_let"
   const receiverFnReturnValue: Symbol = Symbol()
 

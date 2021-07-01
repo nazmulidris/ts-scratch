@@ -5,13 +5,14 @@ import * as chalk from "chalk"
 
 class UIStrings {
   public static readonly closeCommand = "quit"
-  public static readonly userPrompt =
-    `> Please type "${UIStrings.closeCommand}" or ${chalk.red("Ctrl+C")} to exit 🐾`
+  public static readonly userPrompt = `> Please type "${UIStrings.closeCommand}" or ${chalk.red(
+    "Ctrl+C"
+  )} to exit 🐾`
 }
 
 class CommandLineInterface {
   private readonly consoleInterface: readline.Interface
-  
+
   constructor(message: string) {
     this.consoleInterface = readline.createInterface({
       input: process.stdin,
@@ -21,19 +22,19 @@ class CommandLineInterface {
     this.consoleInterface.on("close", this.onControlCPressed)
     this.setPrompt(message)
   }
-  
+
   stop = () => {
     this.consoleInterface.close()
   }
-  
+
   start = () => {
     this.consoleInterface.prompt()
   }
-  
+
   setPrompt = (message: string) => {
     this.consoleInterface.setPrompt(message)
   }
-  
+
   private onLineEntered = (line: string) => {
     switch (line) {
       case UIStrings.closeCommand:
@@ -44,7 +45,7 @@ class CommandLineInterface {
         this.start()
     }
   }
-  
+
   private onControlCPressed = () => {
     console.log(chalk.red("Goodbye!"))
     this.stop()

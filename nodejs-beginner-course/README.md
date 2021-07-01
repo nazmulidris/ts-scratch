@@ -57,6 +57,7 @@
     - [Brief exploration of exec()](#brief-exploration-of-exec)
     - [Brief exploration of fork()](#brief-exploration-of-fork)
     - [Example of replacing a fish script using spawn](#example-of-replacing-a-fish-script-using-spawn)
+- [Publishing npm packages](#publishing-npm-packages)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -1522,7 +1523,7 @@ stream. For example:
 
 ```typescript
 import { ChildProcess, spawn } from "child_process"
-import { _notNil } from "../core-utils/kotlin-lang-utils"
+import { notNil } from "../core-utils/kotlin-lang-utils"
 
 export class SpawnCProcAndPipeStdinToLinuxCommand {
   run = async (): Promise<void> => {
@@ -1531,7 +1532,7 @@ export class SpawnCProcAndPipeStdinToLinuxCommand {
     const wcCommand: ChildProcess = spawn("wc")
 
     // Send input to command (from process.stdin), ie, process.stdin | wcCommand.stdin.
-    _notNil(wcCommand.stdin, (wcCommandStdin) => {
+    notNil(wcCommand.stdin, (wcCommandStdin) => {
       process.stdin.pipe(wcCommandStdin)
     })
 
@@ -1575,7 +1576,7 @@ the `wc` command to count all the files in the current directory.
 ```typescript
 import { ChildProcess, spawn } from "child_process"
 import { ColorConsole, textStyle1 } from "../core-utils/color-console-utils"
-import { _notNil } from "../core-utils/kotlin-lang-utils"
+import { notNil } from "../core-utils/kotlin-lang-utils"
 
 export class SpawnCProcToPipeOutputOfOneLinuxCommandIntoAnother {
   run = async (): Promise<void> => {
@@ -1587,8 +1588,8 @@ export class SpawnCProcToPipeOutputOfOneLinuxCommandIntoAnother {
 
     const wcChildProcess: ChildProcess = spawn("wc", ["-l"])
 
-    _notNil(findChildProcess.stdout, (find) =>
-      _notNil(wcChildProcess.stdin, (wc) => {
+    notNil(findChildProcess.stdout, (find) =>
+      notNil(wcChildProcess.stdin, (wc) => {
         find.pipe(wc)
       })
     )
@@ -1785,7 +1786,7 @@ import * as fs from "fs"
  * - https://blog.logrocket.com/const-assertions-are-the-killer-new-typescript-feature-b73451f35802/
  */
 const MyConstants = {
-  gnomeDotProfileFile: process.env.HOME + ".profile",
+  gnomeDotProfileFile: process.env.HOME + "/.profile",
   linuxbrewSearchTerm: "linuxbrew",
   defaultLinuxbrewPath: "/home/linuxbrew/.linuxbrew",
 } as const
@@ -1843,14 +1844,17 @@ fi`
         MyConstants.gnomeDotProfileFile,
         snippetToAppend,
         (err: NodeJS.ErrnoException | null) => {
-          if (err) {
-            console.error(`Problem appending file ${MyConstants.gnomeDotProfileFile}`)
+          const _onErr = () => {
             rejectFn()
-          } else {
-            console.log(`Appended file ${MyConstants.gnomeDotProfileFile}`)
-            resolveFn()
+            console.error(`Problem appending file ${MyConstants.gnomeDotProfileFile}`)
           }
-        )
+          const _onOk = () => {
+            resolveFn()
+            console.log(`Appended file ${MyConstants.gnomeDotProfileFile}`)
+          }
+          err ? _onErr() : _onOk()
+        }
+      )
     })
   }
 }
@@ -1861,3 +1865,14 @@ const main = async () => {
 
 main().catch(console.error)
 ```
+
+## Publishing npm packages
+
+- [r3bl-ts-utils][r-3] - This repo is published on npm (`npm i r3bl-ts-utils`) and used in the code
+  here. The README contains instructions on how to publish a package and update it as well.
+- [Excellent tutorial on how to publish an npm package][r-1].
+- [`.npmignore` and `files` directive in `package.json`][r-2].
+
+[r-1]: https://itnext.io/step-by-step-building-and-publishing-an-npm-typescript-package-44fe7164964c
+[r-2]: https://stackoverflow.com/a/41285281/2085356
+[r-3]: https://github.com/r3bl-org/r3bl-ts-utils

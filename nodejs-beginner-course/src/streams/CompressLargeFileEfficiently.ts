@@ -1,12 +1,9 @@
-import { ColorConsole, textStyle1, textStyle2 } from "../core-utils/color-console-utils"
-import { ConsoleLogSkip, Constants } from "./Constants"
-import { fetchLoremIpsumFromAPI, printMemoryUsage, sleep } from "../core-utils/misc-utils"
-import { Readable, Writable } from "stream"
-import { _also } from "../core-utils/kotlin-lang-utils"
+import { ColorConsole, StyledColorConsole, Styles } from "../core-utils/color-console-utils"
+import { Constants } from "./Constants"
+import { sleep } from "../core-utils/misc-utils"
 import * as fs from "fs"
 import * as zlib from "zlib"
 import { pipeline } from "stream/promises"
-import { fileURLToPath } from "url"
 
 /**
  * Use a transform stream in between a read and write stream, with the use of backpressure.
@@ -60,7 +57,7 @@ export class CompressLargeFileEfficiently {
     await this.actuallyCompress().catch(console.error)
 
     // Wait for disk flush.
-    ColorConsole.create(textStyle1.blue)(
+    ColorConsole.create(Styles.Primary.blue)(
       "Waiting for disk to flush the write to file for 5s..."
     ).consoleLog()
     await sleep(5000)
@@ -72,7 +69,7 @@ export class CompressLargeFileEfficiently {
 
     const gzipTransformer = zlib.createGzip()
 
-    ColorConsole.create(textStyle1)(`Using pipeline() to compress file`).consoleLog()
+    StyledColorConsole.Primary(`Using pipeline() to compress file`).consoleLog()
     await pipeline(uncompressedSrcFileReader, gzipTransformer, compressedDestFileWriter)
   }
 }

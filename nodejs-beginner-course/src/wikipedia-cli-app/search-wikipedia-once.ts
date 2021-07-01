@@ -21,8 +21,7 @@ const main = async (argv: Array<string>) => {
     console.log("⚠️ Please pass the search term as an argument!")
     process.exit(1)
   }
-  const searchTerm = argv.join(" ")
-  .toLowerCase()
+  const searchTerm = argv.join(" ").toLowerCase()
   console.log(searchTerm)
   const response: string = await getSearchResultsFromWikipediaAsynchronously(searchTerm)
 

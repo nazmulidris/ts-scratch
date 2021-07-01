@@ -1,4 +1,4 @@
-import {ParsedUrlQuery} from "querystring"
+import { ParsedUrlQuery } from "querystring"
 
 export type ContentGeneratorFnType = (queryParams?: ParsedUrlQuery) => Content
 
@@ -18,4 +18,4 @@ export interface Content {
   type: ValidContentTypes
 }
 
-export type Optional<T> =  T | undefined | null
+export type Optional<T> = T | undefined | null

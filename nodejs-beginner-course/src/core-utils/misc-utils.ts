@@ -1,4 +1,4 @@
-import { ColorConsole, textStyle1, textStyle2 } from "./color-console-utils"
+import { ColorConsole, Styles } from "./color-console-utils"
 import * as prettyBytes from "pretty-bytes"
 import { _also } from "./kotlin-lang-utils"
 import * as _ from "lodash"
@@ -8,15 +8,15 @@ export const sleep = (ms: number = 500) => {
   const sprites = ["-", "\\", "-", "/"]
 
   let count = 0
-  const printDots: NodeJS.Timeout = setInterval(() => {
-    ColorConsole.create(textStyle1.cyan)(
+  const printDotsInterval = setInterval(() => {
+    ColorConsole.create(Styles.Primary.cyan)(
       "Sleep " + sprites[count++ % sprites.length]
     ).consoleLogInPlace()
   }, 100)
 
   return new Promise<void>((resolveFn) => {
     setTimeout(() => {
-      clearInterval(printDots)
+      clearInterval(printDotsInterval)
       console.log()
       resolveFn()
     }, ms)
@@ -40,18 +40,18 @@ export const printMemoryUsage = (
     external: string
     arrayBuffers: string
   } = {
-    rss: textStyle2(prettyBytes(memoryUsage.rss)),
-    heapUsed: textStyle2(prettyBytes(memoryUsage.heapUsed)),
-    heapTotal: textStyle2(prettyBytes(memoryUsage.heapTotal)),
-    external: textStyle2(prettyBytes(memoryUsage.external)),
-    arrayBuffers: textStyle2(prettyBytes(memoryUsage.arrayBuffers)),
+    rss: Styles.Secondary(prettyBytes(memoryUsage.rss)),
+    heapUsed: Styles.Secondary(prettyBytes(memoryUsage.heapUsed)),
+    heapTotal: Styles.Secondary(prettyBytes(memoryUsage.heapTotal)),
+    external: Styles.Secondary(prettyBytes(memoryUsage.external)),
+    arrayBuffers: Styles.Secondary(prettyBytes(memoryUsage.arrayBuffers)),
   }
   const consoleLogOutput = _also(new Array<string>(), (it) => {
     for (const snapshotKey in snapshot) {
       it.push(snapshotKey + "-" + _.get(snapshot, snapshotKey))
     }
   })
-  ColorConsole.create(textStyle1.red)(
+  ColorConsole.create(Styles.Primary.red)(
     message.padStart(padding, ">") + " " + consoleLogOutput.join(", ")
   ).consoleLogInPlace(!printInPlace)
 }

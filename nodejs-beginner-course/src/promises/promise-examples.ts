@@ -21,29 +21,26 @@ function handleImmediateExecutionPromise() {
     resolveFn("hello world!")
   }
 
-  new Promise<string>(myExecutorFn)
-  .then(value => console.log(chalk.red(`immediate: ${value}, actual delay ${timeDiffMs()} ms`)))
+  new Promise<string>(myExecutorFn).then((value) =>
+    console.log(chalk.red(`immediate: ${value}, actual delay ${timeDiffMs()} ms`))
+  )
 }
 
 function handleDeferredExecutionPromise(delayMs: number) {
   const myExecutorFn: ExecutorFnType<string> = (resolveFn) => {
-    setTimeout(
-      () => {
-        resolveFn(`hello world! after ${delayMs} ms`)
-      },
-      delayMs
-    )
+    setTimeout(() => {
+      resolveFn(`hello world! after ${delayMs} ms`)
+    }, delayMs)
   }
 
-  new Promise<string>(myExecutorFn)
-  .then(value => console.log(chalk.green(`using then(): ${value}, actual delay ${timeDiffMs()} ms`)))
+  new Promise<string>(myExecutorFn).then((value) =>
+    console.log(chalk.green(`using then(): ${value}, actual delay ${timeDiffMs()} ms`))
+  )
 }
 
 async function handleDeferredExecutionPromiseWithAwait(delayMs: number) {
-  const myExecutorFn: ExecutorFnType<string> = resolveFn => setTimeout(
-    () => resolveFn(`hello world! after ${delayMs} ms`),
-    delayMs
-  )
+  const myExecutorFn: ExecutorFnType<string> = (resolveFn) =>
+    setTimeout(() => resolveFn(`hello world! after ${delayMs} ms`), delayMs)
 
   const value = await new Promise(myExecutorFn)
   console.log(chalk.blue(`using await: ${value}, actual delay ${timeDiffMs()} ms`))

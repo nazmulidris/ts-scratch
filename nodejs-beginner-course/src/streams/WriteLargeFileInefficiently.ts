@@ -2,7 +2,7 @@ import * as fs from "fs"
 import { WriteStream } from "fs"
 import { ConsoleLogSkip, Constants } from "./Constants"
 import { fetchLoremIpsumFromAPI, printMemoryUsage, sleep } from "../core-utils/misc-utils"
-import { ColorConsole, textStyle1, textStyle2 } from "../core-utils/color-console-utils"
+import { ColorConsole, StyledColorConsole, Styles } from "../core-utils/color-console-utils"
 
 export class WriteLargeFileInefficiently {
   /**
@@ -24,15 +24,15 @@ export class WriteLargeFileInefficiently {
     for (let lineCount: number = 0; lineCount < Constants.maxLinesToWrite; lineCount++) {
       fileOutputStream.write(line, Constants.encoding)
       if (lineCount % ConsoleLogSkip.WriteLargeFileInefficiently === 0) {
-        printMemoryUsage(`line: ${textStyle2(lineCount)}`)
+        printMemoryUsage(`line: ${Styles.Secondary(lineCount)}`)
       }
       charCount += line.length
     }
     fileOutputStream.end()
-    ColorConsole.create(textStyle1)(`Total string length = ${charCount} chars`).consoleLog(true)
+    StyledColorConsole.Primary(`Total string length = ${charCount} chars`).consoleLog(true)
 
     // Wait for disk flush.
-    ColorConsole.create(textStyle1.blue)(
+    ColorConsole.create(Styles.Primary.blue)(
       "Waiting for disk to flush the write to file for 5s..."
     ).consoleLog()
     await sleep(5000)

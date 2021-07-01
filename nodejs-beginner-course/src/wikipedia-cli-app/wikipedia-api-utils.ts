@@ -35,4 +35,4 @@ const saveStringToFileAsynchronously = async (
   }
 }
 
-export {getSearchResultsFromWikipediaAsynchronously, saveStringToFileAsynchronously}
+export { getSearchResultsFromWikipediaAsynchronously, saveStringToFileAsynchronously }

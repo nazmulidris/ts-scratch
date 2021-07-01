@@ -1,4 +1,4 @@
-import { ColorConsole, textStyle1, textStyle2 } from "../core-utils/color-console-utils"
+import { ColorConsole, StyledColorConsole, Styles } from "../core-utils/color-console-utils"
 import { ConsoleLogSkip, Constants } from "./Constants"
 import { fetchLoremIpsumFromAPI, printMemoryUsage, sleep } from "../core-utils/misc-utils"
 import { Readable } from "stream"
@@ -32,14 +32,14 @@ class LineGeneratorReadableStream extends Readable {
   _read(size: number /* Ignore the size (size of buffer that can be read / pushed). */) {
     if (this.lineCount > Constants.maxLinesToWrite) {
       this.push(null) // Close the stream.
-      ColorConsole.create(textStyle1)("Finished writing file").consoleLog(true)
+      StyledColorConsole.Primary("Finished writing file").consoleLog(true)
       return
     }
     this.push(this.line) // Write bytes into the stream.
     this.lineCount++
     this.charCount += this.line.length
     if (this.lineCount % ConsoleLogSkip.WriteLargeFileEfficiently === 0) {
-      printMemoryUsage(`size- ${textStyle2(size)}, line- ${textStyle2(this.lineCount)}`)
+      printMemoryUsage(`size- ${Styles.Secondary(size)}, line- ${Styles.Secondary(this.lineCount)}`)
     }
   }
 }
@@ -60,7 +60,7 @@ export class WriteFileEfficiently {
     lineGeneratorReadableStream.pipe(fileWriteStream)
 
     // Wait for disk flush.
-    ColorConsole.create(textStyle1.blue)(
+    ColorConsole.create(Styles.Primary.blue)(
       "Waiting for disk to flush the write to file for 5s..."
     ).consoleLog()
     await sleep(5000)

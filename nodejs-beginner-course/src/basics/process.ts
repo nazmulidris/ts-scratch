@@ -1,23 +1,16 @@
 import * as process from "process"
-import {
-  printHeader,
-  textStyle1,
-  textStyle2,
-  textStylerPrimary,
-  textStylerSecondary,
-} from "../core-utils/color-console-utils"
+import { printHeader, StyledColorConsole, Styles } from "../core-utils/color-console-utils"
 import * as _ from "lodash"
-import { _also, _apply } from "../core-utils/kotlin-lang-utils"
 
 const main = async () => {
   printHeader(`Print stats for current process`)
   printProcessStats()
 
-  printHeader(`Attaching event listeners to process: ${textStyle2("exit, beforeExit")}`)
+  printHeader(`Attaching event listeners to process: ${Styles.Secondary("exit, beforeExit")}`)
   attachExitHandler()
   attachBeforeExitHandler()
 
-  printHeader(`Attaching event listeners to process: ${textStyle2("uncaughtException")}`)
+  printHeader(`Attaching event listeners to process: ${Styles.Secondary("uncaughtException")}`)
   attachUncaughtExceptionHandler()
   throwUncaughtException()
 }
@@ -34,7 +27,9 @@ const printProcessStats = () => {
   }
   for (const key in data) {
     // https://gomakethings.com/how-to-get-the-value-of-an-object-from-a-specific-path-with-vanilla-js/
-    textStylerPrimary.apply(textStyle1(key) + " -> " + textStyle2(_.get(data, key))).consoleLog()
+    StyledColorConsole.Primary(
+      Styles.Primary(key) + " -> " + Styles.Secondary(_.get(data, key))
+    ).consoleLog()
   }
 }
 
@@ -44,18 +39,18 @@ const throwUncaughtException = () => {
 
 const attachExitHandler = () => {
   process.on("exit", (code) => {
-    textStylerSecondary
-      .apply(`exit event is fired, running this handler synchronously`)
-      .consoleLog()
+    StyledColorConsole.Secondary(
+      `exit event is fired, running this handler synchronously`
+    ).consoleLog()
   })
 }
 
 const attachBeforeExitHandler = () => {
   // Note that this event is not fired if `process.exit()` is called.
   process.on("beforeExit", (code) => {
-    textStylerSecondary
-      .apply(`beforeExit event is fired, running this handler synchronously`)
-      .consoleLog()
+    StyledColorConsole.Secondary(
+      `beforeExit event is fired, running this handler synchronously`
+    ).consoleLog()
   })
 }
 
@@ -65,7 +60,7 @@ const attachBeforeExitHandler = () => {
 // https://shapeshed.com/uncaught-exceptions-in-node/
 const attachUncaughtExceptionHandler = () => {
   process.on("uncaughtException", (err) => {
-    textStylerSecondary.apply(`uncaughtException handler triggered ${err}`).consoleLog()
+    StyledColorConsole.Secondary(`uncaughtException handler triggered ${err}`).consoleLog()
     // process.exit(1) // No need for this since the Node.js process should exit automatically.
   })
 }
