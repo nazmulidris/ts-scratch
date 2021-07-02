@@ -759,8 +759,8 @@ To understand advanced things about TypeScript, I decided to write the
 [Kotlin scoping functions](https://kotlinlang.org/docs/scope-functions.html#function-selection)
 (with, apply, let, run, etc) in TypeScript.
 
-- [Sample code - Kotlin Scoping Functions](src/core-utils/kotlin-lang-utils.ts)
-- [Sample code - Test for above](src/core-utils/__test__/kotlin-lang-utils.test.ts)
+- [Sample code - Kotlin Scoping Functions](https://github.com/r3bl-org/r3bl-ts-utils/blob/main/src/kotlin-lang-utils.ts)
+- [Sample code - Test for above](https://github.com/r3bl-org/r3bl-ts-utils/tree/main/src/__tests)
 
 Here are some references:
 
@@ -811,7 +811,7 @@ More info:
 
 - [Callable interface](https://basarat.gitbook.io/typescript/type-system/callable)
 - [Implementing Callable interface in TypeScript](https://stackoverflow.com/questions/12769636/how-to-make-a-class-implement-a-call-signature-in-typescript)
-- [Sample code - ColorConsole class and ColorConsoleIF interface in utils](src/core-utils/color-console-utils.ts)
+- [Sample code - ColorConsole class and ColorConsoleIF interface in utils](https://github.com/r3bl-org/r3bl-ts-utils/blob/main/src/color-console-utils.ts)
 
 ```typescript
 interface CallableIF {
@@ -1175,7 +1175,7 @@ class Events {
   static readonly Event2 = Symbol()
 }
 
-_kt._let(new EventEmitter(), (emitter) => {
+utils._let(new EventEmitter(), (emitter) => {
   // Start Timer.
   console.time(Events.TimerName)
 
@@ -1192,7 +1192,7 @@ _kt._let(new EventEmitter(), (emitter) => {
   })
 
   // Fire Event1.
-  _kt._let(Events.Event1, (event) => {
+  utils._let(Events.Event1, (event) => {
     fireEvent(emitter, event, 100, "🐵", { foo: "bar" })
     fireEvent(emitter, event, 200)
   })
@@ -1340,7 +1340,8 @@ note.
    instead.
 5. The `console` global object is just a `Writable` stream! This makes it possible to overwrite the
    output that has already been written w/out generating a new line! This is handy for showing long
-   running progress. Take a look at [color-console-utils.kt](src/core-utils/color-console-utils.ts)
+   running progress. Take a look at
+   [color-console-utils.kt](https://github.com/r3bl-org/r3bl-ts-utils/blob/main/src/color-console-utils.ts)
    `consoleLogInPlace` method.
 6. Piping is an incredibly powerful feature for working with streams in a high performance and
    memory efficient way. Read the docs and tutorials above for details.
