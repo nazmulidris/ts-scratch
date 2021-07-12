@@ -39,7 +39,9 @@ function foo2(bar: unknown) {
 
 # User defined type guards
 
-A guard is not a type, but a mechanism that narrows types.
+A guard is not a type, but a mechanism that narrows types. This is a great [guide in the official
+docs](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) that explains all of this,
+including truthy / falsy, `as` operator, etc.
 
 Here are some examples of built-in type guards.
 

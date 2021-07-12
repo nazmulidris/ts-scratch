@@ -15,23 +15,17 @@
  *
  */
 
-:root {
-  font-family: "Fira Sans", serif;
-  padding: 8pt;
-  font-size: 1rem;
-  background: rgb(40, 40, 40);
-  color: lightsteelblue;
+import React from "react"
+
+export interface MessageProps {
+  readonly message: string
 }
 
-code {
-  font-family: "Fira Code Retina" , monospace;
+export interface MessagePropsWithChildren extends MessageProps {
+  /** More info: https://linguinecode.com/post/pass-react-component-as-prop-with-typescript */
+  readonly children?: React.ReactNode
 }
 
-.DottedBox {
-  padding: 8pt;
-  border: 4pt dotted cornflowerblue;
-}
-
-.DottedBox > * {
-  font-size: 1.2rem;
+export interface MonkeyCountProps {
+  readonly monkeyCount: number
 }

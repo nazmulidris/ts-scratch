@@ -17,7 +17,7 @@
  */
 
 import * as chalk from "chalk"
-import * as _kt from "r3bl-ts-utils"
+import * as utils from "r3bl-ts-utils"
 import { printHeader } from "r3bl-ts-utils"
 import { EventEmitter } from "events"
 
@@ -36,7 +36,7 @@ function main() {
   // Start timer.
   console.time(Events.TimerName)
 
-  _kt._let(new EventEmitter(), (emitter) => {
+  utils._let(new EventEmitter(), (emitter) => {
     // Handle Event1.
     emitter.on(Events.Event1, (...args: any[]) => {
       console.log(chalk.blue(`emitter.on -> Event1, args: ${JSON.stringify(args)}`))
@@ -57,14 +57,14 @@ function main() {
 
     // Fire Event1.
     printHeader("Fire Event1")
-    _kt._let(Events.Event1, (event) => {
+    utils._let(Events.Event1, (event) => {
       fireEvent(emitter, event, 100, "🐵", { foo: "bar" })
       fireEvent(emitter, event, 200)
     })
 
     // Fire Event2.
     printHeader("Fire Event2")
-    _kt._let(Events.Event2, (event) => {
+    utils._let(Events.Event2, (event) => {
       fireEvent(emitter, event)
       fireEvent(emitter, event)
     })
