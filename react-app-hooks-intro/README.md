@@ -12,7 +12,12 @@ Here are some tips and tricks used in this project.
 - [Debugging in Webstorm or IDEA Ultimate](#debugging-in-webstorm-or-idea-ultimate)
 - [TypeScript readonly vs ReadonlyArray](#typescript-readonly-vs-readonlyarray)
 - [TypeScript prop and state types](#typescript-prop-and-state-types)
+- [TypeScript and ReactNode, ReactElement, and JSX.Element](#typescript-and-reactnode-reactelement-and-jsxelement)
+- [TypeScript types in array and object destructuring](#typescript-types-in-array-and-object-destructuring)
 - [React Hooks](#react-hooks)
+  - [How does it work?](#how-does-it-work)
+  - [Why?](#why)
+  - [Example w/ explanation of React memory model](#example-w-explanation-of-react-memory-model)
   - [useState](#usestate)
   - [useEffect](#useeffect)
 
@@ -21,10 +26,11 @@ Here are some tips and tricks used in this project.
 ### Normalize.css
 
 Using Normalize.css is pretty straight forwards following this
-[guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/).
+[guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/)
+.
 
-1.  Simply run `npm install normalize.css`
-2.  Then add `import 'normalize.css'` line to the top of [`index.tsx`](src/index.tsx)
+1. Simply run `npm install normalize.css`
+2. Then add `import 'normalize.css'` line to the top of [`index.tsx`](src/index.tsx)
 
 ### Using CSS class pseudo selectors to style child elements of a parent
 
@@ -47,10 +53,10 @@ included in [`r3bl-ts-utils`](https://www.npmjs.com/package/r3bl-ts-utils).
   which I also used in the `ColorConsole` implementation.
 - Here are the key takeaways in the
   [`ReactReplayClassComponent`](src/components/ReactReplayClassComponent.tsx) implementation:
-  1.  A class can't implement the `Callable` interface.
-  2.  However, any member of the class can, and that member can be exposed as `Callable`.
-  3.  This member is exposed as a getter.
-  4.  This member can then be the only export in the module.
+  1. A class can't implement the `Callable` interface.
+  2. However, any member of the class can, and that member can be exposed as `Callable`.
+  3. This member is exposed as a getter.
+  4. This member can then be the only export in the module.
 - In this case, the getter simply returns the reference to the 'generatorImpl' method. So we can
   write things like `GenerateReactElement.generator(...)` instead of just
   `GenerateReactElement.generator` (which is the normal use of a getter).
@@ -97,6 +103,7 @@ If you mark an variable holding an array as `readonly`, you can't reassign it. H
 class ContainsArray {
   constructor(readonly values: string[]) {}
 }
+
 const object = new ContainsArray(["a", "b"])
 object.values.push("d") // This is ok! 👎
 ```
@@ -108,6 +115,7 @@ keyword `readonly` showing up twice!
 class ContainsArray {
   constructor(readonly values: readonly string[]) {}
 }
+
 const object = new ContainsArray(["a", "b"])
 object.values.push("d") // This is NOT ok! 👍
 ```
@@ -118,6 +126,7 @@ Another way to write the same thing is as follows.
 class ContainsArray {
   constructor(readonly values: ReadonlyArray<string>) {}
 }
+
 const object = new ContainsArray(["a", "b"])
 object.values.push("d") // This is ok!
 ```
@@ -143,8 +152,9 @@ children can be passed.
 
 ```typescript
 export interface AnimationFramesProps {
-  readonly animationFrames: readonly JSX.Element[]
+  animationFrames: Readonly<ReactElement>
 }
+
 export class ReactReplayClassComponent extends React.Component<AnimationFramesProps, {}> {
   /* snip */
 }
@@ -155,7 +165,7 @@ If you wanted children to be passed, you could do something like this.
 ```typescript
 export interface AnimationFramesPropsWithKids extends AnimationFramesProps {
   /** More info: https://linguinecode.com/post/pass-react-component-as-prop-with-typescript */
-  readonly children?: React.ReactNode
+  children?: Readonly<ReactElement>
 }
 
 export class ReactReplayClassComponent extends React.Component<AnimationFramesPropsWithKids, {}> {
@@ -168,9 +178,41 @@ functional component that takes a prop. Being a functional component, you can't 
 types.
 
 ```typescript
-export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
   /* snip */
 }
+```
+
+### TypeScript and ReactNode, ReactElement, and JSX.Element
+
+This [SO thread](https://stackoverflow.com/a/58123882/2085356) has the answers. Basically,
+
+1. Use `ReactElement` where possible.
+2. When TypeScript complains at times, use `ReactElement | null`.
+3. Class components (return `ReactElement | null`) and functional components (return `ReactElement`)
+   actually return different things.
+
+### TypeScript types in array and object destructuring
+
+More info:
+
+- [Array and object destructuring in ES6](https://basarat.gitbook.io/typescript/future-javascript/destructuring#array-destructuring)
+- [Typing destructured objects in TypeScript](https://mariusschulz.com/blog/typing-destructured-object-parameters-in-typescript#typing-immediately-destructured-parameters)
+- [Typing destructed arrays in TypeScript](https://www.carlrippon.com/strongly-typed-destructuring-and-rest-parameters/)
+
+Example of object destructuring.
+
+```typescript
+type AnimationFrames = Readonly<ReactElement>
+type MyProps = { animationFrames: AnimationFrames }
+const { animationFrames }: MyProps = props
+```
+
+Example of array destructuring.
+
+```typescript
+type MyFrameIndexState = [number, Dispatch<SetStateAction<number>>]
+const [frameIndex, setFrameIndex]: MyFrameIndexState = useState<number>(0)
 ```
 
 ### React Hooks
@@ -179,19 +221,39 @@ React hooks exist because there were severe limitations in versions before React
 functional components could do. And there were some problems w/ how class components function. By
 adding hooks to functional components, it basically eliminates these 2 groups of problems.
 
+#### How does it work?
+
+To learn about hooks, here are some important resources.
+
+- [Great video introducing hooks][h-2]
+- [Deep dive into useState hook and React memory model][h-1]
+- [Official docs on writing custom hooks][h-4]
+- [Official Hooks API Reference for useState][h-3]
+
+[h-1]: https://www.newline.co/@CarlMungazi/a-journey-through-the-usestate-hook--a4983397
+[h-2]: https://youtu.be/dpw9EHDh2bM
+[h-3]: https://reactjs.org/docs/hooks-reference.html#usestate
+[h-4]: https://reactjs.org/docs/hooks-custom.html
+
+#### Why?
+
 Here are the details on the problems w/ class components mentioned above. It is difficult to reuse
 stateful logic between components, which results in people doing things like:
 
 - [render props](https://reactjs.org/docs/render-props.html): Passing functions down the component
-  hierarchy is cumbersome. However, there are situations where this is simply not avoidable.
-- [higher-order components](https://reactjs.org/docs/higher-order-components.html): Scope can be
-  stored at the top most component in the hierarchy, which makes it necessary to add components at
-  the top most level just to wrap everything else underneath it, which is not optimal.
+  hierarchy as via props is cumbersome. However, there are situations where this is simply not
+  avoidable.
+- [higher-order components](https://reactjs.org/docs/higher-order-components.html): State can be
+  stored at the top most component in the hierarchy in order to be shared between children
+  components, which makes it necessary to add "artificial" components at the top most level just to
+  wrap everything else underneath it, which is not optimal.
 
 With hooks, it is now possible to reuse stateful logic between functional components! Thru the use
-of `useState` hook, you can create your own more complex hooks. The official docs have
+of `useState` hook and others, you can create your own more complex hooks. The official docs have
 [Hooks at a Glance](https://reactjs.org/docs/hooks-overview.html) which is a great overview of hooks
 along w/ an example of how you can make your own.
+
+#### Example w/ explanation of React memory model
 
 Here's an example from the docs.
 
@@ -234,13 +296,36 @@ function FriendListItem(props) {
 }
 ```
 
-> Note that when stateful logic is reused, the state of each component is completely independent.
-> Hooks are a way to reuse stateful logic, not state itself. In fact, each call to a Hook has a
-> completely isolated state — so you can even use the same custom Hook twice in one component.
->
-> Custom Hooks are more of a convention than a feature. If a function’s name starts with ”use” and
-> it calls other Hooks, we say it is a custom Hook. The useSomething naming convention is how our
-> linter plugin is able to find bugs in the code using Hooks.
+Here are some notes on the code to understand what is happening here and how to think about state in
+a functional component, and how that maps to React's memory model.
+
+1. With classes, it was easier to understand React's memory model, because a stateful class
+   component has a constructor, which then allocates the state up front.
+   `ReactDOM.render(virtualDom, actualDom)` actually takes the `JSX.Element` that this class
+   component represents, and mounts and renders it. Then there are subsequent re-renders which is
+   where state actually comes into play. In hooks, this part is a little bit confusing, since there
+   is no constructor. Here's one way to think about it.
+
+1. The first time the functional component is rendered (after being mounted), React will allocate
+   any state variables that are declared via calls to `useState()`. This is stored in memory by
+   React and the initial value is the argument passed to `useState(initialValue)`.
+1. This is also why React cares that these calls should not be wrapped in conditional logic or
+   loops, because it relies on the lexical order in which these `useState()` calls are declared to
+   do internal bookkeeping to figure out what the values of each stateful variable is (in its
+   [internal memory model][h-1]).
+1. When the setter returned by `useState<T>(initialValue:T)` which is of type
+   `Dispatch<SetStateAction<T>>`, is called w/ a new value, it will trigger a re-render. A function
+   can also be passed to `useState<T>(initialValue:(T)=>T)` which will compute the subsequent value
+   based on the previous state's value. When a re-render is triggered then the new value of this
+   state will be used to generate the UI.
+
+1. Note that when stateful logic is reused, the state of each component is completely independent.
+   Hooks are a way to reuse stateful logic, not state itself. In fact, each call to a Hook has a
+   completely isolated state — so you can even use the same custom Hook twice in one component.
+
+1. Custom Hooks are more of a convention than a feature. If a function’s name starts with ”use” and
+   it calls other Hooks, we say it is a custom Hook. The "useSomething" naming convention is how the
+   linter plugin is able to find bugs in the code using Hooks.
 
 #### useState
 
@@ -252,13 +337,15 @@ Here are some great resources on learning about `useState`.
 Here are some examples.
 
 ```typescript
-export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+import { ReactElement } from "react"
+
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
   /** State: currentAnimationFrameIndex (mutable). */
   const [currentAnimationFrameIndex, setCurrentAnimationFrameIndex] = useState<number>(0)
 
   /** State: animator (immutable). */
   const [animator] = useState<Animator>(
-    new Animator(MyConstants.animationDelayMs, tick, "[FunctionalComponentAnimator]")
+    new Animator(MyConstants.delayMs, tick, "[FunctionalComponentAnimator]")
   )
 
   /* snip */
@@ -269,11 +356,11 @@ Here's the anatomy of each call to `useState`.
 
 1. On the _left hand side_ of the call to `useState` hook, it returns an array.
 
-   1. The first item is a reference to the state variable.
-   2. The second item is the setter function for it. This mutates the state and triggers are render
-      of the functional component.
+1. The first item is a reference to the state variable.
+1. The second item is the setter function for it. This mutates the state and triggers are render of
+   the functional component.
 
-2. It has to be initialized w/ whatever value is on the _right hand side_ expression. So it is a
+1. It has to be initialized w/ whatever value is on the _right hand side_ expression. So it is a
    pretty simple way of making functional components have initial state.
 
 #### useEffect
@@ -290,13 +377,14 @@ change in order to trigger this effect to be run).
 Here is an example that mimics `componentDidMount`.
 
 ```typescript
-export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
   /** State: animator (immutable). */
   const [animator] = useState<Animator>(
-    new Animator(MyConstants.animationDelayMs, tick, "[FunctionalComponentAnimator]")
+    new Animator(MyConstants.delayMs, tick, "[FunctionalComponentAnimator]")
   )
 
   useEffect(runAnimatorAtStart, [animator])
+
   /** Starts the animator. */
   function runAnimatorAtStart() {
     animator.start()
@@ -321,7 +409,9 @@ This `useEffect` hook is scoped to the `animator` variable, which is returned by
 If you want a hook to run on every single DOM render, then you can write something like this.
 
 ```typescript
-export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+import { ReactElement } from "react"
+
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
   useEffect(runForEveryDomChange)
 
   function runForEveryDomChange() {

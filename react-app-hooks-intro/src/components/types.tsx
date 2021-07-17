@@ -15,21 +15,24 @@
  *
  */
 
-import React from "react"
+import { ReactElement } from "react"
+
+// Readonly: https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype
+export type AnimationFrames = Readonly<Array<ReactElement>> /* readonly ReactElement[] */
 
 export interface AnimationFramesProps {
-  readonly animationFrames: readonly JSX.Element[] /* ReadonlyArray<JSX.Element> */
+  animationFrames: AnimationFrames
 }
 
 export interface MessageProps {
-  readonly message: string
+  message: Readonly<string>
 }
 
+// Children props: https://linguinecode.com/post/pass-react-component-as-prop-with-typescript
 export interface MessagePropsWithChildren extends MessageProps {
-  /** More info: https://linguinecode.com/post/pass-react-component-as-prop-with-typescript */
-  readonly children?: React.ReactNode
+  children?: Readonly<ReactElement>
 }
 
 export interface MonkeyCountProps {
-  readonly monkeyCount: number
+  monkeyCount: Readonly<number>
 }
