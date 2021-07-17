@@ -16,6 +16,7 @@
  */
 
 import React from "react"
+import { _also } from "r3bl-ts-utils"
 
 /**
  * This class generates a JSX.Element object that contains a Virtual DOM representation of the a

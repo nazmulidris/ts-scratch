@@ -19,7 +19,29 @@ import React from "react"
 import "./styles/App.css"
 import { ComponentWithState } from "./components/ComponentWithState"
 import { ComponentWithoutState } from "./components/ComponentWithoutState"
-import { ReactReplayComponent } from "./components/ReactReplayComponent"
+import { ReactReplayFunctionComponent } from "./components/ReactReplayFunctionComponent"
+import { _also, _let } from "r3bl-ts-utils"
+import { VirtualDomElementGenerator } from "./components/GenerateReactElement"
+import { ReactReplayClassComponent } from "./components/ReactReplayClassComponent"
+
+const preGeneratedFrames: readonly JSX.Element[] = _let(undefined, () => {
+  class User {
+    constructor(readonly firstName: string, readonly lastName: string) {}
+    get name(): string {
+      return this.firstName + " " + this.lastName
+    }
+  }
+
+  const user: User = new User("R3BL", "Commander")
+  const helloInMultipleLanguages: string[] = ["Hello", "Tere", "Bonjour", "Olá", "Salve"]
+
+  // Create the immutable elementArray which holds React elements.
+  return _also(new Array<JSX.Element>(), (elementArray) => {
+    helloInMultipleLanguages
+      .map((lang) => VirtualDomElementGenerator(lang, user.name))
+      .forEach((localizedElement) => elementArray.push(localizedElement))
+  })
+})
 
 function App() {
   return (
@@ -29,7 +51,8 @@ function App() {
       <ComponentWithoutState message={"Stateless component ⛔ aka 'generic box'"}>
         <h4>This is an unknown child</h4>
       </ComponentWithoutState>
-      <ReactReplayComponent />
+      <ReactReplayClassComponent animationFrames={preGeneratedFrames} />
+      <ReactReplayFunctionComponent animationFrames={preGeneratedFrames} />
     </React.Fragment>
   )
 }

@@ -16,42 +16,28 @@
  */
 
 import ReactDOM from "react-dom"
-import { _also } from "r3bl-ts-utils"
 import React, { RefObject } from "react"
-import { VirtualDomElementGenerator } from "./GenerateReactElement"
+import { AnimationFramesProps } from "./types"
+import { Animator } from "./Animator"
+import { Counter } from "./Counter"
 
 /** Constants. */
 const MyConstants = {
   animationDelayMs: 700,
+  maxLoopFactor: 4,
 } as const
-
-/** Misc utility classes. */
-class Counter {
-  count: number = 0
-  get = (): number => this.count
-  increment = () => this.count++
-  getAndIncrement = () => {
-    let retval = this.count
-    this.count++
-    return retval
-  }
-}
-
-class User {
-  constructor(readonly firstName: string, readonly lastName: string) {}
-  get name(): string {
-    return this.firstName + " " + this.lastName
-  }
-}
 
 /**
  * Component that doesn't use `setState()` or `forceUpdate()` to re-render. This is why a ref
  * is needed. More info on refs: https://reactjs.org/docs/refs-and-the-dom.html
+ *
+ * This class component should really be written using hooks, since it only really needs to be in a
+ * class in order to hook into certain React lifecycle callbacks, as it does not have any
+ * local state.
  */
-export class ReactReplayComponent extends React.Component {
-  readonly counter: Counter = new Counter()
-  readonly user: User = new User("R3BL", "Commander")
-  readonly helloInMultipleLanguages: string[] = ["Hello", "Tere", "Bonjour", "Olá", "Salve"]
+export class ReactReplayClassComponent extends React.Component<AnimationFramesProps, {}> {
+  // First frame is shown by default, start animation w/ the 2nd frame (startCount = 1).
+  readonly counter: Counter = new Counter(1)
 
   // The following are populated in the constructor.
   readonly myRef: RefObject<any>
@@ -65,46 +51,41 @@ export class ReactReplayComponent extends React.Component {
    * - readonly elementArray: ReadonlyArray<JSX.Element>
    */
   readonly elementArray: ReadonlyArray<JSX.Element>
+  readonly animator: Animator
 
-  constructor(props: {}) {
+  constructor(props: AnimationFramesProps) {
     super(props)
 
     // This ref will be used by renderAnimationFrame.
     this.myRef = React.createRef()
 
     // Create the immutable elementArray which holds React elements.
-    this.elementArray = _also(new Array<JSX.Element>(), (elementArray) => {
-      this.helloInMultipleLanguages
-        .map((lang) => VirtualDomElementGenerator(lang, this.user.name))
-        .forEach((localizedElement) => elementArray.push(localizedElement))
-    })
+    this.elementArray = this.props.animationFrames
+
+    this.animator = new Animator(
+      MyConstants.animationDelayMs,
+      this.renderAnimationFrame,
+      "[ClassComponentAnimator]"
+    )
   }
+
+  componentDidMount = () => this.animator.start()
 
   /** Initial state, before animation and updates the ref. */
   render = (): JSX.Element => <div ref={this.myRef}>{this.elementArray[0]} </div>
 
-  startAnimation = (): void => {
-    let timerId: NodeJS.Timeout = setInterval(
-      () => this.renderAnimationFrame(timerId),
-      MyConstants.animationDelayMs
-    )
-  }
-
-  renderAnimationFrame = (timerId: NodeJS.Timeout) => {
-    // Tell React to render the Virtual DOM elements to the DOM.
-    const virtualDomElement =
-      this.elementArray[this.counter.getAndIncrement() % this.elementArray.length]
+  renderAnimationFrame = () => {
     const domElement = this.myRef.current
-    ReactDOM.render(virtualDomElement, domElement)
+    let virtualDomElement = this.elementArray[this.counter.value % this.elementArray.length]
 
     // Cancel animation after a certain count.
-    if (this.counter.getAndIncrement() > this.elementArray.length * 2) {
-      ReactDOM.render(<h2>Animation finished!🎉</h2>, domElement)
-      clearInterval(timerId)
+    if (this.counter.value > this.elementArray.length * MyConstants.maxLoopFactor) {
+      this.animator.stop()
+      virtualDomElement = <h2>Animation finished!🎉</h2>
     }
-  }
 
-  componentDidMount() {
-    this.startAnimation()
+    // Tell React to render the Virtual DOM elements to the DOM.
+    ReactDOM.render(virtualDomElement, domElement)
+    this.counter.increment()
   }
 }

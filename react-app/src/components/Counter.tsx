@@ -15,21 +15,22 @@
  *
  */
 
-import React from "react"
+export class Counter {
+  private count: number
 
-export interface AnimationFramesProps {
-  readonly animationFrames: readonly JSX.Element[] /* ReadonlyArray<JSX.Element> */
-}
+  constructor(startCount = 0) {
+    this.count = startCount
+  }
 
-export interface MessageProps {
-  readonly message: string
-}
+  get value(): number {
+    return this.count
+  }
 
-export interface MessagePropsWithChildren extends MessageProps {
-  /** More info: https://linguinecode.com/post/pass-react-component-as-prop-with-typescript */
-  readonly children?: React.ReactNode
-}
+  increment = () => this.count++
 
-export interface MonkeyCountProps {
-  readonly monkeyCount: number
+  getAndIncrement = () => {
+    let retval = this.count
+    this.count++
+    return retval
+  }
 }

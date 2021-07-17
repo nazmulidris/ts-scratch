@@ -11,6 +11,10 @@ Here are some tips and tricks used in this project.
 - [Composition over inheritance](#composition-over-inheritance)
 - [Debugging in Webstorm or IDEA Ultimate](#debugging-in-webstorm-or-idea-ultimate)
 - [TypeScript readonly vs ReadonlyArray](#typescript-readonly-vs-readonlyarray)
+- [TypeScript prop and state types](#typescript-prop-and-state-types)
+- [React Hooks](#react-hooks)
+  - [useState](#usestate)
+  - [useEffect](#useeffect)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -42,7 +46,7 @@ included in [`r3bl-ts-utils`](https://www.npmjs.com/package/r3bl-ts-utils).
   [SO Answer](https://stackoverflow.com/questions/12769636/how-to-make-a-class-implement-a-call-signature-in-typescript)
   which I also used in the `ColorConsole` implementation.
 - Here are the key takeaways in the
-  [`ReactReplayComponent`](src/components/ReactReplayComponent.tsx) implementation:
+  [`ReactReplayClassComponent`](src/components/ReactReplayClassComponent.tsx) implementation:
   1.  A class can't implement the `Callable` interface.
   2.  However, any member of the class can, and that member can be exposed as `Callable`.
   3.  This member is exposed as a getter.
@@ -118,8 +122,212 @@ const object = new ContainsArray(["a", "b"])
 object.values.push("d") // This is ok!
 ```
 
-In the code for [`ReactReplayComponent`](src/components/ReactReplayComponent.tsx), the following
-lines do the same thing (preventing any mutations on `elementArray`):
+In the code for [`ReactReplayClassComponent`](src/components/ReactReplayClassComponent.tsx), the
+following lines do the same thing (preventing any mutations on `elementArray`):
 
 - `readonly elementArray: readonly JSX.Element[]`
 - `readonly elementArray: ReadonlyArray<JSX.Element>`
+
+### TypeScript prop and state types
+
+In strict mode, the prop and state types (if any) need to be declared explicitly. The React codebase
+supports generics which is how these types are declared.
+
+> You can also pass `{}` to specify that there are no props or state.
+
+Here is a [tutorial](https://fettblog.eu/typescript-react/components/#class-components) that shows
+how to specify prop and state types for function and class components.
+
+Here's an example for a class component which takes props but contains no state. Note that no
+children can be passed.
+
+```typescript
+export interface AnimationFramesProps {
+  readonly animationFrames: readonly JSX.Element[]
+}
+export class ReactReplayClassComponent extends React.Component<AnimationFramesProps, {}> {
+  /* snip */
+}
+```
+
+If you wanted children to be passed, you could do something like this.
+
+```typescript
+export interface AnimationFramesPropsWithKids extends AnimationFramesProps {
+  /** More info: https://linguinecode.com/post/pass-react-component-as-prop-with-typescript */
+  readonly children?: React.ReactNode
+}
+
+export class ReactReplayClassComponent extends React.Component<AnimationFramesPropsWithKids, {}> {
+  /* snip */
+}
+```
+
+Here's an example for a functional component. Note the use of `FC` to specify that this is a
+functional component that takes a prop. Being a functional component, you can't declare any state
+types.
+
+```typescript
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+  /* snip */
+}
+```
+
+### React Hooks
+
+React hooks exist because there were severe limitations in versions before React 16 on what
+functional components could do. And there were some problems w/ how class components function. By
+adding hooks to functional components, it basically eliminates these 2 groups of problems.
+
+Here are the details on the problems w/ class components mentioned above. It is difficult to reuse
+stateful logic between components, which results in people doing things like:
+
+- [render props](https://reactjs.org/docs/render-props.html): Passing functions down the component
+  hierarchy is cumbersome. However, there are situations where this is simply not avoidable.
+- [higher-order components](https://reactjs.org/docs/higher-order-components.html): Scope can be
+  stored at the top most component in the hierarchy, which makes it necessary to add components at
+  the top most level just to wrap everything else underneath it, which is not optimal.
+
+With hooks, it is now possible to reuse stateful logic between functional components! Thru the use
+of `useState` hook, you can create your own more complex hooks. The official docs have
+[Hooks at a Glance](https://reactjs.org/docs/hooks-overview.html) which is a great overview of hooks
+along w/ an example of how you can make your own.
+
+Here's an example from the docs.
+
+```javascript
+import React, { useState, useEffect } from "react"
+
+/** Custom hook. */
+function useFriendStatus(friendID) {
+  const [isOnline, setIsOnline] = useState(null)
+
+  function handleStatusChange(status) {
+    setIsOnline(status.isOnline)
+  }
+
+  useEffect(() => {
+    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange)
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange)
+    }
+  })
+
+  return isOnline // This comes from `useState()`.
+}
+
+// FC.
+function FriendStatus(props) {
+  const isOnline = useFriendStatus(props.friend.id)
+
+  if (isOnline === null) {
+    return "Loading..."
+  }
+  return isOnline ? "Online" : "Offline"
+}
+
+// FC.
+function FriendListItem(props) {
+  const isOnline = useFriendStatus(props.friend.id)
+
+  return <li style={{ color: isOnline ? "green" : "black" }}>{props.friend.name}</li>
+}
+```
+
+> Note that when stateful logic is reused, the state of each component is completely independent.
+> Hooks are a way to reuse stateful logic, not state itself. In fact, each call to a Hook has a
+> completely isolated state — so you can even use the same custom Hook twice in one component.
+>
+> Custom Hooks are more of a convention than a feature. If a function’s name starts with ”use” and
+> it calls other Hooks, we say it is a custom Hook. The useSomething naming convention is how our
+> linter plugin is able to find bugs in the code using Hooks.
+
+#### useState
+
+Here are some great resources on learning about `useState`.
+
+1. [Official docs](https://reactjs.org/docs/hooks-state.html)
+2. [TypeScript and useState](https://www.carlrippon.com/typed-usestate-with-typescript/)
+
+Here are some examples.
+
+```typescript
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+  /** State: currentAnimationFrameIndex (mutable). */
+  const [currentAnimationFrameIndex, setCurrentAnimationFrameIndex] = useState<number>(0)
+
+  /** State: animator (immutable). */
+  const [animator] = useState<Animator>(
+    new Animator(MyConstants.animationDelayMs, tick, "[FunctionalComponentAnimator]")
+  )
+
+  /* snip */
+}
+```
+
+Here's the anatomy of each call to `useState`.
+
+1. On the _left hand side_ of the call to `useState` hook, it returns an array.
+
+   1. The first item is a reference to the state variable.
+   2. The second item is the setter function for it. This mutates the state and triggers are render
+      of the functional component.
+
+2. It has to be initialized w/ whatever value is on the _right hand side_ expression. So it is a
+   pretty simple way of making functional components have initial state.
+
+#### useEffect
+
+This hook allows you to register a function that is called whenever anything is rendered to the DOM
+on the page. And it can be scoped to an array of dependencies (which are state variables that can
+change in order to trigger this effect to be run).
+
+> 1. Read more about this in the
+>    [official docs](https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects).
+> 2. This [SO thread](https://stackoverflow.com/a/53974039/2085356) also has some good insight on
+>    how to use this hook.
+
+Here is an example that mimics `componentDidMount`.
+
+```typescript
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+  /** State: animator (immutable). */
+  const [animator] = useState<Animator>(
+    new Animator(MyConstants.animationDelayMs, tick, "[FunctionalComponentAnimator]")
+  )
+
+  useEffect(runAnimatorAtStart, [animator])
+  /** Starts the animator. */
+  function runAnimatorAtStart() {
+    animator.start()
+
+    // Cleanup.
+    return () => {
+      if (animator.isStarted) animator.stop()
+    }
+  }
+
+  /* snip */
+}
+```
+
+This `useEffect` hook is scoped to the `animator` variable, which is returned by `useState`.
+
+> This is similar functionality to `componentDidMount`, unmount, update, etc. However, there are
+> some big differences. For example to mimic the functionality of `componentDidMount` you have to
+> pass a 2nd argument to `useEffect` which is either an empty array `[]` or some state variable that
+> doesn't really change.
+
+If you want a hook to run on every single DOM render, then you can write something like this.
+
+```typescript
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
+  useEffect(runForEveryDomChange)
+
+  function runForEveryDomChange() {
+    /* code */
+  }
+
+  /* snip */
+}
+```
