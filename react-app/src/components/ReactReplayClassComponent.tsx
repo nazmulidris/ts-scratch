@@ -18,8 +18,7 @@
 import ReactDOM from "react-dom"
 import React, { RefObject } from "react"
 import { AnimationFramesProps } from "./types"
-import { Animator } from "./Animator"
-import { Counter } from "./Counter"
+import { Animator, Counter } from "./Animator"
 
 /** Constants. */
 const MyConstants = {
@@ -63,9 +62,9 @@ export class ReactReplayClassComponent extends React.Component<AnimationFramesPr
     this.elementArray = this.props.animationFrames
 
     this.animator = new Animator(
+      "[ClassComponentAnimator]",
       MyConstants.animationDelayMs,
-      this.renderAnimationFrame,
-      "[ClassComponentAnimator]"
+      this.renderAnimationFrame
     )
   }
 

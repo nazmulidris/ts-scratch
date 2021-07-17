@@ -15,73 +15,44 @@
  *
  */
 
-import React, { FC, useEffect, useState } from "react"
+import { Dispatch, FC, SetStateAction, useState } from "react"
 import { AnimationFramesProps } from "./types"
-import { Animator } from "./Animator"
-import { Counter } from "./Counter"
+import { Animator, useAnimator } from "./Animator"
 
-/** Constants. */
-const MyConstants = {
-  animationDelayMs: 700,
-  maxLoopFactor: 4,
-  invalidFrameIndex: -1,
+/** AnimationConstants. */
+const AnimationConstants = {
+  delayMs: 700,
+  maxLoops: 2,
 } as const
 
+// Local type aliases.
+type AnimationFrames = readonly JSX.Element[]
+type MyPropTypes = { animationFrames: AnimationFrames }
+type FrameIndexState = [number, Dispatch<SetStateAction<number>>]
+
 export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): JSX.Element => {
-  /** State: currentAnimationFrameIndex (mutable). */
-  const [currentAnimationFrameIndex, setCurrentAnimationFrameIndex] = useState<number>(0)
+  // Get animationFrames array from props.
+  const { animationFrames }: MyPropTypes = props
 
-  /**
-   * State: counter (immutable)
-   * Note - First frame is shown by default, start animation w/ the 2nd frame (startCount = 1).
-   */
-  const [counter] = useState<Counter>(new Counter(1))
+  // Create a local state variable frameIndex (mutable) w/ a number.
+  const [frameIndex, setFrameIndex]: FrameIndexState = useState<number>(0)
 
-  /** State: animator (immutable). */
-  const [animator] = useState<Animator>(
-    new Animator(MyConstants.animationDelayMs, tick, "[FunctionalComponentAnimator]")
+  // Use custom hook to setup the animation.
+  useAnimator(
+    ReactReplayFunctionComponent.name,
+    AnimationConstants.delayMs,
+    animationFrames.length * AnimationConstants.maxLoops - 1,
+    _tick
   )
 
-  /** Based on the props and state, render the correct frame in the animation sequence. */
-  function render() {
-    switch (currentAnimationFrameIndex === MyConstants.invalidFrameIndex) {
-      case true:
-        return <h2>Animation finished!🎉</h2>
-      default:
-        return props.animationFrames[currentAnimationFrameIndex]
-    }
+  // Render - based on the props and state, render the correct frame in the animation sequence.
+  return _render()
+
+  function _tick(myAnimator: Animator) {
+    setFrameIndex(myAnimator.currentCount % animationFrames.length)
   }
 
-  /** Lambda that is executed at every tick by the animator. */
-  function tick(myAnimator: Animator): void {
-    let totalAnimationFrames = props.animationFrames.length
-
-    // Trigger update.
-    setCurrentAnimationFrameIndex(counter.getAndIncrement() % totalAnimationFrames)
-
-    // Stop animation after certain number of loops.
-    if (counter.value > totalAnimationFrames * MyConstants.maxLoopFactor) {
-      console.log(counter.value, myAnimator.isStarted)
-      myAnimator.stop()
-      setCurrentAnimationFrameIndex(MyConstants.invalidFrameIndex)
-    }
+  function _render() {
+    return animationFrames[frameIndex]
   }
-
-  /** Starts the animator. */
-  function runAnimatorAtStart() {
-    animator.start()
-
-    // Cleanup.
-    return () => {
-      if (animator.isStarted) animator.stop()
-    }
-  }
-
-  // Similar to hooks into React lifecycle (componentDidMount, componentDidUnmount). This runs only
-  // once, since the deps is narrowed to `animator` which doesn't change. It is also acceptable
-  // to pass `[]`.
-  useEffect(runAnimatorAtStart, [animator])
-
-  // Actual render function result.
-  return render()
 }

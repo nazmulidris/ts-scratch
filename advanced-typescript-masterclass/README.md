@@ -280,14 +280,20 @@ console.log(array3);
 - [Chapter in educative.io](https://www.educative.io/courses/advanced-typescript-masterclass/NE0jOpyxgoL).
 
 ```typescript
+// Eg1
 type X1 = NonNullable<string | undefined>; // X1 = string
 
+// Eg2
 type X2 = Partial<{ name: string; age: number }>; // X2 = { name?: string; age?: number;}
 
+// Eg3
 function square(x: number): number {
   return x * x;
 }
 type X3 = ReturnType<typeof square>; // X3 = number
+
+// Eg4
+type Optional<T> = T | undefined | null // Optional = T | undefined | null
 ```
 
 ## Useful utility types
