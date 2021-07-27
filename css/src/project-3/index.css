@@ -1,0 +1,24 @@
+@import "boilerplate.css";
+
+.movie {
+  width: 100%;
+
+  background:
+    /* Z-layer: "0", Background image. */ url("http://i.imgur.com/lcm5byq.png") 20px 20px/ 150px 218px no-repeat,
+    /* Z-layer: "1", Gradient. */ linear-gradient(to top, #50528550 0%, #585e9250 12%, #65689f50 25%, #7474b050 37%, #7e7ebb50 50%, #8389c750 62%, #9795d450 75%, #a2a1dc50 87%, #b5aee450 100%),
+    /* Z-layer: "2", Superman image. */ url("http://i.imgur.com/2tiJEnP.png") 0 0/cover;
+
+  padding: 20px 20px 20px 190px;
+  box-sizing: border-box; /** Don't account for the margins and padding sizing. */
+}
+
+.movie-button {
+  display: block; /** Don't make the button an inline element. */
+  border: 0;
+  /** More info - https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius */
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px;
+  /* From - http://webgradients.com */
+  background-image: linear-gradient(to right, #b8cbb8 0%, #b8cbb8 0%, #b465da 0%, #cf6cc9 33%, #ee609c 66%, #ee609c 100%);
+}
