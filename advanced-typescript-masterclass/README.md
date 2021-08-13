@@ -1,19 +1,68 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [`tsconfig.json` options](#tsconfigjson-options)
-- [Use `unknown` over `any`](#use-unknown-over-any)
+- [Object cloning and deep copy](#object-cloning-and-deep-copy)
+- [Use strict=true in tsconfig.json options](#use-stricttrue-in-tsconfigjson-options)
+- [Use unknown over any](#use-unknown-over-any)
 - [User defined type guards](#user-defined-type-guards)
 - [FP and generics](#fp-and-generics)
 - [Type constructors - mathematical function that returns a new type based on the original type](#type-constructors---mathematical-function-that-returns-a-new-type-based-on-the-original-type)
+  - [Useful utility types](#useful-utility-types)
 - [Type union and intersection](#type-union-and-intersection)
-- [Union type discriminators](#union-type-discriminators)
+- [Discriminated Unions (FP) aka Algebraic Data Types](#discriminated-unions-fp-aka-algebraic-data-types)
+- [Discriminated Unions (FP) vs Subtyping (OOP)](#discriminated-unions-fp-vs-subtyping-oop)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 TypeScript learnings from the Master class
 
 - [TS Master class](https://www.educative.io/courses/advanced-typescript-masterclass/)
+
+# Object cloning and deep copy
+
+This isn't directly related to Typescript, or even Redux, but this pattern does show up in Redux
+reducer functions. Here are the [source files](redux.ts) and [test files](redux-test.ts).
+
+When an instance of a class is trying to deep copy itself (using lodash or spread operator) in a
+method, if this method is an arrow function, then there will be problems! This method must be a
+normal JS / TS function in order for `this` keyword to bind correctly as you think it should. Since
+an instance variable returns a reference to another instance, the arrow function binds `this` to the
+previous instance!
+
+Here's code that works.
+
+```typescript
+class State {
+  addItem(id: number, text: string): State {
+    const copyOfState: State = _.cloneDeep<State>(this)
+    const newTodoItem: Todo = {
+      id,
+      text,
+      done: false,
+    }
+    copyOfState.todoItems.push(newTodoItem)
+    return copyOfState
+  }
+}
+```
+
+Here's code that does not work!
+
+```typescript
+class State {
+  // Arrow function breaks how you think `this` works in this method!
+  addItem = (id: number, text: string): State => {
+    const copyOfState: State = _.cloneDeep<State>(this)
+    const newTodoItem: Todo = {
+      id,
+      text,
+      done: false,
+    }
+    copyOfState.todoItems.push(newTodoItem)
+    return copyOfState
+  }
+}
+```
 
 # Use strict=true in tsconfig.json options
 
@@ -25,23 +74,23 @@ Because it does not propagate:
 
 ```javascript
 function foo1(bar: any) {
-  const a: string = bar; // no error
-  const b: number = bar; // no error
-  const c: { name: string } = bar; // no error
+  const a: string = bar // no error
+  const b: number = bar // no error
+  const c: { name: string } = bar // no error
 }
 
 function foo2(bar: unknown) {
-  const a: string = bar; // 🔴 Type 'unknown' is not assignable to type 'string'.(2322)
-  const b: number = bar; // 🔴 Type 'unknown' is not assignable to type 'number'.(2322)
-  const c: { name: string } = bar; // 🔴 Type 'unknown' is not assignable to type '{ name: string; }'.(2322)
+  const a: string = bar // 🔴 Type 'unknown' is not assignable to type 'string'.(2322)
+  const b: number = bar // 🔴 Type 'unknown' is not assignable to type 'number'.(2322)
+  const c: { name: string } = bar // 🔴 Type 'unknown' is not assignable to type '{ name: string; }'.(2322)
 }
 ```
 
 # User defined type guards
 
-A guard is not a type, but a mechanism that narrows types. This is a great [guide in the official
-docs](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) that explains all of this,
-including truthy / falsy, `as` operator, etc.
+A guard is not a type, but a mechanism that narrows types. This is a great
+[guide in the official docs](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) that
+explains all of this, including truthy / falsy, `as` operator, etc.
 
 Here are some examples of built-in type guards.
 
@@ -51,13 +100,13 @@ Here are some examples of built-in type guards.
 
    ```typescript
    class Properties {
-     width: number = 0;
+     width: number = 0
 
      setWidth(width: number | string) {
        if (typeof width === "number") {
-         this.width = width;
+         this.width = width
        } else {
-         this.width = parseInt(width);
+         this.width = parseInt(width)
        }
      }
    }
@@ -73,7 +122,7 @@ Here are some examples of built-in type guards.
 
    function greet(obj: any) {
      if (obj instanceof Person) {
-       console.log(obj.name);
+       console.log(obj.name)
      }
    }
    ```
@@ -89,108 +138,108 @@ Here are some examples of built-in type guards.
 
    ```typescript
    interface Article {
-     title: string;
-     body: string;
+     title: string
+     body: string
    }
 
    function doSomething(bar: unknown) {
-     const title: string = bar.title; // 🔴 Error!
-     const body: number = bar.body; // 🔴 Error!
-     console.log(title, body);
+     const title: string = bar.title // 🔴 Error!
+     const body: number = bar.body // 🔴 Error!
+     console.log(title, body)
    }
 
-   doSomething({ title: "t", body: "b" });
-   doSomething({ foo: "t", bar: "b" });
+   doSomething({ title: "t", body: "b" })
+   doSomething({ foo: "t", bar: "b" })
    ```
 
    **First** try at using user defined type guards. It doesn't narrow automatically!
 
    ```typescript
    interface Article {
-     title: string;
-     body: string;
+     title: string
+     body: string
    }
 
    function isArticle(param: unknown): boolean {
-     const myParam = param as Article;
+     const myParam = param as Article
      // 👍 One way of writing this without using string literals.
      if (myParam.title != undefined && myParam.body != undefined) {
        // The following works too.
        // if ("title" in myParam && "body" in myParam) {
-       return true;
+       return true
      }
-     return false;
+     return false
    }
 
    function doSomething(bar: unknown) {
      if (isArticle(bar)) {
        // 👎 You have to cast bar to Article as it does not narrow automatically.
-       const article = bar as Article;
-       console.log("Article interface type: ", article.title, article.body);
+       const article = bar as Article
+       console.log("Article interface type: ", article.title, article.body)
      } else {
-       console.log("unknown type", bar);
+       console.log("unknown type", bar)
      }
    }
 
-   doSomething({ title: "t", body: "b" });
-   doSomething({ foo: "t", bar: "b" });
+   doSomething({ title: "t", body: "b" })
+   doSomething({ foo: "t", bar: "b" })
    ```
 
    **Second** try at writing this. Have to use string literals for the properties!
 
    ```typescript
    interface Article {
-     title: string;
-     body: string;
+     title: string
+     body: string
    }
 
    function isArticle(param: any): param is Article {
      // 👎 You lose the ability to autocomplete title and body (as shown above), string literals are
      // needed, which could be a problem with keeping things in sync.
-     return "title" in param && "body" in param;
+     return "title" in param && "body" in param
    }
 
    function doSomething(bar: unknown) {
      if (isArticle(bar)) {
        // 👍 You don't have to cast bar to Article! It is automatically narrowed!
-       console.log("Article interface type: ", bar.title, bar.body);
+       console.log("Article interface type: ", bar.title, bar.body)
      } else {
-       console.log("unknown type", bar);
+       console.log("unknown type", bar)
      }
    }
 
-   doSomething({ title: "t", body: "b" });
-   doSomething({ foo: "t", bar: "b" });
+   doSomething({ title: "t", body: "b" })
+   doSomething({ foo: "t", bar: "b" })
    ```
 
    **Third** and best try, which solves both problems with previous tries.
 
    ```typescript
    interface Article {
-     title: string;
-     body: string;
+     title: string
+     body: string
    }
 
    function isArticle(param: any): param is Article {
-     const myParam = param as Article;
+     const myParam = param as Article
      return (
        myParam.title != undefined &&
        myParam.body != undefined &&
        typeof myParam.title == "string" &&
        typeof myParam.body == "string"
-     );
+     )
    }
 
    function doSomething(bar: unknown) {
      if (isArticle(bar)) {
-       console.log("Article interface type: ", bar.title, bar.body);
+       console.log("Article interface type: ", bar.title, bar.body)
      } else {
-       console.log("unknown type", bar);
+       console.log("unknown type", bar)
      }
    }
 
-   doSomething({ title: "t", body: "b" });
-   doSomething({ foo: "t", bar: "b" });
+   doSomething({ title: "t", body: "b" })
+   doSomething({ foo: "t", bar: "b" })
    ```
 
 # FP and generics
@@ -207,12 +256,12 @@ You can use generics in functions
 
 ```typescript
 function zip<TElement1, TElement2>(array1: Array<TElement1>, array2: Array<TElement2>) {
-  const length = Math.min(array1.length, array2.length);
-  const result: Array<Array<TElement1 | TElement2>> = [];
+  const length = Math.min(array1.length, array2.length)
+  const result: Array<Array<TElement1 | TElement2>> = []
   for (let i = 0; i < length; i++) {
-    result.push([array1[i], array2[i]]);
+    result.push([array1[i], array2[i]])
   }
-  return result;
+  return result
 }
 ```
 
@@ -220,18 +269,18 @@ Constraining with index type query operator `keyof`:
 
 ```typescript
 interface Person {
-  name: string;
-  age: number;
+  name: string
+  age: number
 }
 
-type PersonKeys = keyof Person; // ‘name’ | ‘age’
+type PersonKeys = keyof Person // ‘name’ | ‘age’
 
 function get<T, K extends keyof T>(object: T, key: K): T[K] {
-  return object[key];
+  return object[key]
 }
 
-const person: Person = { name: "foo", age: 10 };
-console.log(get(person, "name")); // ✅ No errors
+const person: Person = { name: "foo", age: 10 }
+console.log(get(person, "name")) // ✅ No errors
 //console.log(get(person, 'foo')); // 🔴 Error!
 ```
 
@@ -240,36 +289,36 @@ property name and returns an array of values of the provided property of array e
 
 ```typescript
 function pick<T, K extends keyof T>(array: T[], key: K): Array<T[K]> {
-  const results = new Array();
+  const results = new Array()
   array.forEach((element) => {
-    results.push(element[key]);
-  });
-  return results;
+    results.push(element[key])
+  })
+  return results
 }
 
 // This also works.
 function pick_alt<T>(array: T[], key: keyof T): Array<T[keyof T]> {
-  const results = new Array<T[keyof T]>();
+  const results = new Array<T[keyof T]>()
   array.forEach((element: T) => {
-    results.push(element[key]);
-  });
-  return results;
+    results.push(element[key])
+  })
+  return results
 }
 
 interface Person {
-  name: string;
-  age: number;
+  name: string
+  age: number
 }
 
-const obj1: Person = { name: "foo", age: 10 };
-const obj2: Person = { name: "bar", age: 20 };
-const array = [obj1, obj2];
+const obj1: Person = { name: "foo", age: 10 }
+const obj2: Person = { name: "bar", age: 20 }
+const array = [obj1, obj2]
 
-const array2: Array<Person[keyof Person]> = pick(array, "age");
-console.log(array2);
+const array2: Array<Person[keyof Person]> = pick(array, "age")
+console.log(array2)
 
-const array3: Array<Person[keyof Person]> = pick(array, "name");
-console.log(array3);
+const array3: Array<Person[keyof Person]> = pick(array, "name")
+console.log(array3)
 
 // const array3: Array<Person[keyof Person]> = pick(array, "baz"); // ⛔ Error!
 ```
@@ -281,16 +330,16 @@ console.log(array3);
 
 ```typescript
 // Eg1
-type X1 = NonNullable<string | undefined>; // X1 = string
+type X1 = NonNullable<string | undefined> // X1 = string
 
 // Eg2
-type X2 = Partial<{ name: string; age: number }>; // X2 = { name?: string; age?: number;}
+type X2 = Partial<{ name: string; age: number }> // X2 = { name?: string; age?: number;}
 
 // Eg3
 function square(x: number): number {
-  return x * x;
+  return x * x
 }
-type X3 = ReturnType<typeof square>; // X3 = number
+type X3 = ReturnType<typeof square> // X3 = number
 
 // Eg4
 type Optional<T> = T | undefined | null // Optional = T | undefined | null
@@ -306,14 +355,14 @@ type Optional<T> = T | undefined | null // Optional = T | undefined | null
 
     ```typescript
     interface Todo {
-      title: string;
+      title: string
     }
 
     const todo: Readonly<Todo> = {
       title: "Delete inactive users",
-    };
+    }
 
-    todo.title = "Hello";
+    todo.title = "Hello"
     ```
 
 2.  [Partial<T>](https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype) -
@@ -322,22 +371,22 @@ type Optional<T> = T | undefined | null // Optional = T | undefined | null
 
     ```typescript
     interface Todo {
-      title: string;
-      description: string;
+      title: string
+      description: string
     }
 
     function updateTodo(todo: Todo, fieldsToUpdate: Partial<Todo>) {
-      return { ...todo, ...fieldsToUpdate };
+      return { ...todo, ...fieldsToUpdate }
     }
 
     const todo1 = {
       title: "organize desk",
       description: "clear clutter",
-    };
+    }
 
     const todo2 = updateTodo(todo1, {
       description: "throw out trash",
-    });
+    })
     ```
 
 3.  [Record<K,V>](https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeystype) -
@@ -345,19 +394,19 @@ type Optional<T> = T | undefined | null // Optional = T | undefined | null
 
     ```typescript
     interface CatInfo {
-      age: number;
-      breed: string;
+      age: number
+      breed: string
     }
 
-    type CatName = "miffy" | "boris" | "mordred";
+    type CatName = "miffy" | "boris" | "mordred"
 
     const cats: Record<CatName, CatInfo> = {
       miffy: { age: 10, breed: "Persian" },
       boris: { age: 5, breed: "Maine Coon" },
       mordred: { age: 16, breed: "British Shorthair" },
-    };
+    }
 
-    cats.boris;
+    cats.boris
     // ^ = const cats: Record<CatName, CatInfo>
     ```
 
@@ -365,8 +414,8 @@ type Optional<T> = T | undefined | null // Optional = T | undefined | null
     Constructs a type consisting of the return type of function `T`.
 
     ```typescript
-    declare function f1(): { a: number; b: string };
-    type T4 = ReturnType<typeof f1>;
+    declare function f1(): { a: number; b: string }
+    type T4 = ReturnType<typeof f1>
     //    ^ = type T4 = {
     //        a: number;
     //        b: string;
@@ -378,8 +427,8 @@ type Optional<T> = T | undefined | null // Optional = T | undefined | null
     holds all the types of the parameters of a function of type `T`.
 
     ```typescript
-    declare function f1(arg: { a: number; b: string }): void;
-    type T3 = Parameters<typeof f1>;
+    declare function f1(arg: { a: number; b: string }): void
+    type T3 = Parameters<typeof f1>
     //    ^ = type T3 = [arg: {
     //        a: number;
     //        b: string;
@@ -390,9 +439,9 @@ type Optional<T> = T | undefined | null // Optional = T | undefined | null
     Constructs a type by excluding `null` and `undefined` from `T`.
 
     ```typescript
-    type T0 = NonNullable<string | number | undefined>;
+    type T0 = NonNullable<string | number | undefined>
     //    ^ = type T0 = string | number
-    type T1 = NonNullable<string[] | null | undefined>;
+    type T1 = NonNullable<string[] | null | undefined>
     //    ^ = type T1 = string[]
     ```
 
@@ -403,32 +452,32 @@ work.
 
 ```typescript
 interface Foo {
-  foo: string;
-  boo: string;
-  name: string;
+  foo: string
+  boo: string
+  name: string
 }
 
 interface Bar {
-  bar: string;
-  name: string;
+  bar: string
+  name: string
 }
 
 const sayHelloIntersection = (obj: Foo & Bar) => {
   /* ... */
-};
+}
 const sayHelloUnion = (obj: Foo | Bar) => {
   /* ... */
-};
+}
 
-sayHelloIntersection({ foo: "foo", boo: "dffe", name: "xyz", bar: "bar" }); // Both Foo and Bar.
-sayHelloIntersection({ foo: "foo", boo: "dffe", name: "xyz" }); // ⛔ Error! Only Foo. No Bar.
-sayHelloIntersection({ bar: "bar", name: "xyz" }); // ⛔ Error! Only Bar. No Foo.
+sayHelloIntersection({ foo: "foo", boo: "dffe", name: "xyz", bar: "bar" }) // Both Foo and Bar.
+sayHelloIntersection({ foo: "foo", boo: "dffe", name: "xyz" }) // ⛔ Error! Only Foo. No Bar.
+sayHelloIntersection({ bar: "bar", name: "xyz" }) // ⛔ Error! Only Bar. No Foo.
 
-sayHelloUnion({ bar: "bar", name: "xyz" }); // This is a Bar (missing Foo:.foo,.boo).
-sayHelloUnion({ foo: "foo", boo: "boo", name: "xyz" }); // This is a Foo (missing Bar:.bar).
-sayHelloUnion({ bar: "bar", name: "xyz", boo: "boo" }); // Bar with partial Foo (missing foo).
-sayHelloUnion({ foo: "foo", boo: "boo", name: "xyz" }); // Foo with partial Boo (missing bar).
-sayHelloUnion({ name: "xyz" }); // ⛔ Error! Not a complete Foo or Bar!
+sayHelloUnion({ bar: "bar", name: "xyz" }) // This is a Bar (missing Foo:.foo,.boo).
+sayHelloUnion({ foo: "foo", boo: "boo", name: "xyz" }) // This is a Foo (missing Bar:.bar).
+sayHelloUnion({ bar: "bar", name: "xyz", boo: "boo" }) // Bar with partial Foo (missing foo).
+sayHelloUnion({ foo: "foo", boo: "boo", name: "xyz" }) // Foo with partial Boo (missing bar).
+sayHelloUnion({ name: "xyz" }) // ⛔ Error! Not a complete Foo or Bar!
 ```
 
 # Discriminated Unions (FP) aka Algebraic Data Types
@@ -447,29 +496,29 @@ enum ContactType {
 
 type Contact =
   | { kind: ContactType.Phone; phone: number }
-  | { kind: ContactType.Email; email: string };
+  | { kind: ContactType.Email; email: string }
 
 interface Customer {
-  name: string;
-  contact: Contact;
+  name: string
+  contact: Contact
 }
 
 function printCustomerContact(customer: Customer) {
   switch (customer.contact.kind) {
     case ContactType.Email:
-      console.log("Narrowed to contact w/ email: ", customer.contact.email);
-      break;
+      console.log("Narrowed to contact w/ email: ", customer.contact.email)
+      break
     case ContactType.Phone:
-      console.log("Narrowed to contact w/ phone: ", customer.contact.phone);
-      break;
+      console.log("Narrowed to contact w/ phone: ", customer.contact.phone)
+      break
   }
 }
 
-const c1: Customer = { name: "customer1", contact: { kind: ContactType.Phone, phone: 1231234567 } };
-const c2: Customer = { name: "customer2", contact: { kind: ContactType.Email, email: "a@b.com" } };
+const c1: Customer = { name: "customer1", contact: { kind: ContactType.Phone, phone: 1231234567 } }
+const c2: Customer = { name: "customer2", contact: { kind: ContactType.Email, email: "a@b.com" } }
 
-printCustomerContact(c1);
-printCustomerContact(c2);
+printCustomerContact(c1)
+printCustomerContact(c2)
 ```
 
 - These two union members follow a special convention. They both have a "literal" property called
@@ -486,33 +535,33 @@ pending result using generics and enums.
 
 ```typescript
 interface PendingResultComplete<T> {
-  done: true;
-  value: T;
+  done: true
+  value: T
 }
 
 interface PendingResultIncomplete {
-  done: false;
-  error: Error;
+  done: false
+  error: Error
 }
 
-type PendingResult<T> = PendingResultComplete<T> | PendingResultIncomplete;
+type PendingResult<T> = PendingResultComplete<T> | PendingResultIncomplete
 
 function printPendingResult<T>(result: PendingResult<T>) {
   switch (result.done) {
     case true:
-      console.log("Narrowing to PendingResultComplete: ", result.value);
-      break;
+      console.log("Narrowing to PendingResultComplete: ", result.value)
+      break
     case false:
-      console.log("Narrowing to PendingResultError: ", result.error.message);
-      break;
+      console.log("Narrowing to PendingResultError: ", result.error.message)
+      break
   }
 }
 
-const pr1: PendingResultComplete<string> = { done: true, value: "payload" };
-const pr2: PendingResultIncomplete = { done: false, error: new Error("oh no!") };
+const pr1: PendingResultComplete<string> = { done: true, value: "payload" }
+const pr2: PendingResultIncomplete = { done: false, error: new Error("oh no!") }
 
-printPendingResult(pr1);
-printPendingResult(pr2);
+printPendingResult(pr1)
+printPendingResult(pr2)
 ```
 
 Also, a discriminator does not have to be a single property. A group of repeating "literal"
@@ -523,12 +572,12 @@ different member of the union type. Here's an example.
 type Foo =
   | { kind: "A"; type: "X"; abc: string }
   | { kind: "A"; type: "Y"; xyz: string }
-  | { kind: "B"; type: "X"; rty: string };
+  | { kind: "B"; type: "X"; rty: string }
 
-declare const foo: Foo;
+declare const foo: Foo
 
 if (foo.kind === "A" && foo.type === "X") {
-  console.log("Narrowing to type with abc property: ", foo.abc);
+  console.log("Narrowing to type with abc property: ", foo.abc)
 }
 ```
 

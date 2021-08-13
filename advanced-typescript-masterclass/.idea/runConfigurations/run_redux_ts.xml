@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run redux.ts" type="NodeJSConfigurationType" path-to-node="$PROJECT_DIR$/../../../../linuxbrew/.linuxbrew/bin/ts-node-dev" path-to-js-file="redux.ts" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
