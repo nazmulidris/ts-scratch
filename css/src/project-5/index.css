@@ -1,0 +1,163 @@
+@import "boilerplate.css";
+
+/*
+  - CSS opacity - https://developer.mozilla.org/en-US/docs/Web/CSS/opacity
+  - SVG & CSS - https://www.w3.org/TR/SVG/styling.html
+  - Counters - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Lists_and_Counters/Using_CSS_counters
+  - `fit-content` - https://developer.mozilla.org/en-US/docs/Web/CSS/fit-content
+  - `ch` unit - https://www.freecodecamp.org/news/css-unit-guide/
+  - Line of text readability - https://www.freecodecamp.org/news/css-unit-guide/
+  - Media queries - https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Media_queries
+  - Limitations of media queries and CSS variables - https://stackoverflow.com/a/40723269/2085356
+*/
+
+html {
+  --defaultPadding: 8pt;
+  --defaultBorderRadius: 5px;
+}
+
+.header {
+  --smallerPadding: calc(var(--defaultPadding) * 0.5);
+
+  margin: var(--defaultPadding) var(--defaultPadding) 0 var(--defaultPadding);
+  padding: var(--smallerPadding);
+  text-align: center;
+  background: var(--primary-fg-color);
+  color: var(--secondary-bg-color);
+  border-radius: var(--defaultBorderRadius);
+}
+
+.bodyContainer {
+}
+
+.gridCardsContainer {
+  --gridNumCols: 1;
+  --alpha: 0.3;
+
+  display: grid;
+  grid-template-columns: repeat(var(--gridNumCols), 1fr);
+  grid-gap: var(--defaultPadding);
+
+  border: solid var(--defaultPadding) transparent;
+  counter-reset: cardCounter;
+  color: yellow;
+}
+
+/* If the screen is < 70ch wide. */
+@media screen and (max-width: 70ch) {
+  .gridCardsContainer {
+    --gridNumCols: 1;
+  }
+}
+
+/* If the screen is > 70ch wide. */
+@media screen and (min-width: 70ch) {
+  .gridCardsContainer {
+    --gridNumCols: 2;
+  }
+}
+
+.card {
+  /* Grid. */
+  align-self: start;
+
+  /* Flexbox - for children (card contents). */
+  display: flex;
+  flex-direction: column;
+
+  width: fit-content;
+  background: rgba(0, 0, 0, var(--alpha));
+  border-radius: var(--defaultBorderRadius);
+
+  /* Flexbox - for self. */
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.card:last-child {
+  grid-column: span var(--gridNumCols);
+}
+
+.card img,
+.card p {
+  padding: var(--defaultPadding);
+}
+
+.fancyBackground {
+  background: /* Z-layer: "0", Background image. */ url("../images/oceanwave2.svg") 10px 10px/ 50px 50px
+      repeat,
+    /* Z-layer: "1", Gradient. */
+      linear-gradient(
+        to top,
+        rgba(80, 82, 133, var(--alpha)) 0%,
+        rgba(88, 94, 146, var(--alpha)) 12%,
+        rgba(101, 104, 159, var(--alpha)) 25%,
+        rgba(116, 116, 176, var(--alpha)) 37%,
+        rgba(126, 126, 187, var(--alpha)) 50%,
+        rgba(131, 137, 199, var(--alpha)) 62%,
+        rgba(151, 149, 212, var(--alpha)) 75%,
+        rgba(162, 161, 220, var(--alpha)) 87%,
+        rgba(181, 174, 228, var(--alpha)) 100%
+      ),
+    linear-gradient(
+      to top,
+      rgba(80, 82, 133, var(--alpha)) 0%,
+      rgba(131, 137, 199, var(--alpha)) 62%,
+      rgba(181, 174, 228, var(--alpha)) 100%
+    );
+}
+
+.card .heroImage {
+  --alpha: 0.65;
+  height: 100pt;
+  opacity: var(--alpha);
+}
+
+/* How to add emoji: https://dev.to/beumsk/how-to-add-emoji-s-in-your-website-using-html-css-or-javascript-4g6g */
+.card h3:before {
+  counter-increment: cardCounter;
+  content: "\01F525 \01F5C3 \01F4C7 Card #"counter(cardCounter) " - ";
+}
+
+#modalDialog {
+  --marginFromTop: 20vh;
+
+  background-color: var(--secondary-bg-color);
+  color: var(--primary-fg-color);
+  border: none;
+  margin: var(--defaultPadding);
+  margin-top: var(--marginFromTop);
+  padding: var(--defaultPadding);
+  border-radius: var(--defaultBorderRadius);
+}
+
+#modalDialog::backdrop {
+  --alpha: 0.5;
+  background-image: linear-gradient(
+    to right,
+    rgba(248, 54, 0, var(--alpha)) 0%,
+    rgba(249, 212, 35, var(--alpha)) 100%
+  );
+}
+
+#modalDialog[open] {
+  animation: appear 250ms ease-in;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--marginFromTop)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#modalDialog .dialogActions {
+}
+
+#modalButtonClose,
+#modalButtonOK {
+}

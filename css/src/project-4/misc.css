@@ -1,0 +1,64 @@
+.star-icon::before {
+  --icon: "\f14a";
+  font-family: "Font Awesome 5 Free";
+  content: var(--icon);
+}
+
+.checkbox-icon::before {
+  --icon: "\f005";
+  font-family: "Font Awesome 5 Free";
+  content: var(--icon);
+}
+
+.underline {
+  border-bottom-style: dotted;
+  border-bottom-width: 0.2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.highlight {
+  background: yellow;
+  color: black;
+}
+
+.justify {
+  text-align: justify;
+}
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  padding: 1rem;
+  text-align: center;
+}
+
+.caps {
+  text-transform: upper-case;
+}
+
+.indent {
+  text-indent: 2rem;
+}
+
+.drop-cap::first-letter {
+  text-transform: upper-case;
+  font-size: 2rem;
+  float: above;
+  line-height: 2rem;
+}
+
+/* Use local variable, instead of decalaring in :root. */
+a {
+  --my-link-color: lightgray;
+  color: var(--my-link-color);
+}
+
+a a:link {
+  --my-link-color: teal;
+}
+
+a:hover {
+  --my-link-color: aquamarine;
+}

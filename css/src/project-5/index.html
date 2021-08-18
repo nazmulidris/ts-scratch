@@ -1,0 +1,132 @@
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="index.css"/>
+  <link rel="icon" type="image/svg+xml" href="../images/css.svg"/>
+  <title></title>
+</head>
+
+<body class="bodyContainer">
+<h3 class="header">
+  Flexbox, Grid, media query
+  <button id="btnShowDialog">Modal Dialog</button>
+</h3>
+
+<dialog id="modalDialog">
+  <h3>This is a modal dialog &#x1F44B</h3>
+  <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+  <section class="dialogActions">
+    <button id="modalButtonOK">Ok</button>
+    <button id="modalButtonClose">Cancel</button>
+  </section>
+</dialog>
+
+<script>
+  const modalDialog = document.getElementById("modalDialog")
+
+  // More info:
+  // https://techstacker.com/close-modal-click-outside-vanilla-javascript/
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
+  document.addEventListener("click", (event) => {
+    console.log(">>>")
+    console.log("document.click => event.target", event.target)
+
+    const closeButtonClicked = event.target.matches("#modalButtonOK") || event.target.matches(
+      "#modalButtonClose")
+    console.log("closeButtonClicked", closeButtonClicked)
+
+    const parentsContainModalDialog = event.target.closest("#modalDialog")
+    console.log("event.target.parentContainModalDialog", event.target.closest("#modalDialog"))
+
+    const clickedOutsideModalDialog = !parentsContainModalDialog
+    console.log("clickedOutsideModalDialog", clickedOutsideModalDialog)
+
+    const dialogIsOpen = modalDialog.open
+    console.log("dialogIsOpen", dialogIsOpen)
+
+    const btnShowDialogClicked = !!event.target.matches("#btnShowDialog")
+    console.log("btnShowDialogClicked", btnShowDialogClicked)
+
+    if (closeButtonClicked) {
+      console.log("closeButtonClicked")
+      modalDialog.classList.add("hide")
+      modalDialog.close()
+    } else if (btnShowDialogClicked) {
+      console.log("btnShowDialogClicked")
+      modalDialog.classList.remove("hide")
+      modalDialog.showModal()
+    }
+
+    console.log("<<<")
+
+  })
+
+  modalDialog.addEventListener("focusout", (event) => {
+    console.log("[[[ modalDialog focusout event from previously focused event", event.target, "]]]")
+  })
+
+  // Simpler code that does the same thing as above.
+  //
+  // const btnShowDialog = document.getElementById("btnShowDialog")
+  // const btnOk = document.getElementById("modalButtonOK")
+  // const btnCancel = document.getElementById("modalButtonClose")
+  //
+  // btnShowDialog.addEventListener("click", (event) => {
+  //   modalDialog.showModal()
+  // })
+  //
+  // btnOk.addEventListener("click", () => {
+  //   modalDialog.close()
+  // })
+  //
+  // btnCancel.addEventListener("click", () => {
+  //   modalDialog.close()
+  // })
+
+</script>
+
+<main class="gridCardsContainer">
+  <section class="card fancyBackground">
+    <img class="heroImage" src="../images/cat.svg" alt="svg cat image"/>
+    <h3>One</h3>
+    <p>
+      Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
+      been the industry's standard dummy text ever since the 1500s, when an unknown printer took a
+      galley of type and scrambled it to make a type specimen book.
+    </p>
+  </section>
+  <section class="card fancyBackground">
+    <img class="heroImage" src="../images/hummingbird.svg" alt="svg bird image"/>
+    <h3>Two</h3>
+    <p>
+      It has survived not only five centuries, but also the leap into electronic typesetting,
+      remaining essentially unchanged. It was popularised in the 1960s with the release of
+      Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
+      software like Aldus PageMaker including versions of Lorem Ipsum.
+    </p>
+  </section>
+  <section class="card fancyBackground">
+    <img class="heroImage" src="../images/three-birds.svg" alt="svg bird image"/>
+    <h3>Three</h3>
+    <p>
+      It is a long established fact that a reader will be distracted by the readable content of a
+      page when looking at its layout.
+    </p>
+  </section>
+  <section class="card fancyBackground">
+    <img class="heroImage" src="../images/penguin.svg" alt="svg bird image"/>
+    <h3>Four</h3>
+    <p>
+      The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters,
+      as opposed to using 'Content here, content here', making it look like readable English.
+    </p>
+  </section>
+  <section class="card fancyBackground">
+    <img class="heroImage" src="../images/goat.svg" alt="svg bird image"/>
+    <h3>Five</h3>
+    <p>
+      The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters,
+      as opposed to using 'Content here, content here', making it look like readable English.
+    </p>
+  </section>
+</main>
+</body>

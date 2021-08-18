@@ -26,8 +26,7 @@ Here are some tips and tricks used in this project.
 ### Normalize.css
 
 Using Normalize.css is pretty straight forwards following this
-[guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/)
-.
+[guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/).
 
 1. Simply run `npm install normalize.css`
 2. Then add `import 'normalize.css'` line to the top of [`index.tsx`](src/index.tsx)
