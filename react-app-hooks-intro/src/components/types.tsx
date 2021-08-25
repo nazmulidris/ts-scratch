@@ -17,13 +17,6 @@
 
 import { ReactElement } from "react"
 
-// Readonly: https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype
-export type AnimationFrames = Readonly<Array<ReactElement>> /* readonly ReactElement[] */
-
-export interface AnimationFramesProps {
-  animationFrames: AnimationFrames
-}
-
 export interface MessageProps {
   message: Readonly<string>
 }

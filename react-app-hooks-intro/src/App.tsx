@@ -17,13 +17,14 @@
 
 import React, { ReactElement } from "react"
 import "./styles/App.css"
-import { ComponentWithState } from "./components/ComponentWithState"
-import { ComponentWithoutState } from "./components/ComponentWithoutState"
-import { ReactReplayFunctionComponent } from "./components/ReactReplayFunctionComponent"
+import { ComponentWithState } from "./components/basics/ComponentWithState"
+import { ComponentWithoutState } from "./components/basics/ComponentWithoutState"
+import { ReactReplayFunctionComponent } from "./components/animate/ReactReplayFunctionComponent"
 import { _also } from "r3bl-ts-utils"
-import { VirtualDomElementGenerator } from "./components/GenerateReactElement"
-import { ReactReplayClassComponent } from "./components/ReactReplayClassComponent"
-import { AnimationFrames } from "./components/types"
+import { VirtualDomElementGenerator } from "./components/animate/GenerateReactElement"
+import { ReactReplayClassComponent } from "./components/animate/ReactReplayClassComponent"
+import { AnimationFrames } from "./components/animate/types"
+import { ListOfStoriesComponent } from "./components/list/ListOfStoriesComponent"
 
 const preGeneratedAnimationFrames: AnimationFrames = _also(
   new Array<ReactElement>(),
@@ -38,15 +39,18 @@ const preGeneratedAnimationFrames: AnimationFrames = _also(
 
 function App() {
   return (
-    <React.Fragment>
-      <h2>Helloooooo!!!!</h2>
+    <>
+      <section className={"Heading"}>Helloooooo!!!!</section>
       <ComponentWithState message={"Click me to see the count go up"} />
       <ComponentWithoutState message={"Stateless component ⛔ aka 'generic box'"}>
-        <h4>This is an unknown child</h4>
+        <section>
+          This is an unknown child passed via <code>props.child</code>
+        </section>
       </ComponentWithoutState>
       <ReactReplayClassComponent animationFrames={preGeneratedAnimationFrames} />
       <ReactReplayFunctionComponent animationFrames={preGeneratedAnimationFrames} />
-    </React.Fragment>
+      <ListOfStoriesComponent takeInitialKeyboardFocus={true} />
+    </>
   )
 }
 

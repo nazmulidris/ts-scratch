@@ -17,8 +17,8 @@
 
 import ReactDOM from "react-dom"
 import React, { RefObject } from "react"
-import { AnimationFramesProps } from "./types"
 import { Animator, Counter } from "./Animator"
+import { AnimationFramesProps } from "./types"
 
 /** Constants. */
 const MyConstants = {
@@ -71,7 +71,11 @@ export class ReactReplayClassComponent extends React.Component<AnimationFramesPr
   componentDidMount = () => this.animator.start()
 
   /** Initial state, before animation and updates the ref. */
-  render = (): JSX.Element => <div ref={this.myRef}>{this.elementArray[0]} </div>
+  render = (): JSX.Element => (
+    <div className={"Container"} ref={this.myRef}>
+      {this.elementArray[0]}{" "}
+    </div>
+  )
 
   renderAnimationFrame = () => {
     const domElement = this.myRef.current
@@ -80,7 +84,7 @@ export class ReactReplayClassComponent extends React.Component<AnimationFramesPr
     // Cancel animation after a certain count.
     if (this.counter.value > this.elementArray.length * MyConstants.maxLoopFactor) {
       this.animator.stop()
-      virtualDomElement = <h2>Animation finished!🎉</h2>
+      virtualDomElement = <p>Animation finished!🎉</p>
     }
 
     // Tell React to render the Virtual DOM elements to the DOM.

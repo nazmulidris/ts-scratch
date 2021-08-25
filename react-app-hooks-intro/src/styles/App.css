@@ -15,23 +15,57 @@
  *
  */
 
-:root {
-  font-family: "Fira Sans", serif;
-  padding: 8pt;
+@import "reset.css";
+
+body {
+  --variableWidthFont: "Google Sans", serif;
+  --fixedWidthFont: "Cascadia Code", monospace;
+  --defaultPadding: 8px;
+}
+
+body {
+  font-family: var(--variableWidthFont);
+  font-weight: 500;
   font-size: 1rem;
-  background: rgb(40, 40, 40);
+
+  background: rgb(32, 33, 36);
   color: lightsteelblue;
+
+  line-height: 1.5;
+}
+
+.Heading {
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-align: center;
+
+  background: cornflowerblue;
+  color: rgb(40, 40, 40);
+
+  padding: var(--defaultPadding);
 }
 
 code {
-  font-family: "Fira Code Retina" , monospace;
+  font-family: var(--fixedWidthFont);
+
+  border: 1pt dotted rgba(173, 255, 47, 0.3);
 }
 
-.DottedBox {
-  padding: 8pt;
-  border: 4pt dotted cornflowerblue;
+button,
+input {
+  padding: calc(var(--defaultPadding) * 0.4);
+  margin: calc(var(--defaultPadding) * 0.6);
+  border-radius: var(--defaultPadding);
 }
 
-.DottedBox > * {
-  font-size: 1.2rem;
+.Container {
+  border: 2px solid rgba(100, 149, 237, 0.3);
+  border-radius: var(--defaultPadding);
+
+  margin: var(--defaultPadding);
+  padding: var(--defaultPadding);
+}
+
+.Container > * {
+  color: lightslategrey;
 }

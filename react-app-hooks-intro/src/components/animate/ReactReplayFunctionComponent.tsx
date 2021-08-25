@@ -16,8 +16,9 @@
  */
 
 import { Dispatch, FC, ReactElement, SetStateAction, useState } from "react"
+import { Animator } from "./Animator"
 import { AnimationFrames, AnimationFramesProps } from "./types"
-import { Animator, useAnimator } from "./Animator"
+import { useAnimator } from "./hooks"
 
 /** AnimationConstants. */
 const AnimationConstants = {
@@ -26,15 +27,15 @@ const AnimationConstants = {
 } as const
 
 // Local type aliases.
-type MyPropShape = { animationFrames: Readonly<AnimationFrames> }
-type MyFrameIndexState = [number, Dispatch<SetStateAction<number>>]
+type MyPropType = { animationFrames: Readonly<AnimationFrames> }
+type FrameIndexStateType = [number, Dispatch<SetStateAction<number>>]
 
 export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
   // Get animationFrames array from props.
-  const { animationFrames }: MyPropShape = props
+  const { animationFrames }: MyPropType = props
 
   // Create a local state variable frameIndex (mutable) w/ a number.
-  const [frameIndex, setFrameIndex]: MyFrameIndexState = useState<number>(0)
+  const [frameIndex, setFrameIndex]: FrameIndexStateType = useState<number>(0)
 
   // Use custom hook to setup the animation.
   useAnimator(
@@ -52,6 +53,7 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
   }
 
   function _render() {
-    return animationFrames[frameIndex]
+    const currentFrame: ReactElement = animationFrames[frameIndex]
+    return <section className={"Container"}>{currentFrame}</section>
   }
 }

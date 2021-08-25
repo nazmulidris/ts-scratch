@@ -15,9 +15,13 @@
  *
  */
 
-import React from "react"
-import { MonkeyCountProps } from "./types"
+import { MessagePropsWithChildren } from "../types"
 
-export const NestedComponentUsingState = (props: MonkeyCountProps) => (
-  <p>{"🙈".repeat(props.monkeyCount)}</p>
-)
+export const ComponentWithoutState = (props: MessagePropsWithChildren) => {
+  return (
+    <section className="Container">
+      <code>{props.message}</code>
+      {props.children}
+    </section>
+  )
+}

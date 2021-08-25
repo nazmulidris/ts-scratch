@@ -15,12 +15,17 @@
  *
  */
 
-import React from "react"
-import { render, screen } from "@testing-library/react"
-import App from "../App"
+import { ReactElement } from "react"
 
-test("renders learn react link", () => {
-  render(<App />)
-  const linkElement = screen.getByText(/learn react/i)
-  expect(linkElement).toBeInTheDocument()
-})
+/**
+ * Readonly: https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype
+ * The following lines are equivalent.
+ * - type AnimationFrames = Readonly<Array<ReactElement>>
+ * - readonly ReactElement[]
+ * - ReadonlyArray<ReactElement>
+ */
+export type AnimationFrames = Readonly<Array<ReactElement>>
+
+export interface AnimationFramesProps {
+  animationFrames: AnimationFrames
+}

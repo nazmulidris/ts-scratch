@@ -15,13 +15,18 @@
  *
  */
 
-import { MessagePropsWithChildren } from "./types"
-
-export const ComponentWithoutState = (props: MessagePropsWithChildren) => {
-  return (
-    <div className="DottedBox">
-      <code>{props.message}</code>
-      {props.children}
-    </div>
-  )
+export interface HasId {
+  objectID: number
 }
+
+export interface Story extends HasId {
+  num_comments: number
+  author: string
+  title: string
+  url: string
+  points: number
+}
+
+export type ListOfStoriesProps = { takeInitialKeyboardFocus: boolean }
+
+export type FnWithSingleArg<T> = (arg: T) => void

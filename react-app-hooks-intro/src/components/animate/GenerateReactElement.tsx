@@ -45,9 +45,9 @@ class GenerateReactElement {
 
   private static generate(localGreeting: string, user: string): JSX.Element {
     return (
-      <h2>
+      <p>
         👋{localGreeting}, {user}
-      </h2>
+      </p>
     )
   }
 }
