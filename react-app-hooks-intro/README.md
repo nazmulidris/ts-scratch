@@ -7,6 +7,7 @@ Here are some tips and tricks used in this project.
 
 - [CSS Reset](#css-reset)
 - [Upgrade CRA itself to the latest version](#upgrade-cra-itself-to-the-latest-version)
+- [Using CRA and environment variables](#using-cra-and-environment-variables)
 - [Using CSS class pseudo selectors to style child elements of a parent](#using-css-class-pseudo-selectors-to-style-child-elements-of-a-parent)
 - [Callable](#callable)
 - [Composition over inheritance](#composition-over-inheritance)
@@ -25,6 +26,7 @@ Here are some tips and tricks used in this project.
     - [Resources](#resources)
     - [Example](#example)
   - [useReducer](#usereducer)
+    - [Examples](#examples)
   - [useCallback and useMemo](#usecallback-and-usememo)
   - [How to write complex functional components](#how-to-write-complex-functional-components)
   - [Custom hook examples](#custom-hook-examples)
@@ -75,6 +77,22 @@ You can upgrade any npm packages using the following.
 ```shell
 npm update
 ```
+
+### Using CRA and environment variables
+
+Read all about how to do this in this
+[guide](https://create-react-app.dev/docs/adding-custom-environment-variables/).
+
+For example, to use the [Cat API](https://docs.thecatapi.com/), you have to do the following steps:
+
+1. Get an API key from [https://thecatapi.com/](https://thecatapi.com/).
+2. Save this API key as `REACT_APP_CAT_API_KEY` in `$HOME/.profile` (for Ubuntu & GNOME).
+   - You have to logout and log back in, in order for this to take effect on GUI apps launched via
+     GNOME.
+   - CRA will grab all the environment variables that are prefixed w/ `REACT_APP` and compile them
+     into the minified Javascript code that it generates.
+3. In your Typescript code, you can use the following variable `process.env.REACT_APP_CAT_API_KEY`
+   in order to access the value of this environment variable.
 
 ### Using CSS class pseudo selectors to style child elements of a parent
 
@@ -383,9 +401,12 @@ a functional component, and how that maps to React's memory model.
 
 #### useEffect
 
-This hook allows you to register a function that is called whenever anything is rendered to the DOM
-on the page. And it can be scoped to an array of dependencies (which are state variables that can
-change in order to trigger this effect to be run).
+This [hook](https://reactjs.org/docs/hooks-effect.html) is kind of `componentDidMount`,
+`componentDidUpdate`, and `componentWillUnmount` combined!
+
+It allows you to register a function that is called whenever anything is rendered to the DOM on the
+page. And it can be scoped to an array of dependencies (which are state variables that can change in
+order to trigger this effect to be run).
 
 > 1. Read more about this in the
 >    [official docs](https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects).
@@ -598,14 +619,14 @@ export const ListOfStoriesComponent: FC<ListOfStoriesProps> = (props) => {
 // This is the reducer function.
 
 export type StateType = Story[]
-export type ActionType = {
+export type Action = {
   type: "setState" | "removeItem"
   payload?: any
 }
-export type ReducerType = Reducer<StateType, ActionType>
-export type ReducerHookType = [StateType, Dispatch<ActionType>]
+export type ReducerType = Reducer<StateType, Action>
+export type ReducerHookType = [StateType, Dispatch<Action>]
 
-export const storiesReducer = (currentState: StateType, action: ActionType): StateType => {
+export const storiesReducer = (currentState: StateType, action: Action): StateType => {
   console.log("storiesReducer -> \ncurrentState:", currentState, "\n-> action:", action)
   let newState: StateType
   switch (action.type) {
@@ -624,9 +645,14 @@ export const storiesReducer = (currentState: StateType, action: ActionType): Sta
 }
 ```
 
-For a real example, check out the
-[`ListOfStoriesComponent`](src/components/list/ListOfStoriesComponent.tsx) which utilizes both
-`useState` and `useReducer` hooks.
+##### Examples
+
+1. For a simple example that doesn't use any network, and that is decomposed into many files, check
+   out the [`ListOfStoriesComponent`](src/components/list/ListOfStoriesComponent.tsx) which utilizes
+   both `useState` and `useReducer` hooks.
+2. For an example that has network calls, and does everything in one file, check out the
+   [`CatApiComponent`](src/components/cat_api/CatApiComponent.tsx) which only uses `useReducer` and
+   no `useState`.
 
 #### useCallback and useMemo
 
@@ -743,42 +769,42 @@ Here's another way to do the same thing imperatively (programmatically) using `u
 >    `useEffect()` hook to actually call `focus()` on the DOM element.
 
 ```typescript jsx
-type ListOfStoriesProps = { takeInitialKeybFocus: boolean }
-const ListOfStoriesComponent: FC<ListOfStoriesProps> = (props) => {
-  const { takeInitialKeybFocus } = props
-
-  /* snip */
-
-  return (
-    <div className={"Container"}>
-      <strong>My Searchable Stories</strong>
-      <SearchComponent
-        searchTerm={searchTerm}
-        onSearchFn={onSearchFn}
-        takeInitialKeybFocus={takeInitialKeybFocus}
-      >
-        <strong>Search: </strong>
-      </SearchComponent>
-      <ListComponent list={filteredStories} />
-    </div>
-  )
-}
-
 const SearchComponent: FC<SearchProps> = (props) => {
-  const { takeInitialKeybFocus, searchTerm, onSearchFn, children } = props
+  const { takeInitialKeyboardFocus, searchTerm, onSearchFn, children } = props
 
   // useEffect hook for initial keyboard focus on input element.
   const inputRef: React.MutableRefObject<any> = React.useRef()
   React.useEffect(() => {
-    if (inputRef.current && takeInitialKeybFocus) {
+    if (inputRef.current && takeInitialKeyboardFocus) {
       inputRef.current.focus()
+    }
+  })
+
+  // Run this effect to log inputRef.
+  const [showUi, setShowUi] = React.useState(true)
+  function onButtonClicked() {
+    setShowUi((prevState) => !prevState)
+    console.log("showUi", showUi)
+  }
+  const logInputRef = (msg: string) => {
+    console.log(msg, inputRef.current ? "has DOM element" : "🧨 does not have DOM element")
+  }
+  React.useEffect(() => {
+    logInputRef("🎹 inputRef")
+    return () => {
+      logInputRef("🎹❌ Do something here to unregister the DOM element, inputRef")
     }
   })
 
   return (
     <section>
-      <label htmlFor="search">{children}</label>
-      <input id="search" type="text" value={searchTerm} onChange={onSearchFn} ref={inputRef} />
+      {showUi && (
+        <>
+          <label htmlFor="search">{children}</label>
+          <input id="search" type="text" value={searchTerm} onChange={onSearchFn} ref={inputRef} />
+        </>
+      )}
+      <button onClick={onButtonClicked}>mount/unmount</button>
     </section>
   )
 }

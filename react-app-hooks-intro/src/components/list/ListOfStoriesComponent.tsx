@@ -110,10 +110,31 @@ const SearchComponent: FC<SearchProps> = (props) => {
     }
   })
 
+  // Run this effect to log inputRef.
+  const [showUi, setShowUi] = React.useState(true)
+  function onButtonClicked() {
+    setShowUi((prevState) => !prevState)
+    console.log("showUi", showUi)
+  }
+  const logInputRef = (msg: string) => {
+    console.log(msg, inputRef.current ? "has DOM element" : "🧨 does not have DOM element")
+  }
+  React.useEffect(() => {
+    logInputRef("🎹 inputRef")
+    return () => {
+      logInputRef("🎹❌ Do something here to unregister the DOM element, inputRef")
+    }
+  })
+
   return (
     <section>
-      <label htmlFor="search">{children}</label>
-      <input id="search" type="text" value={searchTerm} onChange={onSearchFn} ref={inputRef} />
+      {showUi && (
+        <>
+          <label htmlFor="search">{children}</label>
+          <input id="search" type="text" value={searchTerm} onChange={onSearchFn} ref={inputRef} />
+        </>
+      )}
+      <button onClick={onButtonClicked}>mount/unmount</button>
     </section>
   )
 }

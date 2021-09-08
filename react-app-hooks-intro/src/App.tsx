@@ -25,6 +25,7 @@ import { VirtualDomElementGenerator } from "./components/animate/GenerateReactEl
 import { ReactReplayClassComponent } from "./components/animate/ReactReplayClassComponent"
 import { AnimationFrames } from "./components/animate/types"
 import { ListOfStoriesComponent } from "./components/list/ListOfStoriesComponent"
+import { CatApiComponent } from "./components/cat_api/CatApiComponent"
 
 const preGeneratedAnimationFrames: AnimationFrames = _also(
   new Array<ReactElement>(),
@@ -50,6 +51,7 @@ function App() {
       <ReactReplayClassComponent animationFrames={preGeneratedAnimationFrames} />
       <ReactReplayFunctionComponent animationFrames={preGeneratedAnimationFrames} />
       <ListOfStoriesComponent takeInitialKeyboardFocus={true} />
+      <CatApiComponent />
     </>
   )
 }
