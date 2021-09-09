@@ -3,6 +3,7 @@ import { LocalStorageHook, MyLocalStorageEvents, useLocalStorage } from "./hooks
 import { getAsyncStoriesWithSimulatedNetworkLag } from "./data"
 import { FnWithSingleArg, ListOfStoriesProps, Story } from "./types"
 import { ReducerHookType, ReducerType, storiesReducer } from "./reducer"
+import { Tooltip } from "../utils/Tooltip"
 
 type SearchProps = {
   searchTerm: string
@@ -102,6 +103,26 @@ export const ListOfStoriesComponent: FC<ListOfStoriesProps> = (props) => {
 const SearchComponent: FC<SearchProps> = (props) => {
   const { takeInitialKeyboardFocus, searchTerm, onSearchFn, children } = props
 
+  // Run this effect to log inputRef.
+  const [showUi, setShowUi] = React.useState(true)
+  function onButtonClicked() {
+    setShowUi((prevState) => !prevState)
+    console.log("showUi", showUi)
+  }
+  React.useEffect(() => {
+    console.log("✨ Creating inputRef related effect")
+    const logInputRef = (msg: string) => {
+      console.log(
+        `${msg}\n`,
+        inputRef.current ? "🎉 has DOM element" : "🧨 does not have DOM element"
+      )
+    }
+    logInputRef("🎹✨ inputRef")
+    return () => {
+      logInputRef("🎹🗑 Do something here to unregister the DOM element, inputRef")
+    }
+  }, [showUi])
+
   // useEffect hook for initial keyboard focus on input element.
   const inputRef: React.MutableRefObject<any> = React.useRef()
   React.useEffect(() => {
@@ -110,22 +131,8 @@ const SearchComponent: FC<SearchProps> = (props) => {
     }
   })
 
-  // Run this effect to log inputRef.
-  const [showUi, setShowUi] = React.useState(true)
-  function onButtonClicked() {
-    setShowUi((prevState) => !prevState)
-    console.log("showUi", showUi)
-  }
-  const logInputRef = (msg: string) => {
-    console.log(msg, inputRef.current ? "has DOM element" : "🧨 does not have DOM element")
-  }
-  React.useEffect(() => {
-    logInputRef("🎹 inputRef")
-    return () => {
-      logInputRef("🎹❌ Do something here to unregister the DOM element, inputRef")
-    }
-  })
-
+  const tooltipText =
+    "Toggle whether this component is shown or not. Triggers useEffect mount and unmount."
   return (
     <section>
       {showUi && (
@@ -134,7 +141,9 @@ const SearchComponent: FC<SearchProps> = (props) => {
           <input id="search" type="text" value={searchTerm} onChange={onSearchFn} ref={inputRef} />
         </>
       )}
-      <button onClick={onButtonClicked}>mount/unmount</button>
+      <Tooltip tooltipText={tooltipText}>
+        <button onClick={onButtonClicked}>➕/➖</button>
+      </Tooltip>
     </section>
   )
 }

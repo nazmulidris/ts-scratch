@@ -1,0 +1,29 @@
+.tooltipContainer {
+  position: relative;
+}
+
+.tooltip {
+  --radius: 5px;
+  --alpha: 0.8;
+  --fillColor: rgba(26, 31, 48, var(--alpha));
+  --borderColor: rgba(100, 149, 237, var(--alpha));
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+
+  padding: calc(var(--defaultPadding) * 0.5);
+  background: var(--fillColor);
+  border-radius: var(--radius);
+  border: 2px solid var(--borderColor);
+
+  /* This ensures that the tooltip does not obstruct the element that is being hovered */
+  top: 100%;
+  width: auto;
+}
+
+.tooltip.visible {
+  display: block;
+}

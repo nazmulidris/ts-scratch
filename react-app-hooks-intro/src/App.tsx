@@ -40,7 +40,7 @@ const preGeneratedAnimationFrames: AnimationFrames = _also(
 
 function App() {
   return (
-    <>
+    <main className={"GridContainer"}>
       <section className={"Heading"}>Helloooooo!!!!</section>
       <ComponentWithState message={"Click me to see the count go up"} />
       <ComponentWithoutState message={"Stateless component ⛔ aka 'generic box'"}>
@@ -52,7 +52,7 @@ function App() {
       <ReactReplayFunctionComponent animationFrames={preGeneratedAnimationFrames} />
       <ListOfStoriesComponent takeInitialKeyboardFocus={true} />
       <CatApiComponent />
-    </>
+    </main>
   )
 }
 

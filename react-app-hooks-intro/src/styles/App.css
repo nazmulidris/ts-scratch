@@ -21,6 +21,7 @@ body {
   --variableWidthFont: "Google Sans", serif;
   --fixedWidthFont: "Cascadia Code", monospace;
   --defaultPadding: 8px;
+  --alpha: 0.8;
 }
 
 body {
@@ -34,6 +35,14 @@ body {
   line-height: 1.5;
 }
 
+.GridContainer {
+  --gridNumCols: 2;
+
+  display: grid;
+  grid-template-columns: repeat(var(--gridNumCols), 1fr);
+  grid-gap: calc(var(--defaultPadding) * 0.25);
+}
+
 .Heading {
   font-size: 1.5rem;
   font-weight: 500;
@@ -43,6 +52,8 @@ body {
   color: rgb(40, 40, 40);
 
   padding: var(--defaultPadding);
+
+  grid-column: span var(--gridNumCols);
 }
 
 code {

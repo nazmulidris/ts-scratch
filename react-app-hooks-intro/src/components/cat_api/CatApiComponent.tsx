@@ -1,31 +1,37 @@
-import React, { Dispatch, FC, Reducer } from "react"
+import React, { Dispatch, FC, ReactElement, Reducer } from "react"
 import _ from "lodash"
+import axios from "axios"
+import { _also } from "r3bl-ts-utils"
+import "./CatApiComponent.css"
+import { Tooltip } from "../utils/Tooltip"
 
 // Types.
 type Action = {
   type: "fetchStart" | "fetchOk" | "fetchErr"
   payload?: CatApiSearchResult[]
+  error?: any
 }
 type State = {
   isFetching: boolean
   isError: boolean
   isOk: boolean
-  catApiSearchResults: Readonly<CatApiSearchResult[]>
+  catApiSearchResults: CatApiSearchResult[]
+  error?: any
 }
-const initialState: Readonly<State> = {
+const initialState: State = {
   isFetching: false,
   isError: false,
   isOk: true,
   catApiSearchResults: new Array<CatApiSearchResult>(),
-} as const
+}
 
 // TheCatApi - https://docs.thecatapi.com/api-reference/images/images-search
-type CatApiSearchResult = { imageId: string; imageUrl: string }
+type CatApiSearchResult = { id: string; url: string }
 const TheCatApi = {
   apiKey: process.env.REACT_APP_CAT_API_KEY,
   search: {
     endpoint: "https://api.thecatapi.com/v1/images/search",
-    numberOfResultsToGet: 3,
+    config: { params: { limit: 3, size: "full" } },
   },
 } as const
 
@@ -35,16 +41,42 @@ export const CatApiComponent: FC = () => {
     reducerFn,
     initialState
   )
+
+  React.useEffect(
+    () => {
+      myStateDispatcher({ type: "fetchStart" })
+      axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+      _also(TheCatApi.search, async (it) => {
+        try {
+          const response = await axios.get(it.endpoint, it.config)
+          myStateDispatcher({ type: "fetchOk", payload: response.data })
+        } catch (error) {
+          myStateDispatcher({ type: "fetchErr", error: error })
+        }
+      })
+    },
+    [] /* Run once, like componentDidMount. */
+  )
+
+  function renderCats(cats: CatApiSearchResult[]): ReactElement[] {
+    // Note when returning an array, make sure that each item has a unique key prop.
+    return _also(new Array<ReactElement>(), (it) => {
+      cats.forEach((cat) =>
+        it.push(
+          <Tooltip key={cat.id} tooltipText={cat.id}>
+            <img className={"Image"} src={cat.url} />
+          </Tooltip>
+        )
+      )
+    })
+  }
+
   return (
-    <h1 className={"Container"}>
-      TODO CatApiComponent
-      <p>ApiKey: {TheCatApi.apiKey}</p>
-      {myState.isFetching && <h2>Loading ...</h2>}
-      {myState.isError && <h2>Error!</h2>}
-      {myState.isOk && (
-        <p>myState.catApiSearchResults.length: {myState.catApiSearchResults.length}</p>
-      )}
-    </h1>
+    <div className={"Container"}>
+      {myState.isFetching && <p>Loading ...</p>}
+      {myState.isError && <p>Error!{myState.error}</p>}
+      {myState.isOk && renderCats(myState.catApiSearchResults)}
+    </div>
   )
 }
 
@@ -52,21 +84,34 @@ export const CatApiComponent: FC = () => {
 type ReducerType = Reducer<State, Action>
 type ReducerHookType = [State, Dispatch<Action>]
 
-function reducerFn(currentState: State, action: Action): State {
-  console.log("storiesReducer -> \ncurrentState:", currentState, "\n-> action:", action)
-
-  let copyOfState = _.cloneDeep(currentState)
+const reducerFn: ReducerType = (currentState: State, action: Action): State => {
+  let newState = _.cloneDeep(currentState)
 
   switch (action.type) {
     case "fetchErr":
+      newState.isFetching = false
+      newState.isError = true
+      newState.error = action.error ?? newState.error
       break
     case "fetchOk":
+      newState.isFetching = false
+      newState.catApiSearchResults = action.payload ?? newState.catApiSearchResults
       break
     case "fetchStart":
+      newState.isFetching = true
       break
     default:
       throw new Error(`Illegal action type: '${action.type}'`)
   }
 
-  return copyOfState
+  console.log(
+    "🌐 reducerFn:\n->currentState:",
+    currentState,
+    "\n-> action:",
+    action,
+    "\n-> newState:",
+    newState
+  )
+
+  return newState
 }
