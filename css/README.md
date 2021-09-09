@@ -303,8 +303,8 @@ Here are some interesting things to note.
 
 Code example
 
-- [HTML](src/project-4/index.html)
-- [CSS](src/project-4/index.css)
+- [HTML](src/project-5/index.html)
+- [CSS](src/project-5/index.css)
 
 References & notes
 
