@@ -26,6 +26,9 @@ import { ReactReplayClassComponent } from "./components/animate/ReactReplayClass
 import { AnimationFrames } from "./components/animate/types"
 import { ListOfStoriesComponent } from "./components/list/ListOfStoriesComponent"
 import { CatApiComponent } from "./components/cat_api/CatApiComponent"
+import { SimpleReduxComponent, store } from "./components/redux/SimpleReduxComponent"
+import { Provider } from "react-redux"
+import { SvgExample } from "./components/svg/SvgExample"
 
 const preGeneratedAnimationFrames: AnimationFrames = _also(
   new Array<ReactElement>(),
@@ -52,6 +55,10 @@ function App() {
       <ReactReplayFunctionComponent animationFrames={preGeneratedAnimationFrames} />
       <ListOfStoriesComponent takeInitialKeyboardFocus={true} />
       <CatApiComponent />
+      <Provider store={store}>
+        <SimpleReduxComponent />
+      </Provider>
+      <SvgExample />
     </main>
   )
 }

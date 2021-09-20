@@ -35,14 +35,8 @@ export class ComponentWithState extends React.Component<MessageProps, CounterSta
     return (
       <React.Fragment>
         <section className="Container">
-          <ul>
-            <li>
-              <code>this.state.count={this.state.count}</code>
-            </li>
-            <li>
-              <button onClick={this.increaseCounter}>{this.props.message}</button>
-            </li>
-          </ul>
+          <code>this.state.count={this.state.count}</code>
+          <button onClick={this.increaseCounter}>{this.props.message}</button>
           <NestedComponentUsingState monkeyCount={this.state.count} />
         </section>
       </React.Fragment>

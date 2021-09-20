@@ -78,5 +78,10 @@ input {
 }
 
 .Container > * {
-  color: lightslategrey;
+  color: #c5c4c4;
 }
+
+.Container > button {
+  color: #32518b;
+}
+
