@@ -85,3 +85,12 @@ input {
   color: #32518b;
 }
 
+.SvgImage {
+  height: 100px;
+  width: 100px;
+}
+
+.SvgImage:hover > g {
+  stroke: yellow;
+  stroke-width: 8px;
+}

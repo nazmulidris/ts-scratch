@@ -33,13 +33,19 @@
   - [useCallback and useMemo](#usecallback-and-usememo)
   - [How to write complex functional components](#how-to-write-complex-functional-components)
   - [Custom hook examples](#custom-hook-examples)
-  - [References](#references)
+  - [References about hooks](#references-about-hooks)
 - [Keyboard focus and React](#keyboard-focus-and-react)
   - [Learning materials](#learning-materials)
   - [Declarative](#declarative)
   - [Imperative using useRef](#imperative-using-useref)
 - [React and CSS](#react-and-css)
-  - [Tooltip example](#tooltip-example)
+  - [Styled component example - Tooltip](#styled-component-example---tooltip)
+  - [CSS Modules example](#css-modules-example)
+- [React and SVG](#react-and-svg)
+  - [References on SVG and React](#references-on-svg-and-react)
+- [Redux](#redux)
+  - [Simple example (no async, thunks, or splitting reducers)](#simple-example-no-async-thunks-or-splitting-reducers)
+  - [🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)](#-todo-advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -80,6 +86,8 @@ Typescript.
 Follow instructions in the
 [CRA changelog](https://github.com/facebook/create-react-app/blob/main/CHANGELOG.md). For example,
 you can run something like the following w/out ejecting CRA itself.
+
+> You can find the list of releases [here](https://github.com/facebook/create-react-app/releases).
 
 ```shell
 npm install --save --save-exact react-scripts@4.0.3
@@ -572,8 +580,11 @@ This hook is very similar to the `useState` hook. You can use both in a componen
 difference between them is unlike `setState`, a reducer function must be provided that deals w/
 generating a new state when employing `useReducer`.
 
-This is very similar to Redux! And this might just be the simplest way to learn Redux patterns. It
-is possible to replace code that employs `useState` w/ code that employs `useReducer`. Here's an
+> This is very similar to Redux! And this might just be the simplest way to learn Redux patterns.
+> Jump to this [section](#redux) to learn all about how to use React and Redux (using the modern
+> `redux-toolkit` and not old-school `redux-react`).
+
+It is possible to replace code that employs `useState` w/ code that employs `useReducer`. Here's an
 example.
 
 Code that employs `useState` hook.
@@ -737,7 +748,7 @@ with keyboard focus, than if they are defined outside it!
   - [`ReactReplayFunctionComponent`](src/components/animate/ReactReplayFunctionComponent.tsx) uses
     this hook in order to show frames in a pre-rendered array of frames (`ReactElement[]`).
 
-### References
+### References about hooks
 
 To learn about hooks, here are some important resources.
 
@@ -861,7 +872,21 @@ const SearchComponent: FC<SearchProps> = (props) => {
 
 ## React and CSS
 
-### Tooltip example
+At a high level there are 2 strategies to consider when using CSS in React (which are both bundled
+when you use `create-react-app` (CRA).
+
+1. Styled components (CSS in JS) - This is where you simply use the `className` prop to specify
+   which CSS rules to use.
+2. CSS Modules (CSS in CSS) - This is where you leverage
+   [CSS modules](https://css-tricks.com/css-modules-part-1-need/) which locally scope the styles to
+   prevent collisions w/ synonymous styles declared in other files. Here are the main differences
+   that you have to be aware of when compared to styled components:
+   1. Instead of using `XXX.css`, make `XXX.module.css` files. This tells CRA to use CSS modules.
+   2. Instead of importing the CSS file like you would for a styled component, do this instead
+      `import styles from './XXX.module.css'`.
+   3. Then use these styles in your JSX like this: `<Component className{styles.XYZ}/>`.
+
+### Styled component example - Tooltip
 
 Here is an example of implementing a tooltip that uses CSS but is packaged as a React component.
 This example shows how these two technologies can work together, but also shows how React really
@@ -938,3 +963,247 @@ Here's the code.
   - [`Tooltip.tsx`](src/components/utils/Tooltip.tsx)
   - [`Tooltip.css`](src/components/utils/Tooltip.css)
 - Used in [`ListOfStoriesComponent.tsx`](src/components/list/ListOfStoriesComponent.tsx)
+
+### CSS Modules example
+
+Here's a simple example that shows how to use CSS modules or CSS in CSS approach.
+
+Here's a simple `App.module.css` file.
+
+```css
+.container {
+  height: 100vw;
+  padding: 20px;
+  background: linear-gradient(to left, #b6fbff, #83a4d4);
+  color: #171212;
+}
+```
+
+In your JSX component, you have to do the following import.
+
+```typescript jsx
+import React from "react"
+import styles from "./App.module.css"
+```
+
+Then to use it in a component, you can do the following.
+
+```typescript jsx
+const App: FC = () => <div className={styles.container}>Content</div>
+```
+
+## React and SVG
+
+It is very easy to use SVG w/ React. There are various ways of importing the SVG asset into a React
+component itself:
+
+1. You can import it from a file (static asset). The imported file is actually a React component
+   itself. And you can style the SVG directly by passing `className` or inline styles to this
+   component. Here's an example of importing the SVG file.
+
+   ```typescript jsx
+   import { ReactComponent as Car } from "./car.svg"
+   export const SvgExample: FC = (props) => <Car className={"SvgImage"} />
+   ```
+
+   Here's an example of styling it in CSS.
+
+   ```css
+   .SvgImage {
+     height: 100px;
+     width: 100px;
+   }
+
+   .SvgImage:hover > g {
+     stroke: yellow;
+     stroke-width: 8px;
+   }
+   ```
+
+2. You can declare it in JSX. Here's an example.
+
+   ```typescript jsx
+   const BasicSvg = () => (
+     <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+       <circle cx="50" cy="50" r="40" stroke="blue" strokeWidth="4" fill="lightblue" />
+     </svg>
+   )
+   ```
+
+   You can then just use it as a React component.
+
+   ```typescript jsx
+   export const SvgExample: FC = (props) => <BasicSvg />
+   ```
+
+   Or you can use it inside an `img` tag like so.
+
+   ```typescript jsx
+   export const SvgExample: FC = (props) => <img src={logo} className="logo" alt="logo" />
+   ```
+
+3. You can load it as a string using the `data:image/svg+xml` pattern. Here's an example of defining
+   the SVG in CSS.
+
+   ```css
+   .topography-pattern {
+     background-color: #ffffff;
+     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' ... ");
+   }
+   ```
+
+   And then using it in a React component.
+
+   ```typescript jsx
+   export const SvgExample: FC = (props) => <div className={"topography-pattern"}></div>
+   ```
+
+### References on SVG and React
+
+- [CRA and SVG](https://create-react-app.dev/docs/adding-images-fonts-and-files/)
+- [Using SVG as backgrounds in React](https://www.robinwieruch.de/react-svg-patterns)
+
+## Redux
+
+[Redux](https://redux.js.org/tutorials/fundamentals/part-1-overview) is a great way to share state
+between components. The `redux-toolkit` uses the underlying `react-redux` module, but is easier to
+use. Here's how you can install it in your project.
+
+```shell
+npm install @reduxjs/toolkit react-redux
+```
+
+> To understand Redux it is best to start w/ 'useReducer' hook as show in this
+> [section](#usereducer). It is an easy way to understand the fundamentals of Redux which is
+> actions, state, reducer functions, and immutable state.
+
+### Simple example (no async, thunks, or splitting reducers)
+
+> Here's the full example in a single source file
+> [`SimpleReduxComponent`](src/components/redux/SimpleReduxComponent.tsx).
+
+Here are the steps to using Redux.
+
+1. Define the types for the state, action, and use those to create a reducer function.
+
+   > 1. Note that the type of the reducer function is `Reducer<State | undefined, Action>`. The
+   >    `undefined` is to cover the initial state that is returned by this reducer.
+   > 2. Also note that if you try and replace the `Reducer<State ... , Action>` w/ a type variable
+   >    that holds the same thing, then it will not work for some reason w/ Typescript.
+
+   ```tsx
+   // Types.
+   type State = {
+     strings: Array<string>
+   }
+   type Action = {
+     type: "add" | "remove" | "clear"
+     payload?: any
+   }
+
+   // Reducer function.
+   const reducerFn: Reducer<State | undefined, Action> = (state, action): State => {
+     if (!state)
+       return {
+         strings: ["11222", "ddddd"],
+       }
+
+     switch (action.type) {
+       case "add":
+         return { strings: [...state.strings, action.payload] }
+       case "remove":
+         // Get the index (the string we want to remove).
+         const index = action.payload
+         // Make a copy of the old state.
+         const copyOfState = [...state.strings]
+         // Remove the element in position index and return the new state.
+         copyOfState.splice(index, 1)
+         return { strings: copyOfState }
+     }
+     return state
+   }
+   ```
+
+2. Create a store that uses this reducer function.
+
+   > If you split reducers, then this is where you would declare all the ones that comprise the root
+   > reducer function.
+
+   ```tsx
+   // Redux store.
+   export const store = configureStore({
+     reducer: reducerFn,
+   })
+   ```
+
+3. Wrap the component(s) that will share this state with `<Provider store={store}>...</Provider>`
+   where `store` is what you created and exported in step 2.
+
+   ```tsx
+   <Provider store={store}>
+     <SimpleReduxComponent />
+   </Provider>
+   ```
+
+4. In your component, make sure to subscribe to the store, using the `useSelector()` hook.
+
+   > - This is used instead of the old
+   >   [`mapStateToProps` / 'connect'](https://react-redux.js.org/using-react-redux/connect-mapstate)
+   >   mechanism.
+   > - When the state changes in the store then, the new state will be passed to this component (by
+   >   the hook), and it will be re-rendered.
+
+   > This is somewhat equivalent to the `useReducer()` hook, in the sense that you will get the
+   > state from this hook.
+
+   > If you split reducers, then you can select just a subset of the state that you are interested
+   > in (in the function that you pass to the `useSelector()` hook).
+
+   ```tsx
+   // Functional component.
+   export const SimpleReduxComponent: FC = () => {
+     const state: DefaultRootState = useSelector((state) => state)
+     const myState = state as State
+     /* snip */
+   }
+   ```
+
+5. In your component make sure to call `store.dispatch({/* action */})` in order to request changes
+   to happen to your store. This will trigger re-renders of the components that are subscribed to
+   the store.
+
+   ```tsx
+   export const SimpleReduxComponent: FC = () => {
+     /* snip */
+     function addString() {
+       store.dispatch({
+         type: "add",
+         payload: "NazmulMaretIdris".substring(Math.floor(Math.random() * 15)),
+       })
+     }
+
+     function removeListItem(index: number) {
+       store.dispatch({
+         type: "remove",
+         payload: index,
+       })
+     }
+
+     function render() {
+       return (
+         <div className={"Container"}>
+           <button onClick={addString}>Add</button>
+           <ol>
+             {myState.strings.map((string, index) => (
+               <li onClick={() => removeListItem(index)}>{string}</li>
+             ))}
+           </ol>
+         </div>
+       )
+     }
+
+     return render()
+   }
+   ```
+
+### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
