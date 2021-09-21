@@ -23,6 +23,7 @@
   - [Limitations when using hooks (must follow these rules)](#limitations-when-using-hooks-must-follow-these-rules)
   - [Example w/ explanation of React memory model](#example-w-explanation-of-react-memory-model)
   - [useEffect](#useeffect)
+    - [First render and subsequent re-renders using useRef and useEffect](#first-render-and-subsequent-re-renders-using-useref-and-useeffect)
   - [useState](#usestate)
     - [Shared stateful logic vs shared state](#shared-stateful-logic-vs-shared-state)
     - [Resources](#resources)
@@ -510,6 +511,60 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
   /* snip */
 }
 ```
+
+#### First render and subsequent re-renders using useRef and useEffect
+
+Out of the box the callback that you pass to `useEffect()` can't tell the difference between first
+render, and subsequent re-renders. This is where `useRef` can be very useful (we have seen it used
+for keyboard focus in [this section](#imperative-using-useref).
+
+You can set whatever value you want in the `current` property of the `ref` (which is returned by
+`React.useRef(initialValue)`). This value will be stable when the component is re-rendered. This can
+be a simple way of detecting when the first render occurs, and when subsequent re-renders occur.
+
+> Note that storing a value in an object returned by `useRef` is different than simply using
+> `setState` because React isn't watching for changes in the state in order to trigger a re-render.
+
+Here's an example of a custom hook that allows you to use `localStorage` in order to get and set
+key-value pairs.
+
+```typescript jsx
+export type MyLocalStorageHook = [string, Dispatch<SetStateAction<string>>]
+const useMyLocalStorageHook = (key: string): MyLocalStorageHook => {
+  const isMounted = React.useRef(false)
+
+  const [value, setValue] = React.useState(localStorage.getItem(key) || "N/A")
+
+  React.useEffect(() => {
+    if (!isMounted.current) {
+      console.log("First render")
+      isMounted.current = true
+      return
+    }
+
+    console.log("Subsequent re-render")
+    localStorage.setItem(key, value)
+  }, [key, value])
+
+  return [value, setValue]
+}
+```
+
+> Note that the value of the object returned by `useRef` (the `current` property of `ref`) is only
+> set in the `useEffect` callback. It isn't set in the code that is doing the rendering for example.
+
+1. This hook can tell the difference between the first render and subsequent re-renders since it is
+   using `useRef(boolean)` in order to set the `current` property to `true` on first render (and
+   then doing an early return).
+2. Subsequent re-renders will skip over this early return condition check and will actually the work
+   it is intended to.
+3. When the `setValue` dispatch is used to assign a new value to the key, then it will actually save
+   the key-value pair to local storage.
+
+> Note that `ref.current` can also be used as a place to store the results of an expensive
+> computation that are local to a functional component, but isn't part of the state. This can be a
+> cache that is local to the component. Perhaps this cache can be populated on first render and then
+> re-used for subsequent renders.
 
 ### useState
 
