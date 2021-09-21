@@ -41,10 +41,15 @@ export const SimpleReduxComponent: FC = () => {
 type State = {
   strings: Array<string>
 }
-type Action = {
-  type: "add" | "remove" | "clear"
-  payload?: any
+interface ActionAdd {
+  type: "add"
+  payload: string
 }
+interface ActionRemove {
+  type: "remove"
+  index: number
+}
+type Action = ActionAdd | ActionRemove
 
 // Reducer function.
 const reducerFn: Reducer<State | undefined, Action> = (state, action): State => {
@@ -58,7 +63,7 @@ const reducerFn: Reducer<State | undefined, Action> = (state, action): State => 
       return { strings: [...state.strings, action.payload] }
     case "remove":
       // Get the index (the string we want to remove).
-      const index = action.payload
+      const index = action.index
       // Make a copy of the old state.
       const copyOfState = [...state.strings]
       // Remove the element in position index and return the new state.

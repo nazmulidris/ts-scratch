@@ -6,11 +6,21 @@ import "./CatApiComponent.css"
 import { Tooltip } from "../utils/Tooltip"
 
 // Types.
-type Action = {
-  type: "fetchStart" | "fetchOk" | "fetchErr"
-  payload?: CatApiSearchResult[]
-  error?: any
+interface ActionFetchStart {
+  type: "fetchStart"
 }
+
+interface ActionFetchOk {
+  type: "fetchOk"
+  payload: CatApiSearchResult[]
+}
+
+interface ActionFetchError {
+  type: "fetchError"
+  error: any
+}
+
+type Action = ActionFetchStart | ActionFetchOk | ActionFetchError
 type State = {
   isFetching: boolean
   isError: boolean
@@ -51,7 +61,7 @@ export const CatApiComponent: FC = () => {
           const response = await axios.get(it.endpoint, it.config)
           myStateDispatcher({ type: "fetchOk", payload: response.data })
         } catch (error) {
-          myStateDispatcher({ type: "fetchErr", error: error })
+          myStateDispatcher({ type: "fetchError", error: error })
         }
       })
     },
@@ -88,7 +98,7 @@ const reducerFn: ReducerType = (currentState: State, action: Action): State => {
   let newState = _.cloneDeep(currentState)
 
   switch (action.type) {
-    case "fetchErr":
+    case "fetchError":
       newState.isFetching = false
       newState.isError = true
       newState.error = action.error ?? newState.error
@@ -101,7 +111,7 @@ const reducerFn: ReducerType = (currentState: State, action: Action): State => {
       newState.isFetching = true
       break
     default:
-      throw new Error(`Illegal action type: '${action.type}'`)
+      throw new Error(`Illegal action type: '${action}'`)
   }
 
   console.log(

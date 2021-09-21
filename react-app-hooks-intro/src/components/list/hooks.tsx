@@ -65,7 +65,7 @@ export const useLocalStorage = (key: string, initialState: string): LocalStorage
   // 1. For changes initiated by this hook, whenever key or value change, save kvp to localStorage.
   React.useEffect(() => {
     localStorage.setItem(key, value)
-  }, [value, key])
+  }, [key, value])
 
   // 2. Respond to localStorage changes (not made via the effect above) which are initiated via
   // LocalStorageEvents.setValue() and they occur in *this* document.

@@ -1,4 +1,4 @@
-import React, { FC } from "react"
+import React, { FC, PropsWithChildren } from "react"
 import "./Tooltip.css"
 
 /**
@@ -11,9 +11,7 @@ export type TooltipProps = {
   tooltipText: string
 }
 
-export const Tooltip: FC<TooltipProps> = (propsWithChildren) => {
-  const { children, tooltipText } = propsWithChildren
-
+export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltipText }) => {
   const [showTooltip, setShowTooltip] = React.useState(false)
   const onMouseEnter = () => setShowTooltip(true)
   const onMouseLeave = () => setShowTooltip(false)

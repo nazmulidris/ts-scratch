@@ -257,6 +257,24 @@ export class ReactReplayClassComponent extends React.Component<AnimationFramesPr
 }
 ```
 
+You can also wrap your prop type, eg: `MyPropType`, w/ `PropsWithChildren<MyPropType>` when
+declaring your functional component to declare that your component can accept `children`. And then
+you can use the destructuring syntax to get the required props out. Here's an example.
+
+```typescript jsx
+export type TooltipProps = {
+  text: string
+}
+
+export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, text }) => {
+  /* snip */
+}
+```
+
+> Note the use of the destructuring syntax to get the specific properties (`children`, `text`) out
+> of the passed `props` object. The types are defined in `TooltipProps` (`text` comes from this) and
+> `PropsWithChildren` (`children` comes from this).
+
 Here's an example for a functional component. Note the use of `FC` to specify that this is a
 functional component that takes a prop. Being a functional component, you can't declare any state
 types.
@@ -650,23 +668,28 @@ export const ListOfStoriesComponent: FC<ListOfStoriesProps> = (props) => {
 // This is the reducer function.
 
 export type StateType = Story[]
-export type Action = {
-  type: "setState" | "removeItem"
-  payload?: any
+interface ActionSetState {
+  type: "setState"
+  payload: Story[]
 }
-export type ReducerType = Reducer<StateType, Action>
-export type ReducerHookType = [StateType, Dispatch<Action>]
+interface ActionRemoveItem {
+  type: "removeItem"
+  payload: Story
+}
+export type ActionType = ActionSetState | ActionRemoveItem
+export type ReducerType = Reducer<StateType, ActionType>
+export type ReducerHookType = [StateType, Dispatch<ActionType>]
 
-export const storiesReducer = (currentState: StateType, action: Action): StateType => {
+export const storiesReducer = (currentState: StateType, action: ActionType): StateType => {
   console.log("storiesReducer -> \ncurrentState:", currentState, "\n-> action:", action)
   let newState: StateType
   switch (action.type) {
     case "removeItem":
-      const itemToRemove = action?.payload as Story
+      const itemToRemove = action?.payload
       newState = currentState.filter((story) => story.objectID !== itemToRemove.objectID)
       break
     case "setState":
-      newState = action.payload as Story[]
+      newState = action.payload
       break
     default:
       throw new Error(`Invalid action: ${action}`)
@@ -794,8 +817,12 @@ const ListOfStoriesComponent: FC = () => {
   )
 }
 
-const SearchComponent: FC<SearchProps> = (props) => {
-  const { searchTerm, onSearchFn, children, initialKeybFocus } = props
+const SearchComponent: FC<SearchProps> = ({
+  searchTerm,
+  onSearchFn,
+  children,
+  initialKeybFocus,
+}) => {
   return (
     <section>
       <label htmlFor="search">{children}</label>
@@ -825,9 +852,12 @@ Here's another way to do the same thing imperatively (programmatically) using `u
 >    `useEffect()` hook to actually call `focus()` on the DOM element.
 
 ```typescript jsx
-const SearchComponent: FC<SearchProps> = (props) => {
-  const { takeInitialKeyboardFocus, searchTerm, onSearchFn, children } = props
-
+const SearchComponent: FC<SearchProps> = ({
+  takeInitialKeyboardFocus,
+  searchTerm,
+  onSearchFn,
+  children,
+}) => {
   // useEffect hook for initial keyboard focus on input element.
   const inputRef: React.MutableRefObject<any> = React.useRef()
   React.useEffect(() => {
@@ -870,6 +900,9 @@ const SearchComponent: FC<SearchProps> = (props) => {
 }
 ```
 
+> You can also utilize `useRef()` in order to detect the first render vs subsequent re-render by
+> pairing it w/ `useEffect()` hook; more in [this section](#first-render-and-subsequent-re-renders).
+
 ## React and CSS
 
 At a high level there are 2 strategies to consider when using CSS in React (which are both bundled
@@ -900,9 +933,7 @@ export type TooltipProps = {
   tooltipText: string
 }
 
-export const Tooltip: FC<TooltipProps> = (propsWithChildren) => {
-  const { children, tooltipText } = propsWithChildren
-
+export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltipText }) => {
   const [showTooltip, setShowTooltip] = React.useState(false)
   const onMouseEnter = () => setShowTooltip(true)
   const onMouseLeave = () => setShowTooltip(false)
@@ -1096,10 +1127,15 @@ Here are the steps to using Redux.
    type State = {
      strings: Array<string>
    }
-   type Action = {
-     type: "add" | "remove" | "clear"
-     payload?: any
+   interface ActionAdd {
+     type: "add"
+     text: string
    }
+   interface ActionRemove {
+     type: "remove"
+     index: number
+   }
+   type Action = ActionAdd | ActionRemove
 
    // Reducer function.
    const reducerFn: Reducer<State | undefined, Action> = (state, action): State => {
@@ -1110,10 +1146,10 @@ Here are the steps to using Redux.
 
      switch (action.type) {
        case "add":
-         return { strings: [...state.strings, action.payload] }
+         return { strings: [...state.strings, action.text] }
        case "remove":
          // Get the index (the string we want to remove).
-         const index = action.payload
+         const index = action.index
          // Make a copy of the old state.
          const copyOfState = [...state.strings]
          // Remove the element in position index and return the new state.

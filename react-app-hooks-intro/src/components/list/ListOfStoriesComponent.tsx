@@ -16,9 +16,7 @@ type ListItemProps = { item: Story; handleRemoveItem: FnWithSingleArg<Story> }
 
 type StatusTextStateHookType = [string, Dispatch<SetStateAction<string>>]
 
-export const ListOfStoriesComponent: FC<ListOfStoriesProps> = (props) => {
-  const { takeInitialKeyboardFocus }: ListOfStoriesProps = props
-
+export const ListOfStoriesComponent: FC<ListOfStoriesProps> = ({ takeInitialKeyboardFocus }) => {
   // Create a statusText state.
   const [statusText, setStatusText]: StatusTextStateHookType = React.useState<string>("")
 
@@ -100,9 +98,12 @@ export const ListOfStoriesComponent: FC<ListOfStoriesProps> = (props) => {
 // declared inside of a function, then they will be recreated everytime that function is run, vs
 // if they are declared outside, then they won't be recreated on every render call.
 
-const SearchComponent: FC<SearchProps> = (props) => {
-  const { takeInitialKeyboardFocus, searchTerm, onSearchFn, children } = props
-
+const SearchComponent: FC<SearchProps> = ({
+  takeInitialKeyboardFocus,
+  searchTerm,
+  onSearchFn,
+  children,
+}) => {
   // Run this effect to log inputRef.
   const [showUi, setShowUi] = React.useState(true)
   function onButtonClicked() {
@@ -148,16 +149,14 @@ const SearchComponent: FC<SearchProps> = (props) => {
   )
 }
 
-const ListComponent: FC<ListProps> = (props) => {
-  const { list, handleRemoveItem }: ListProps = props
+const ListComponent: FC<ListProps> = ({ list, handleRemoveItem }) => {
   let elements: ReactElement[] = list.map((it) => (
     <ListItemComponent key={it.objectID} handleRemoveItem={handleRemoveItem} item={it} />
   ))
   return <ul>{elements.length === 0 ? <li>Empty</li> : elements}</ul>
 }
 
-const ListItemComponent: FC<ListItemProps> = (props) => {
-  const { item, handleRemoveItem }: ListItemProps = props
+const ListItemComponent: FC<ListItemProps> = ({ item, handleRemoveItem }) => {
   const element = (
     <>
       <a href={item.url}>{item.title}</a>, {item.author}, {item.num_comments}, {item.points}
