@@ -26,6 +26,7 @@ categories:
   - [What works](#what-works)
   - [What does not work](#what-does-not-work)
 - [Upgrade CRA itself to the latest version](#upgrade-cra-itself-to-the-latest-version)
+- [Test app live data APIs](#test-app-live-data-apis)
 - [Using CRA and environment variables](#using-cra-and-environment-variables)
 - [Using CSS class pseudo selectors to style child elements of a parent](#using-css-class-pseudo-selectors-to-style-child-elements-of-a-parent)
 - [Callable](#callable)
@@ -48,7 +49,6 @@ categories:
     - [Example](#example)
   - [useReducer](#usereducer)
     - [Two examples (one w/out network, and one w/ network)](#two-examples-one-wout-network-and-one-w-network)
-    - [Test app live data APIs](#test-app-live-data-apis)
   - [useCallback and useMemo](#usecallback-and-usememo)
   - [How to write complex functional components](#how-to-write-complex-functional-components)
   - [Custom hook examples](#custom-hook-examples)
@@ -125,6 +125,14 @@ You can upgrade any npm packages using the following.
 npm update
 ```
 
+## Test app live data APIs
+
+Here are some data APIs that might be useful when building prototype apps.
+
+- [TheCatApi](https://docs.thecatapi.com/api-reference/)
+- [doc.ceo/dog-api](https://dog.ceo/dog-api/documentation/)
+- [Hacker News API](https://hn.algolia.com/api)
+
 ## Using CRA and environment variables
 
 Read all about how to do this in this
@@ -134,10 +142,12 @@ For example, to use the [Cat API](https://docs.thecatapi.com/), you have to do t
 
 1. Get an API key from [https://thecatapi.com/](https://thecatapi.com/).
 2. Save this API key as `REACT_APP_CAT_API_KEY` in `$HOME/.profile` (for Ubuntu & GNOME).
-   - You have to logout and log back in, in order for this to take effect on GUI apps launched via
-     GNOME.
-   - CRA will grab all the environment variables that are prefixed w/ `REACT_APP` and compile them
-     into the minified Javascript code that it generates.
+
+- You have to logout and log back in, in order for this to take effect on GUI apps launched via
+  GNOME.
+- CRA will grab all the environment variables that are prefixed w/ `REACT_APP` and compile them into
+  the minified Javascript code that it generates.
+
 3. In your Typescript code, you can use the following variable `process.env.REACT_APP_CAT_API_KEY`
    in order to access the value of this environment variable.
 
@@ -285,7 +295,16 @@ export class ReactReplayClassComponent extends React.Component<AnimationFramesPr
 
 You can also wrap your prop type, eg: `MyPropType`, w/ `PropsWithChildren<MyPropType>` when
 declaring your functional component to declare that your component can accept `children`. And then
-you can use the destructuring syntax to get the required props out. Here's an example.
+you can use the destructuring syntax to get the required props out.
+
+> Typescript supports built-in and user defined
+> [utility types](https://www.typescriptlang.org/docs/handbook/utility-types.html) and
+> [advanced types](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-differentiating-types)
+> which are in leverage in `PropsWithChildren` type. It takes your prop type as an argument and
+> returns a new type which includes everything in your type _and_ >
+> `children?: ReactNode | undefined`.
+
+Here's an example.
 
 ```typescript jsx
 export type TooltipProps = {
@@ -382,7 +401,7 @@ components get turned into objects that are stored in a linked list inside of a
 the DOM that each React component has).
 
 > More info on
-> [fibers](https://blog.ag-grid.com/inside-fiber-an-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/).
+> [React fibers](https://blog.ag-grid.com/inside-fiber-an-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/).
 
 1. By following these rules:
    1. You ensure that Hooks are called in the same order each time a component renders.
@@ -788,14 +807,6 @@ export const storiesReducer = (currentState: StateType, action: ActionType): Sta
    [`CatApiComponent`](src/components/cat_api/CatApiComponent.tsx) which only uses `useReducer` and
    no `useState`.
 
-#### Test app live data APIs
-
-Here are some data APIs that might be useful when building test apps.
-
-- [TheCatApi](https://docs.thecatapi.com/api-reference/)
-- [doc.ceo/dog-api](https://dog.ceo/dog-api/documentation/)
-- [Hacker News API](https://hn.algolia.com/api)
-
 ### useCallback and useMemo
 
 These two hooks are very tricky, since they cache objects that are tightly bound to React's
@@ -1190,8 +1201,9 @@ npm install @reduxjs/toolkit react-redux
 
 ### Simple example (no async, thunks, or splitting reducers)
 
-> Here's the full example in a single source file
-> [`SimpleReduxComponent`](src/components/redux/SimpleReduxComponent.tsx).
+> We will use a Typescript feature called
+> [discriminated unions](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)
+> in order to make our actions typesafe.
 
 Here are the steps to using Redux.
 
@@ -1321,6 +1333,9 @@ Here are the steps to using Redux.
      return render()
    }
    ```
+
+> Here's the full example in a single source file
+> [`SimpleReduxComponent`](src/components/redux/SimpleReduxComponent.tsx).
 
 ### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
 
