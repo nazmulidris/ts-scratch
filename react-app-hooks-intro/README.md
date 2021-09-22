@@ -1,5 +1,23 @@
 # React hooks and TypeScript handbook
 
+```yaml
+---
+author: Nazmul Idris
+date: 2021-09-30 14:00:00+00:00
+excerpt: |
+  This handbook will use TypeScript to take you thru using functional components in React. IDEA
+  Ultimate / Webstorm project files are provided. This handbook is written as a reference. You
+  can easily jump to the section that is relevant to you or read them in any order that you like.
+layout: post
+title: "React hooks (v17.0.3) and TypeScript (v4.3.4) handbook"
+categories:
+  - TypeScript
+  - React
+  - Web
+---
+<img class="post-hero-image" src="{{ 'assets/react-hooks-ts-handbook.svg' | relative_url }}"/>
+```
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -47,17 +65,24 @@
 - [Redux](#redux)
   - [Simple example (no async, thunks, or splitting reducers)](#simple-example-no-async-thunks-or-splitting-reducers)
   - [🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)](#-todo-advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
+- [🔥 TODO Testing](#-todo-testing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Introduction
 
-This project is a reference on how to use React Hooks with Typescript. It is not a React primer, but
-is primarily aimed at developers who know React class components to learn and use Hooks with
-Typescript.
+This handbook and its accompanying Typescript [code][gh-repo] is a reference guide on how to use
+React Hooks with Typescript.
 
-> The project used here is created using `create-react-app` or CRA and the repo can be found on
-> github [here](https://github.com/nazmulidris/ts-scratch/tree/main/react-app-hooks-intro)
+1. This is not a React primer, and is primarily aimed at developers who know React class components
+   and want to learn to use Hooks to create functional components using Typescript.
+2. You can jump directly to any topic that you are curious about in this handbook, you don't have to
+   read it from start to finish.
+
+> 1. The source code project accompanying this handbook created using `create-react-app` or CRA.
+> 2. The source code for this handbook can be found in this [github repo][gh-repo].
+
+[gh-repo]: https://github.com/nazmulidris/ts-scratch/tree/main/react-app-hooks-intro
 
 ## CSS Reset
 
@@ -1298,3 +1323,5 @@ Here are the steps to using Redux.
    ```
 
 ### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
+
+## 🔥 TODO Testing
