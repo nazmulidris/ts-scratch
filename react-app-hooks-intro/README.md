@@ -1340,3 +1340,16 @@ Here are the steps to using Redux.
 ### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
 
 ## 🔥 TODO Testing
+
+CRA comes w/ Jest and Typescript support built-in, so writing tests using Jest, Typescript, and
+`@testing-library/react` is really straightforward.
+
+> There is one minor
+> [configuration change](https://newbedev.com/react-testing-library-why-is-tobeinthedocument-not-a-function)
+> that may need to be added in order to enable `jest-dom` support in the project (so that
+> `toBeInTheDocument()` can work). Here are the steps.
+>
+> 1. Install `jest-dom` dev dependency using `npm i --save-dev @testing-library/jest-dom`.
+> 2. In `src/setupTests.ts` add the following line
+>    `import '@testing-library/jest-dom/extend-expect'`. You can create this file if it doesn't
+>    exist.
