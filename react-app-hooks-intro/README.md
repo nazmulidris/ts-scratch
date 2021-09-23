@@ -1,17 +1,17 @@
-# React hooks and TypeScript handbook
+# React hooks and Typescript handbook
 
 ```yaml
 ---
 author: Nazmul Idris
 date: 2021-09-30 14:00:00+00:00
 excerpt: |
-  This handbook will use TypeScript to take you thru using functional components in React. IDEA
+  This handbook will use Typescript to take you thru using functional components in React. IDEA
   Ultimate / Webstorm project files are provided. This handbook is written as a reference. You
   can easily jump to the section that is relevant to you or read them in any order that you like.
 layout: post
-title: "React hooks (v17.0.3) and TypeScript (v4.3.4) handbook"
+title: "React hooks (v17.0.3) and Typescript (v4.3.4) handbook"
 categories:
-  - TypeScript
+  - Typescript
   - React
   - Web
 ---
@@ -22,20 +22,20 @@ categories:
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Introduction](#introduction)
-- [CSS Reset](#css-reset)
-  - [What works](#what-works)
-  - [What does not work](#what-does-not-work)
 - [Upgrade CRA itself to the latest version](#upgrade-cra-itself-to-the-latest-version)
 - [Test app live data APIs](#test-app-live-data-apis)
 - [Using CRA and environment variables](#using-cra-and-environment-variables)
+- [CSS Reset](#css-reset)
+  - [What works](#what-works)
+  - [What does not work](#what-does-not-work)
 - [Using CSS class pseudo selectors to style child elements of a parent](#using-css-class-pseudo-selectors-to-style-child-elements-of-a-parent)
 - [Callable](#callable)
 - [Composition over inheritance](#composition-over-inheritance)
 - [Debugging in Webstorm or IDEA Ultimate](#debugging-in-webstorm-or-idea-ultimate)
-- [TypeScript readonly vs ReadonlyArray](#typescript-readonly-vs-readonlyarray)
-- [TypeScript prop and state types](#typescript-prop-and-state-types)
-- [TypeScript and ReactNode, ReactElement, and JSX.Element](#typescript-and-reactnode-reactelement-and-jsxelement)
-- [TypeScript types in array and object destructuring](#typescript-types-in-array-and-object-destructuring)
+- [Typescript readonly vs ReadonlyArray](#typescript-readonly-vs-readonlyarray)
+- [Typescript prop and state types](#typescript-prop-and-state-types)
+- [Typescript and ReactNode, ReactElement, and JSX.Element](#typescript-and-reactnode-reactelement-and-jsxelement)
+- [Typescript types in array and object destructuring](#typescript-types-in-array-and-object-destructuring)
 - [React](#react)
 - [React Hooks](#react-hooks)
   - [Why?](#why)
@@ -64,6 +64,7 @@ categories:
   - [References on SVG and React](#references-on-svg-and-react)
 - [Redux](#redux)
   - [Simple example (no async, thunks, or splitting reducers)](#simple-example-no-async-thunks-or-splitting-reducers)
+  - [Immutability](#immutability)
   - [🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)](#-todo-advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
 - [🔥 TODO Testing](#-todo-testing)
 
@@ -76,36 +77,15 @@ React Hooks with Typescript.
 
 1. This is not a React primer, and is primarily aimed at developers who know React class components
    and want to learn to use Hooks to create functional components using Typescript.
-2. You can jump directly to any topic that you are curious about in this handbook, you don't have to
-   read it from start to finish.
+2. You can jump directly to any topic in the table of contents that you are curious about in this
+   handbook, you don't have to read it from start to finish.
 
-> 1. The source code project accompanying this handbook created using `create-react-app` or CRA.
-> 2. The source code for this handbook can be found in this [github repo][gh-repo].
+> ⚡ The source code for this handbook can be found in this [github repo][gh-repo].
+
+> 💡 The source code project accompanying this handbook created using
+> [`create-react-app` or CRA](https://github.com/facebook/create-react-app).
 
 [gh-repo]: https://github.com/nazmulidris/ts-scratch/tree/main/react-app-hooks-intro
-
-## CSS Reset
-
-### What works
-
-- Use CSS Reset by:
-  1. Copy the contents of this [CSS file](https://meyerweb.com/eric/tools/css/reset/reset.css) into
-     [`reset.css`](src/styles/reset.css). Feel free to modify this file to suit your needs. Then
-     either:
-     - Import it into [`App.tsx`](src/App.tsx)
-     - Import it into [`App.css`](src/styles/App.css)
-  2. I add entries for elements like `button` and `input` which are not explicitly set by the
-     default Reset CSS stylesheet (and thus end up using user agent stylesheet).
-
-### What does not work
-
-- `normalize.css` **DOES NOT WORK** (its supposed to be built into CRA):
-- Using `normalize.css` is pretty straight forwards following this
-  [guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/).
-  1. Simply run `npm install normalize.css`
-  2. Then add `import 'normalize.css'` line to the top of [`index.tsx`](src/index.tsx)
-- Supposedly, CRA comes w/ [`normalize.css`](https://create-react-app.dev/docs/adding-css-reset/).
-- Using these instructions, the `browser user agent stylesheet` was just messing up all the spacing.
 
 ## Upgrade CRA itself to the latest version
 
@@ -113,7 +93,8 @@ Follow instructions in the
 [CRA changelog](https://github.com/facebook/create-react-app/blob/main/CHANGELOG.md). For example,
 you can run something like the following w/out ejecting CRA itself.
 
-> You can find the list of releases [here](https://github.com/facebook/create-react-app/releases).
+> ⚡ You can find the list of releases
+> [here](https://github.com/facebook/create-react-app/releases).
 
 ```shell
 npm install --save --save-exact react-scripts@4.0.3
@@ -150,6 +131,29 @@ For example, to use the [Cat API](https://docs.thecatapi.com/), you have to do t
 
 3. In your Typescript code, you can use the following variable `process.env.REACT_APP_CAT_API_KEY`
    in order to access the value of this environment variable.
+
+## CSS Reset
+
+### What works
+
+- Use CSS Reset by:
+  1. Copy the contents of this [CSS file](https://meyerweb.com/eric/tools/css/reset/reset.css) into
+     [`reset.css`](src/styles/reset.css). Feel free to modify this file to suit your needs. Then
+     either:
+  - Import it into [`App.tsx`](src/App.tsx)
+  - Import it into [`App.css`](src/styles/App.css)
+  2. I add entries for elements like `button` and `input` which are not explicitly set by the
+     default Reset CSS stylesheet (and thus end up using user agent stylesheet).
+
+### What does not work
+
+- `normalize.css` **DOES NOT WORK** (its supposed to be built into CRA):
+- Using `normalize.css` is pretty straight forwards following this
+  [guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/).
+  1. Simply run `npm install normalize.css`
+  2. Then add `import 'normalize.css'` line to the top of [`index.tsx`](src/index.tsx)
+- Supposedly, CRA comes w/ [`normalize.css`](https://create-react-app.dev/docs/adding-css-reset/).
+- Using these instructions, the `browser user agent stylesheet` was just messing up all the spacing.
 
 ## Using CSS class pseudo selectors to style child elements of a parent
 
@@ -189,7 +193,7 @@ components reusable.
 1. This happens when you think about a component as a "generic box" and simply pass other JSX
    elements inside of them as `props.children`.
 2. You can see this in [`ComponentWithoutState`](src/components/basics/ComponentWithoutState.tsx).
-3. In order to get this to work with TypeScript you have to make sure to add this to the props type
+3. In order to get this to work with Typescript you have to make sure to add this to the props type
    `childComp?: React.ReactNode`. For example, take a look at `MessagePropsWithChildren` in
    [`types.tsx`](src/components/types.tsx)
 
@@ -205,14 +209,14 @@ Use this [guide](https://blog.jetbrains.com/webstorm/2017/01/debugging-react-app
 4. Also now that the JavaScript debugging session run configuration is created, you can just use
    `npm run start` to start the server in a terminal and still be able to debug it!
 
-## TypeScript readonly vs ReadonlyArray
+## Typescript readonly vs ReadonlyArray
 
 More info on `readonly` vs `ReadonlyArray`:
 
-- [Read-Only Array and Tuple Types in TypeScript](https://mariusschulz.com/blog/read-only-array-and-tuple-types-in-typescript)
+- [Read-Only Array and Tuple Types in Typescript](https://mariusschulz.com/blog/read-only-array-and-tuple-types-in-typescript)
 - [Readonly vs ReadonlyArray](https://basarat.gitbook.io/typescript/type-system/readonly)
 
-> Here's more info on TypeScript type narrowing, truthy/falsy, user defined type predicates, and
+> 💡 Here's more info on Typescript type narrowing, truthy/falsy, user defined type predicates, and
 > discriminated unions from the
 > [official docs](https://www.typescriptlang.org/docs/handbook/2/narrowing.html).
 
@@ -257,12 +261,12 @@ the following lines do the same thing (preventing any mutations on `elementArray
 - `readonly elementArray: readonly JSX.Element[]`
 - `readonly elementArray: ReadonlyArray<JSX.Element>`
 
-## TypeScript prop and state types
+## Typescript prop and state types
 
 In strict mode, the prop and state types (if any) need to be declared explicitly. The React codebase
 supports generics which is how these types are declared.
 
-> You can also pass `{}` to specify that there are no props or state.
+> 💡 You can also pass `{}` to specify that there are no props or state.
 
 Here is a [tutorial](https://fettblog.eu/typescript-react/components/#class-components) that shows
 how to specify prop and state types for function and class components.
@@ -297,12 +301,11 @@ You can also wrap your prop type, eg: `MyPropType`, w/ `PropsWithChildren<MyProp
 declaring your functional component to declare that your component can accept `children`. And then
 you can use the destructuring syntax to get the required props out.
 
-> Typescript supports built-in and user defined
+> 💡 Typescript supports built-in and user defined
 > [utility types](https://www.typescriptlang.org/docs/handbook/utility-types.html) and
 > [advanced types](https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-differentiating-types)
 > which are in leverage in `PropsWithChildren` type. It takes your prop type as an argument and
-> returns a new type which includes everything in your type _and_ >
-> `children?: ReactNode | undefined`.
+> returns a new type which includes everything in your type and `children?: ReactNode | undefined`.
 
 Here's an example.
 
@@ -330,22 +333,22 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
 }
 ```
 
-## TypeScript and ReactNode, ReactElement, and JSX.Element
+## Typescript and ReactNode, ReactElement, and JSX.Element
 
 This [SO thread](https://stackoverflow.com/a/58123882/2085356) has the answers. Basically,
 
 1. Use `ReactElement` where possible.
-2. When TypeScript complains at times, use `ReactElement | null`.
+2. When Typescript complains at times, use `ReactElement | null`.
 3. Class components (return `ReactElement | null`) and functional components (return `ReactElement`)
    actually return different things.
 
-## TypeScript types in array and object destructuring
+## Typescript types in array and object destructuring
 
 More info:
 
 - [Array and object destructuring in ES6](https://basarat.gitbook.io/typescript/future-javascript/destructuring#array-destructuring)
-- [Typing destructured objects in TypeScript](https://mariusschulz.com/blog/typing-destructured-object-parameters-in-typescript#typing-immediately-destructured-parameters)
-- [Typing destructed arrays in TypeScript](https://www.carlrippon.com/strongly-typed-destructuring-and-rest-parameters/)
+- [Typing destructured objects in Typescript](https://mariusschulz.com/blog/typing-destructured-object-parameters-in-typescript#typing-immediately-destructured-parameters)
+- [Typing destructed arrays in Typescript](https://www.carlrippon.com/strongly-typed-destructuring-and-rest-parameters/)
 
 Example of object destructuring.
 
@@ -400,7 +403,7 @@ components get turned into objects that are stored in a linked list inside of a
 [fiber](https://github.com/acdlite/react-fiber-architecture) (which is an object representation of
 the DOM that each React component has).
 
-> More info on
+> 💡 More info on
 > [React fibers](https://blog.ag-grid.com/inside-fiber-an-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/).
 
 1. By following these rules:
@@ -499,8 +502,9 @@ It allows you to register a function that is called whenever anything is rendere
 page. And it can be scoped to an array of dependencies (which are state variables that can change in
 order to trigger this effect to be run).
 
-> 1. Read more about this in the
->    [official docs](https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects).
+> 1. Read the
+>    [official docs](https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects)
+>    to get the details.
 > 2. This [SO thread](https://stackoverflow.com/a/53974039/2085356) also has some good insight on
 >    how to use this hook.
 
@@ -531,13 +535,14 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
 
 This `useEffect` hook is scoped to the `animator` variable, which is returned by `useState`.
 
-> This is similar functionality to `componentDidMount`, unmount, update, etc. However, there are
-> some big differences. For example to mimic the functionality of `componentDidMount` you have to
-> pass a 2nd argument to `useEffect` which is either an empty array `[]` or some state variable that
-> doesn't really change. To watch for changes in some specific variables, you can pass them in that
-> array.
+> ⚠ This is similar to `componentDidMount`, unmount, update, etc. However, there are some _big_
+> differences.
 >
-> Read more about the difference between passing an empty deps array and passing nothing on this
+> - To mimic the functionality of `componentDidMount` you have to pass a 2nd argument to `useEffect`
+>   which is either an empty array `[]` or some state variable that doesn't really change.
+> - To watch for changes in some specific variables, you can pass them in that array.
+>
+> 💡 Read more about the difference between passing an empty deps array and passing nothing on this
 > [SO thread](https://stackoverflow.com/a/58579462/2085356).
 
 If you want a hook to run on every single DOM render, then you can write something like this.
@@ -566,7 +571,7 @@ You can set whatever value you want in the `current` property of the `ref` (whic
 `React.useRef(initialValue)`). This value will be stable when the component is re-rendered. This can
 be a simple way of detecting when the first render occurs, and when subsequent re-renders occur.
 
-> Note that storing a value in an object returned by `useRef` is different than simply using
+> 💡 Note that storing a value in an object returned by `useRef` is different than simply using
 > `setState` because React isn't watching for changes in the state in order to trigger a re-render.
 
 Here's an example of a custom hook that allows you to use `localStorage` in order to get and set
@@ -594,7 +599,7 @@ const useMyLocalStorageHook = (key: string): MyLocalStorageHook => {
 }
 ```
 
-> Note that the value of the object returned by `useRef` (the `current` property of `ref`) is only
+> ⚠ Note that the value of the object returned by `useRef` (the `current` property of `ref`) is only
 > set in the `useEffect` callback. It isn't set in the code that is doing the rendering for example.
 
 1. This hook can tell the difference between the first render and subsequent re-renders since it is
@@ -605,7 +610,7 @@ const useMyLocalStorageHook = (key: string): MyLocalStorageHook => {
 3. When the `setValue` dispatch is used to assign a new value to the key, then it will actually save
    the key-value pair to local storage.
 
-> Note that `ref.current` can also be used as a place to store the results of an expensive
+> 💡 Note that `ref.current` can also be used as a place to store the results of an expensive
 > computation that are local to a functional component, but isn't part of the state. This can be a
 > cache that is local to the component. Perhaps this cache can be populated on first render and then
 > re-used for subsequent renders.
@@ -628,23 +633,20 @@ that is shared. Here are some tips from this SO answer.
 
 - Here are some ways to share state between components (each w/ its pros and cons):
 
-  > Note - Avoid the open source custom hook called
-  > [`useBetween`](https://github.com/betula/use-between) since it is a useless hack.
-
   1. Lift state up to a common ancestor component of the two components. This is the same approach
      taken with class components, the only difference w/ hook is how we declare the state.
 
-  ```typescript jsx
-  const Parent: FC = () => {
-    const [count, setCount] = useState(1)
-    return (
-      <>
-        <ChildA count={count} onCountChange={setCount} />
-        <ChildB count={count} onCountChange={setCount} />
-      </>
-    )
-  }
-  ```
+     ```typescript jsx
+     const Parent: FC = () => {
+       const [count, setCount] = useState(1)
+       return (
+         <>
+           <ChildA count={count} onCountChange={setCount} />
+           <ChildB count={count} onCountChange={setCount} />
+         </>
+       )
+     }
+     ```
 
   2. If the child components are deep in the hierarchy to be passed down at every level, then
      [`useContext`](https://reactjs.org/docs/context.html#when-to-use-context) hook might be the way
@@ -653,12 +655,15 @@ that is shared. Here are some tips from this SO answer.
   3. External state management libraries like Redux might be the way to go. Your state will then
      live in a store outside of React and components can subscribe to the store to receive updates.
 
+  > ⚠ Note - Avoid the open source custom hook called
+  > [`useBetween`](https://github.com/betula/use-between) since it is a useless hack.
+
 #### Resources
 
 Here are some great resources on learning about `useState`.
 
 1. [Official docs](https://reactjs.org/docs/hooks-state.html)
-2. [TypeScript and useState](https://www.carlrippon.com/typed-usestate-with-typescript/)
+2. [Typescript and useState](https://www.carlrippon.com/typed-usestate-with-typescript/)
 
 #### Example
 
@@ -697,7 +702,7 @@ This hook is very similar to the `useState` hook. You can use both in a componen
 difference between them is unlike `setState`, a reducer function must be provided that deals w/
 generating a new state when employing `useReducer`.
 
-> This is very similar to Redux! And this might just be the simplest way to learn Redux patterns.
+> 💡 This is very similar to Redux! And this might just be the simplest way to learn Redux patterns.
 > Jump to this [section](#redux) to learn all about how to use React and Redux (using the modern
 > `redux-toolkit` and not old-school `redux-react`).
 
@@ -794,7 +799,7 @@ export const storiesReducer = (currentState: StateType, action: ActionType): Sta
       throw new Error(`Invalid action: ${action}`)
   }
   console.log("return newState", newState)
-  return _.cloneDeep(newState)
+  return _.clone(newState)
 }
 ```
 
@@ -843,7 +848,7 @@ with keyboard focus, than if they are defined outside it!
 2. If they are declared _inside_, the keyboard focus is lost every time you generate a single
    keyboard event.
 
-> This might have something to do with [this](https://stackoverflow.com/a/56655447/2085356),
+> ⚠ This might have something to do with [this](https://stackoverflow.com/a/56655447/2085356),
 > functional components being stateless. If things are declared inside of a function, then they will
 > be recreated everytime that function is run, vs if they are declared outside, then they won't be
 > recreated on every (render) call.
@@ -991,7 +996,7 @@ const SearchComponent: FC<SearchProps> = ({
 }
 ```
 
-> You can also utilize `useRef()` in order to detect the first render vs subsequent re-render by
+> 💡 You can also utilize `useRef()` in order to detect the first render vs subsequent re-render by
 > pairing it w/ `useEffect()` hook; more in [this section](#first-render-and-subsequent-re-renders).
 
 ## React and CSS
@@ -1038,6 +1043,8 @@ export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltip
 }
 ```
 
+> ⚡ [`Tooltip.tsx`](src/components/utils/Tooltip.tsx)
+
 Here's the CSS - An empty parent container (`span`) is created so that its position can be set to
 `relative`, so that any child elements inside of it (other `span` elements) can be positioned as
 `absolute` w/ a `z-index` of `1000`.
@@ -1074,17 +1081,15 @@ Here's the CSS - An empty parent container (`span`) is created so that its posit
 }
 ```
 
+> ⚡ [`Tooltip.css`](src/components/utils/Tooltip.css)
+
+You can see how the `Tooltip` component is used
+[here](src/components/list/ListOfStoriesComponent.tsx).
+
 Here's more information on tooltips, CSS, and React.
 
 - [CSS example](https://stackoverflow.com/a/18359711/2085356)
 - [React example](https://www.30secondsofcode.org/react/s/tooltip)
-
-Here's the code.
-
-- Tooltip
-  - [`Tooltip.tsx`](src/components/utils/Tooltip.tsx)
-  - [`Tooltip.css`](src/components/utils/Tooltip.css)
-- Used in [`ListOfStoriesComponent.tsx`](src/components/list/ListOfStoriesComponent.tsx)
 
 ### CSS Modules example
 
@@ -1195,13 +1200,13 @@ use. Here's how you can install it in your project.
 npm install @reduxjs/toolkit react-redux
 ```
 
-> To understand Redux it is best to start w/ 'useReducer' hook as show in this
+> 💡 To understand Redux it is best to start w/ 'useReducer' hook as show in this
 > [section](#usereducer). It is an easy way to understand the fundamentals of Redux which is
 > actions, state, reducer functions, and immutable state.
 
 ### Simple example (no async, thunks, or splitting reducers)
 
-> We will use a Typescript feature called
+> 💡 We will use a Typescript feature called
 > [discriminated unions](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)
 > in order to make our actions typesafe.
 
@@ -1214,18 +1219,22 @@ Here are the steps to using Redux.
    > 2. Also note that if you try and replace the `Reducer<State ... , Action>` w/ a type variable
    >    that holds the same thing, then it will not work for some reason w/ Typescript.
 
-   ```tsx
+   ```typescript jsx
    // Types.
+   type Text = {
+     id: string
+     content: string
+   }
    type State = {
-     strings: Array<string>
+     textArray: Array<Text>
    }
    interface ActionAdd {
      type: "add"
-     text: string
+     content: string
    }
    interface ActionRemove {
      type: "remove"
-     index: number
+     id: string
    }
    type Action = ActionAdd | ActionRemove
 
@@ -1233,20 +1242,28 @@ Here are the steps to using Redux.
    const reducerFn: Reducer<State | undefined, Action> = (state, action): State => {
      if (!state)
        return {
-         strings: ["11222", "ddddd"],
+         textArray: [
+           { id: _.uniqueId("id"), content: "fffff" },
+           { id: _.uniqueId("id"), content: "gggg" },
+         ],
        }
 
      switch (action.type) {
-       case "add":
-         return { strings: [...state.strings, action.text] }
-       case "remove":
+       case "add": {
+         const newText: Text = { id: _.uniqueId("id"), content: action.content }
+         console.log("add", newText)
+         const copyOfArray = new Array<Text>().concat(state.textArray)
+         copyOfArray.push(newText)
+         return Object.assign({} as State, state, { textArray: copyOfArray })
+       }
+       case "remove": {
          // Get the index (the string we want to remove).
-         const index = action.index
-         // Make a copy of the old state.
-         const copyOfState = [...state.strings]
-         // Remove the element in position index and return the new state.
-         copyOfState.splice(index, 1)
-         return { strings: copyOfState }
+         const id: string = action.id
+         // Make a copy of the old state and remove the element w/ the given id
+         const copyOfArray = new Array<Text>().concat(state.textArray).filter((it) => it.id !== id)
+         console.log("remove", id)
+         return Object.assign({} as State, state, { textArray: copyOfArray })
+       }
      }
      return state
    }
@@ -1254,8 +1271,8 @@ Here are the steps to using Redux.
 
 2. Create a store that uses this reducer function.
 
-   > If you split reducers, then this is where you would declare all the ones that comprise the root
-   > reducer function.
+   > 💡 If you split reducers, then this is where you would declare all the ones that comprise the
+   > root reducer function.
 
    ```tsx
    // Redux store.
@@ -1275,19 +1292,20 @@ Here are the steps to using Redux.
 
 4. In your component, make sure to subscribe to the store, using the `useSelector()` hook.
 
-   > - This is used instead of the old
-   >   [`mapStateToProps` / 'connect'](https://react-redux.js.org/using-react-redux/connect-mapstate)
-   >   mechanism.
-   > - When the state changes in the store then, the new state will be passed to this component (by
-   >   the hook), and it will be re-rendered.
-
+   > This is used instead of the old
+   > [`mapStateToProps` / 'connect'](https://react-redux.js.org/using-react-redux/connect-mapstate)
+   > mechanism. When the state changes in the store then, the new state will be passed to this
+   > component (by the hook), and it will be re-rendered.
+   >
    > This is somewhat equivalent to the `useReducer()` hook, in the sense that you will get the
    > state from this hook.
-
+   >
    > If you split reducers, then you can select just a subset of the state that you are interested
    > in (in the function that you pass to the `useSelector()` hook).
 
    ```tsx
+   import { _also } from "r3bl-ts-utils"
+
    // Functional component.
    export const SimpleReduxComponent: FC = () => {
      const state: DefaultRootState = useSelector((state) => state)
@@ -1296,34 +1314,46 @@ Here are the steps to using Redux.
    }
    ```
 
-5. In your component make sure to call `store.dispatch({/* action */})` in order to request changes
+   > ⚡ Note the `_also` is a scope function (that is inspired by Kotlin) which you can get from
+   > [`r3bl-ts-utils`](https://www.npmjs.com/package/r3bl-ts-utils) npm module.
+
+5. In your component, make sure to call `store.dispatch({/* action */})` in order to request changes
    to happen to your store. This will trigger re-renders of the components that are subscribed to
    the store.
 
-   ```tsx
-   export const SimpleReduxComponent: FC = () => {
-     /* snip */
-     function addString() {
-       store.dispatch({
-         type: "add",
-         payload: "NazmulMaretIdris".substring(Math.floor(Math.random() * 15)),
-       })
-     }
+   ```typescript jsx
+   import { _also } from "r3bl-ts-utils"
 
-     function removeListItem(index: number) {
-       store.dispatch({
-         type: "remove",
-         payload: index,
+   // Functional component.
+   export const SimpleReduxComponent: FC = () => {
+     const state: DefaultRootState = useSelector((state) => state)
+     const myState = state as State
+
+     const addListItem = () =>
+       _also(
+         {
+           type: "add",
+           content: "NazmulMaretIdris".substring(Math.floor(Math.random() * 15)),
+         } as ActionAdd,
+         (it) => {
+           store.dispatch(it)
+         }
+       )
+
+     const removeListItem = (it: string) =>
+       _also({ type: "remove", id: it } as ActionRemove, (it) => {
+         store.dispatch(it)
        })
-     }
 
      function render() {
        return (
          <div className={"Container"}>
-           <button onClick={addString}>Add</button>
+           <button onClick={addListItem}>Add</button>
            <ol>
-             {myState.strings.map((string, index) => (
-               <li onClick={() => removeListItem(index)}>{string}</li>
+             {myState.textArray.map((text) => (
+               <li key={text.id} onClick={() => removeListItem(text.id)}>
+                 {text.content}
+               </li>
              ))}
            </ol>
          </div>
@@ -1334,8 +1364,28 @@ Here are the steps to using Redux.
    }
    ```
 
-> Here's the full example in a single source file
+> ⚡ Here's the full example in a single source file
 > [`SimpleReduxComponent`](src/components/redux/SimpleReduxComponent.tsx).
+
+### Immutability
+
+One of the core concepts in Redux is that the state is immutable. There are a few approaches to make
+this happen.
+
+This is a great
+[article](https://reactkungfu.com/2015/08/pros-and-cons-of-using-immutability-with-react-js/) on
+reference equality, value equality, shallow and deep copy, and how to achieve immutability w/out
+using any external libraries using the following idioms.
+
+- Objects: `Object.assign({}, originalObject, {propertyToChange:'value'})`
+- Arrays: `[].concat(oldArray)`
+
+Since Redux and React compare references to determine equality, it isn't necessary to perform a deep
+copy of all the things, and copying objects and arrays that are contained in the state should
+suffice for most situations.
+
+You can also use lodash [clone](https://lodash.com/docs#clone) instead of the idioms shown above.
+Yet another approach is to use the [immer](https://immerjs.github.io/immer/) library.
 
 ### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
 

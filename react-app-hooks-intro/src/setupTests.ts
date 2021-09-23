@@ -1,3 +1,3 @@
-// More info: https://newbedev.com/react-testing-library-why-is-tobeinthedocument-not-a-function
+// More info: https://create-react-app.dev/docs/running-tests/#react-testing-library
 
-import "@testing-library/jest-dom/extend-expect"
+import "@testing-library/jest-dom"

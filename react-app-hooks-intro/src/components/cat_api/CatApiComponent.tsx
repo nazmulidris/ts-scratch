@@ -95,7 +95,7 @@ type ReducerType = Reducer<State, Action>
 type ReducerHookType = [State, Dispatch<Action>]
 
 const reducerFn: ReducerType = (currentState: State, action: Action): State => {
-  let newState = _.cloneDeep(currentState)
+  let newState = _.clone(currentState)
 
   switch (action.type) {
     case "fetchError":

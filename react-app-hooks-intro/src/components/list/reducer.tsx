@@ -30,5 +30,5 @@ export const storiesReducer = (currentState: StateType, action: ActionType): Sta
       throw new Error(`Invalid action: ${action}`)
   }
   console.log("return newState", newState)
-  return _.cloneDeep(newState)
+  return _.clone(newState)
 }
