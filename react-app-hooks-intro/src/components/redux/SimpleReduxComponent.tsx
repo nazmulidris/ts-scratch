@@ -4,6 +4,8 @@ import { DefaultRootState, useSelector } from "react-redux"
 import _ from "lodash"
 import { _also } from "r3bl-ts-utils"
 
+export const MyAddButtonId = "MyAddButton"
+
 // Functional component.
 export const SimpleReduxComponent: FC = () => {
   const state: DefaultRootState = useSelector((state) => state)
@@ -25,20 +27,21 @@ export const SimpleReduxComponent: FC = () => {
       store.dispatch(it)
     })
 
-  function render() {
-    return (
-      <div className={"Container"}>
-        <button onClick={addListItem}>Add</button>
-        <ol>
-          {myState.textArray.map((text) => (
-            <li key={text.id} onClick={() => removeListItem(text.id)}>
-              {text.content}
-            </li>
-          ))}
-        </ol>
-      </div>
-    )
-  }
+  const render = () => (
+    <div className={"Container"}>
+      <strong>SimpleReduxComponent</strong>
+      <button id={MyAddButtonId} onClick={addListItem}>
+        Add ➕
+      </button>
+      <ol>
+        {myState.textArray.map((text) => (
+          <li key={text.id} onClick={() => removeListItem(text.id)}>
+            {text.content}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
 
   return render()
 }

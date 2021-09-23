@@ -32,6 +32,7 @@ categories:
 - [Callable](#callable)
 - [Composition over inheritance](#composition-over-inheritance)
 - [Debugging in Webstorm or IDEA Ultimate](#debugging-in-webstorm-or-idea-ultimate)
+- [Typescript namespaces](#typescript-namespaces)
 - [Typescript readonly vs ReadonlyArray](#typescript-readonly-vs-readonlyarray)
 - [Typescript prop and state types](#typescript-prop-and-state-types)
 - [Typescript and ReactNode, ReactElement, and JSX.Element](#typescript-and-reactnode-reactelement-and-jsxelement)
@@ -66,7 +67,12 @@ categories:
   - [Simple example (no async, thunks, or splitting reducers)](#simple-example-no-async-thunks-or-splitting-reducers)
   - [Immutability](#immutability)
   - [🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)](#-todo-advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
-- [🔥 TODO Testing](#-todo-testing)
+- [Testing](#testing)
+  - [Use RTL instead of Enzyme](#use-rtl-instead-of-enzyme)
+  - [Initial setup before writing tests](#initial-setup-before-writing-tests)
+  - [🔥 TODO Writing simple tests](#-todo-writing-simple-tests)
+  - [🔥 TODO Writing snapshot tests](#-todo-writing-snapshot-tests)
+  - [Writing integration tests](#writing-integration-tests)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -208,6 +214,83 @@ Use this [guide](https://blog.jetbrains.com/webstorm/2017/01/debugging-react-app
 3. Save the run configurations produced by the steps above in the project file.
 4. Also now that the JavaScript debugging session run configuration is created, you can just use
    `npm run start` to start the server in a terminal and still be able to debug it!
+
+## Typescript namespaces
+
+> ⚡ Read the official Typescript docs on
+> [namespaces](https://www.typescriptlang.org/docs/handbook/namespaces.html).
+
+They allow encapsulation of variables, types, and other symbols in a neat package. This can be
+exported to other modules that need them or just be used inside a single file to organize and hide
+details.
+
+Here's an example of using this in
+[`CatApiComponent.tsx`](src/components/cat_api/CatApiComponent.css). Here are some excerpts from
+this file.
+
+Here is a snippet that shows the use of `namespace` to encapsulate the details of accessing this web
+API.
+
+```typescript
+export namespace TheCatApi {
+  export const apiKey = process.env.REACT_APP_CAT_API_KEY as string
+  export const search = {
+    host: "https://api.thecatapi.com",
+    endpoint: "/v1/images/search",
+    config: { params: { limit: 3, size: "full" } },
+  } as const
+  export type SearchResults = { id: string; url: string }
+}
+```
+
+It can be used in other files (eg a test like
+[this](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.ts)). Here's an excerpt from this
+file.
+
+```typescript
+import { TheCatApi } from "../CatApiComponent"
+
+const restHandlerSearchOk: RestHandler = rest.get(
+  TheCatApi.search.host + TheCatApi.search.endpoint,
+  (
+    req: RestRequest<DefaultRequestBody, RequestParams>,
+    res: ResponseComposition,
+    ctx: RestContext
+  ) => res(ctx.json(cannedResponseOk))
+)
+
+const makeGetRequest: () => Promise<any> = async () =>
+  _let(TheCatApi.search, async (it) => {
+    axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+    const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
+    return payload
+  })
+```
+
+It is possible to import a symbol from one namespace, into another namespace, even in the same file.
+Here's an excerpt from the `CatApiComponent.tsx` file used above.
+
+```typescript
+namespace MyActions {
+  import CatApiSearchResult = TheCatApi.SearchResults
+
+  interface ActionFetchStart {
+    type: "fetchStart"
+  }
+
+  interface ActionFetchOk {
+    type: "fetchOk"
+    payload: CatApiSearchResult[]
+  }
+
+  interface ActionFetchError {
+    type: "fetchError"
+    error: any
+  }
+
+  export type Action = ActionFetchStart | ActionFetchOk | ActionFetchError
+}
+```
 
 ## Typescript readonly vs ReadonlyArray
 
@@ -1095,7 +1178,7 @@ Here's more information on tooltips, CSS, and React.
 
 Here's a simple example that shows how to use CSS modules or CSS in CSS approach.
 
-Here's a simple `App.module.css` file.
+Step 1 - Create a `XYZ.module.css` file, eg: `App.module.css` and not a `App.css` file.
 
 ```css
 .container {
@@ -1106,18 +1189,18 @@ Here's a simple `App.module.css` file.
 }
 ```
 
-In your JSX component, you have to do the following import.
+Step 2 - In your JSX component, you have to do the following import to use the style.
 
 ```typescript jsx
 import React from "react"
 import styles from "./App.module.css"
-```
 
-Then to use it in a component, you can do the following.
-
-```typescript jsx
 const App: FC = () => <div className={styles.container}>Content</div>
 ```
+
+> ⚡ Read the
+> [CRA official docs](https://create-react-app.dev/docs/adding-a-css-modules-stylesheet/) on using
+> CSS modules.
 
 ## React and SVG
 
@@ -1345,20 +1428,18 @@ Here are the steps to using Redux.
          store.dispatch(it)
        })
 
-     function render() {
-       return (
-         <div className={"Container"}>
-           <button onClick={addListItem}>Add</button>
-           <ol>
-             {myState.textArray.map((text) => (
-               <li key={text.id} onClick={() => removeListItem(text.id)}>
-                 {text.content}
-               </li>
-             ))}
-           </ol>
-         </div>
-       )
-     }
+     const render = () => (
+       <div className={"Container"}>
+         <button onClick={addListItem}>Add</button>
+         <ol>
+           {myState.textArray.map((text) => (
+             <li key={text.id} onClick={() => removeListItem(text.id)}>
+               {text.content}
+             </li>
+           ))}
+         </ol>
+       </div>
+     )
 
      return render()
    }
@@ -1389,17 +1470,251 @@ Yet another approach is to use the [immer](https://immerjs.github.io/immer/) lib
 
 ### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
 
-## 🔥 TODO Testing
+## Testing
 
 CRA comes w/ Jest and Typescript support built-in, so writing tests using Jest, Typescript, and
-`@testing-library/react` is really straightforward.
+`react-testing-library` (aka RTL or React Testing Library) is really straightforward.
 
-> There is one minor
-> [configuration change](https://newbedev.com/react-testing-library-why-is-tobeinthedocument-not-a-function)
-> that may need to be added in order to enable `jest-dom` support in the project (so that
-> `toBeInTheDocument()` can work). Here are the steps.
+> ⚡ You can get more info about what comes out of the box w/ CRA
+> [here](https://create-react-app.dev/docs/running-tests/#react-testing-library).
+
+Here are some of the top benefits of using Jest & RTL:
+
+1. You can test your components in isolation from the child components they render.
+2. You can use real DOM nodes because the tests assert actual behavior that a user would experience
+   and not React [Virtual DOM](https://reactjs.org/docs/faq-internals.html) implementation /
+   internals.
+3. A real browser isn't used to run your tests. Jest will use
+   [JSDOM](https://github.com/jsdom/jsdom) which implements the DOM API in pure Javascript, and runs
+   in a Node.js instance on your machine (or whatever machine you run the tests on).
+4. You can do blackbox and integration testing by
+   [mocking web services](https://github.com/mswjs/msw).
+
+### Use RTL instead of Enzyme
+
+1. RTL is a replacement for [`Enzyme`](http://airbnb.io/enzyme/).
+
+   - Both `Enzyme` and RTL are built on top of:
+     - [`react-dom`](https://reactjs.org/docs/react-dom.html)
+     - [`react-dom/test-utils`](https://reactjs.org/docs/test-utils.html)
+     - [`react-test-renderer`](https://reactjs.org/docs/test-renderer.html)
+   - `Enzyme` encourages (and provides utilities for) testing implementation details with rendered
+     instances of components, whereas RTL encourages testing only the "end result" by querying for
+     and making assertions about actual DOM nodes.
+   - [Here is a list](https://stackoverflow.com/a/54153026/2085356) of differences between the two.
+
+2. Rather than dealing with ([Virtual DOM](https://reactjs.org/docs/faq-internals.html)) instances
+   of rendered React components, your tests will work with actual DOM nodes.
+
+   - The utilities RTL provides facilitate querying the DOM in the same way the user would.
+   - Finding form elements by their label text (just like a user would), finding links and buttons
+     from their text (like a user would).
+   - It also exposes a recommended way to find elements by a `data-testid` as an "escape hatch" for
+     elements where the text content and label do not make sense or is not practical.
+
+   > 💡 RTL is built on top of
+   > [`dom-testing-library`](https://testing-library.com/docs/dom-testing-library/intro/) which
+   > provides the underlying APIs for testing DOM nodes.
+   >
+   > - Jest runs RTL tests in a
+   >   [headless environment](https://testing-library.com/docs/dom-testing-library/intro/#this-solution),
+   >   since the entire DOM API is implemented in pure Javascript by
+   >   [JSDOM](https://github.com/jsdom/jsdom).
+   > - The DOM implementation runs in a Node.js environment on the machine in which the tests are
+   >   running in and not a real browser.
+   > - This isn't like
+   >   [`Karma`](https://developerlife.com/2019/07/06/starter-project-typescript-karma-jasmine-webpack/)
+   >   test runner which will spool up an actual browser to run the tests in. This makes these tests
+   >   very fast.
+
+3. You can also mock web services for your tests (Node.js instances are spawned on the machine in
+   which you are running the tests), using [`msw`](https://github.com/mswjs/msw) to test out `fetch`
+   calls.
+   [Here is an example](https://testing-library.com/docs/react-testing-library/example-intro).
+
+> ⚡ More information on RTL:
 >
-> 1. Install `jest-dom` dev dependency using `npm i --save-dev @testing-library/jest-dom`.
-> 2. In `src/setupTests.ts` add the following line
->    `import '@testing-library/jest-dom/extend-expect'`. You can create this file if it doesn't
->    exist.
+> 1. [Introduction](https://testing-library.com/docs/react-testing-library/intro/)
+> 2. [Example w/ explanation](https://testing-library.com/docs/react-testing-library/example-intro/)
+> 3. [Example in codesandbox.io](https://codesandbox.io/s/github/kentcdodds/react-testing-library-examples)
+> 4. [Cheatsheet](https://testing-library.com/docs/react-testing-library/cheatsheet)
+
+### Initial setup before writing tests
+
+To get started you should install the RTL and `jest-dom` packages.
+
+```shell
+npm install --save @testing-library/react @testing-library/jest-dom
+```
+
+Next, modify your [`src/setupTests.ts`](src/setupTests.ts) file by adding this line.
+
+```typescript jsx
+// react-testing-library renders your components to document.body,
+// this adds jest-dom's custom assertions
+import "@testing-library/jest-dom"
+```
+
+### 🔥 TODO Writing simple tests
+
+> 💡 Typescript has an awesome
+> ["escape-hatch"](https://github.com/microsoft/TypeScript/issues/19335) to allow private variables
+> to be accessed in tests. Here's a detailed
+> [SO answer](https://stackoverflow.com/a/35991491/2085356) on this topic.
+>
+> Here's an example:
+>
+> - Let's say you have a class with a private variable named `_x` like so:
+>   `class Clazz {private _x:number = 0}`
+> - Then you can access it w/ type safety in a test when using the array access syntax, eg:
+>   `new Clazz()[_x]`, which will be treated as a `number`.
+> - So you can assert `expect(typeof new Clazz()[_x]).toBe('number')`.
+
+### 🔥 TODO Writing snapshot tests
+
+### Writing integration tests
+
+In order to mock web services, you will need to install the
+[`msw` module](https://github.com/mswjs/msw) as a dev dependency.
+
+```shell
+npm i -D msw
+```
+
+> ⚡ Learn more about mocking REST APIs (using `msw`)
+> [here](https://mswjs.io/docs/getting-started/mocks/rest-api).
+
+> ⚡ This is a great
+> [tutorial](https://dev.to/kettanaito/type-safe-api-mocking-with-mock-service-worker-and-typescript-21bf)
+> on using `msw` and Typescript.
+
+Before we get started w/ the test, here are some supporting constants that are needed in the next
+steps.
+
+> ⚡ Here's the full source file
+> [TheCatApiEndpointMock.test.ts](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.ts).
+
+```typescript
+const cannedResponseOk = [
+  {
+    breeds: [],
+    categories: [],
+    id: "jK5X2xGJ7",
+    url: "https://cdn2.thecatapi.com/images/jK5X2xGJ7.jpg",
+  },
+  {
+    breeds: [],
+    categories: [],
+    id: "9c6",
+    url: "https://cdn2.thecatapi.com/images/9c6.jpg",
+  },
+  {
+    breeds: [],
+    categories: [],
+    id: "ab8",
+    url: "https://cdn2.thecatapi.com/images/ab8.jpg",
+  },
+]
+const TheCatApi = {
+  apiKey: process.env.REACT_APP_CAT_API_KEY,
+  search: {
+    host: "https://api.thecatapi.com",
+    endpoint: "/v1/images/search",
+    config: { params: { limit: 3, size: "full" } },
+  },
+}
+```
+
+Here are the steps that you need to take to create a test to mock the `TheCatApi.com`.
+
+1. **Setup and teardown** - Create the server and tie its start and stop w/ the lifecycle of the
+   tests.
+
+   ```typescript
+   const server: SetupServerApi = setupServer()
+   beforeAll(() => server.listen())
+   afterEach(() => server.resetHandlers())
+   afterAll(() => server.close())
+   ```
+
+2. **Mock the REST API w/ handlers** - Create the function that handles HTTP GET requests that are
+   made to `https://api.thecatapi.com/v1/images/search`.
+
+   ```typescript
+   // More info: https://mswjs.io/docs/getting-started/mocks/rest-api
+   const restHandlerSearchOk: RestHandler = rest.get(
+     TheCatApi.search.host + TheCatApi.search.endpoint,
+     (
+       req: RestRequest<DefaultRequestBody, RequestParams>,
+       res: ResponseComposition,
+       ctx: RestContext
+     ) => {
+       console.log("restHandlerSearchOk.req", req)
+       // console.log("req.url.searchParams", req.url.searchParams)
+       // console.log("req.params", req.params)
+       return res(ctx.json(cannedResponseOk))
+     }
+   )
+   ```
+
+3. **Test the mocked endpoint** - The test does quite a few things.
+
+   ```typescript
+   test("TheCatApi search endpoint works", async () => {
+     server.use(restHandlerSearchOk)
+     axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+     _also(TheCatApi.search, async (it) => {
+       const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
+       expect(payload).toHaveLength(3)
+     })
+   })
+   ```
+
+   1. First, it sets up the server to handle the search endpoint of the REST API.
+      - It binds the `restHandlerSearchOk` to the server via `server.use()`.
+      - All `RestHandlers` registered via `use()` will be torn down after each test in the
+        `afterEach()` call (declared in in the first step).
+   2. Then, it connects to the `msw` mock server and makes the GET request, gets the response, and
+      makes the assertion that 3 items are in the `payload`.
+
+      > ⚠ One thing to note is that the URL query params that are sent via HTTP GET (from the
+      > `axios` call in the following step) don't actually show up on the mocked server. However,
+      > the headers do show up.
+
+4. **Test the mocked endpoint for errors** - This test is very similar to the previous one, except
+   that the REST API is mocked to throw a
+   [`500` HTTP error code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500). It also
+   demonstrates how to detect errors for async functions.
+
+   ```typescript
+   const restHandlerSearchError: RestHandler = rest.get(
+     TheCatApi.search.host + TheCatApi.search.endpoint,
+     (
+       req: RestRequest<DefaultRequestBody, RequestParams>,
+       res: ResponseComposition,
+       ctx: RestContext
+     ) => {
+       console.log("restHandlerSearchError.req", req)
+       // console.log("req.url.searchParams", req.url.searchParams)
+       // console.log("req.params", req.params)
+       return res(ctx.status(500))
+     }
+   )
+
+   // More info: https://stackoverflow.com/a/47887098/2085356
+   const makeGetRequest: () => Promise<any> = async () =>
+     _let(TheCatApi.search, async (it) => {
+       axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+       const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
+       return payload
+     })
+
+   test("TheCatApi endpoint fails as expected", async () => {
+     server.use(restHandlerSearchError)
+     await expect(makeGetRequest()).rejects.toThrow(Error)
+   })
+   ```
+
+```
+
+```
