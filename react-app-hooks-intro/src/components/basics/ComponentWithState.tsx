@@ -18,6 +18,7 @@
 import React from "react"
 import { NestedComponentUsingState } from "./NestedComponentUsingState"
 import { MessageProps } from "../types"
+import styles from "../../styles/App.module.css"
 
 interface CounterState {
   count: number
@@ -34,7 +35,7 @@ export class ComponentWithState extends React.Component<MessageProps, CounterSta
   render() {
     return (
       <React.Fragment>
-        <section className="Container">
+        <section className={styles.Container}>
           <code>this.state.count={this.state.count}</code>
           <button onClick={this.increaseCounter}>{this.props.message}</button>
           <NestedComponentUsingState monkeyCount={this.state.count} />

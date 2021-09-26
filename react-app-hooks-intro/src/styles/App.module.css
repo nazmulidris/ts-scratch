@@ -62,8 +62,9 @@ pre,
 code {
   font-family: var(--fixedWidthFont);
   font-size: var(--defaultFixedFontSize);
+  padding: 0.1rem;
 
-  border: 1pt dotted rgba(173, 255, 47, 0.3);
+  border: 1pt dashed rgba(173, 255, 47, 0.3);
 }
 
 button,

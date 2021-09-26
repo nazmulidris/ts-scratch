@@ -16,10 +16,11 @@
  */
 
 import { MessagePropsWithChildren } from "../types"
+import styles from "../../styles/App.module.css"
 
 export const ComponentWithoutState = (props: MessagePropsWithChildren) => {
   return (
-    <section className="Container">
+    <section className={styles.Container}>
       <code>{props.message}</code>
       {props.children}
     </section>

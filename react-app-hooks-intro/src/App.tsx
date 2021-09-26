@@ -16,7 +16,7 @@
  */
 
 import React, { ReactElement } from "react"
-import "./styles/App.css"
+import styles from "./styles/App.module.css"
 import { ComponentWithState } from "./components/basics/ComponentWithState"
 import { ComponentWithoutState } from "./components/basics/ComponentWithoutState"
 import { ReactReplayFunctionComponent } from "./components/animate/ReactReplayFunctionComponent"
@@ -43,8 +43,8 @@ const preGeneratedAnimationFrames: AnimationFrames = _also(
 
 function App() {
   return (
-    <main className={"GridContainer"}>
-      <section className={"Heading"}>Helloooooo!!!!</section>
+    <main className={styles.GridContainer}>
+      <section className={styles.Heading}>Helloooooo!!!!</section>
       <ComponentWithState message={"Click me to see the count go up"} />
       <ComponentWithoutState message={"Stateless component ⛔ aka 'generic box'"}>
         <section>

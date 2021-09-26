@@ -1,10 +1,11 @@
 import { FC } from "react"
+import styles from "../../styles/App.module.css"
 import { ReactComponent as Car } from "./car.svg"
 
-export const SvgExample: FC = (props) => {
+export const SvgExample: FC = () => {
   return (
-    <div className={"Container"}>
-      <Car className={"SvgImage"} />
+    <div className={styles.Container}>
+      <Car className={styles.SvgImage} />
     </div>
   )
 }

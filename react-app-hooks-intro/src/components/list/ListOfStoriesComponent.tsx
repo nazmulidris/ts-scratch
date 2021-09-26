@@ -4,6 +4,7 @@ import { getAsyncStoriesWithSimulatedNetworkLag } from "./data"
 import { FnWithSingleArg, ListOfStoriesProps, Story } from "./types"
 import { ReducerHookType, ReducerType, storiesReducer } from "./reducer"
 import { Tooltip } from "../utils/Tooltip"
+import styles from "../../styles/App.module.css"
 
 type SearchProps = {
   searchTerm: string
@@ -73,7 +74,7 @@ export const ListOfStoriesComponent: FC<ListOfStoriesProps> = ({ takeInitialKeyb
   }
 
   return (
-    <div className={"Container"}>
+    <div className={styles.Container}>
       <strong>
         My Searchable Stories
         {statusText.length === 0 ? false : <span> :: {statusText}</span>}

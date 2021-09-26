@@ -3,6 +3,7 @@ import { configureStore, Reducer } from "@reduxjs/toolkit"
 import { DefaultRootState, useSelector } from "react-redux"
 import _ from "lodash"
 import { _also } from "r3bl-ts-utils"
+import styles from "../../styles/App.module.css"
 
 export const MyAddButtonId = "MyAddButton"
 
@@ -28,7 +29,7 @@ export const SimpleReduxComponent: FC = () => {
     })
 
   const render = () => (
-    <div className={"Container"}>
+    <div className={styles.Container}>
       <strong>SimpleReduxComponent</strong>
       <button id={MyAddButtonId} onClick={addListItem}>
         Add ➕

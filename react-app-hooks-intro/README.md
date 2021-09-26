@@ -59,8 +59,8 @@ categories:
   - [Declarative](#declarative)
   - [Imperative using useRef](#imperative-using-useref)
 - [React and CSS](#react-and-css)
-  - [Styled component example - Tooltip](#styled-component-example---tooltip)
   - [CSS Modules example](#css-modules-example)
+  - [Styled component example - Tooltip](#styled-component-example---tooltip)
 - [React and SVG](#react-and-svg)
   - [References on SVG and React](#references-on-svg-and-react)
 - [Redux](#redux)
@@ -144,29 +144,31 @@ For example, to use the [Cat API](https://docs.thecatapi.com/), you have to do t
 
 - Use CSS Reset by:
   1. Copy the contents of this [CSS file](https://meyerweb.com/eric/tools/css/reset/reset.css) into
-     [`reset.css`](src/styles/reset.css). Feel free to modify this file to suit your needs. Then
-     either:
-  - Import it into [`App.tsx`](src/App.tsx)
-  - Import it into [`App.css`](src/styles/App.css)
-  2. I add entries for elements like `button` and `input` which are not explicitly set by the
-     default Reset CSS stylesheet (and thus end up using user agent stylesheet).
+     [`reset.css`](src/styles/reset.css). Feel free to modify this file to suit your needs.
+  2. Then add `@import "reset.css";` to [`App.module.css`](src/styles/App.module.css), which is used
+     by [`App.tsx`](src/App.tsx).
+  3. I also add entries for elements like `button` and `input` which are not explicitly set by the
+     default Reset CSS stylesheet (and thus end up using user agent stylesheet, which isn't what I
+     want and why I'm using Reset CSS in the first place).
 
 ### What does not work
 
-- `normalize.css` **DOES NOT WORK** (its supposed to be built into CRA):
+`normalize.css` **does not work** for my needs (its supported by CRA). Using these instructions, the
+`browser user agent stylesheet` was just messing up all the spacing.
+
 - Using `normalize.css` is pretty straight forwards following this
   [guide](https://www.albertgao.xyz/2018/11/11/8-features-you-can-add-after-using-create-react-app-without-ejecting/).
   1. Simply run `npm install normalize.css`
   2. Then add `import 'normalize.css'` line to the top of [`index.tsx`](src/index.tsx)
-- Supposedly, CRA comes w/ [`normalize.css`](https://create-react-app.dev/docs/adding-css-reset/).
-- Using these instructions, the `browser user agent stylesheet` was just messing up all the spacing.
+- CRA comes w/ [`normalize.css`](https://create-react-app.dev/docs/adding-css-reset/).
 
 ## Using CSS class pseudo selectors to style child elements of a parent
 
 Using CSS class pseudo selectors in order to style child elements of a parent (which has this style
 applied) w/out having to manually assign classes to each of these children. Let's say that the
-parent has this class [`DottedBox`](src/styles/App.css), which will do this, here's the CSS. Here's
-a [video](https://youtu.be/9e-lWQdO-DA) by Kevin Powell where he uses this pattern for flexbox.
+parent has this class [`DottedBox`](src/styles/App.module.css), which will do this, here's the CSS.
+Here's a [video](https://youtu.be/9e-lWQdO-DA) by Kevin Powell where he uses this pattern for
+flexbox.
 
 1. `.DottedBox { padding: 8pt; border: 4pt dotted cornflowerblue; }`
 2. `.DottedBox > * { /* this gets applied to all the children */ }`
@@ -225,7 +227,7 @@ exported to other modules that need them or just be used inside a single file to
 details.
 
 Here's an example of using this in
-[`CatApiComponent.tsx`](src/components/cat_api/CatApiComponent.css). Here are some excerpts from
+[`CatApiComponent.tsx`](src/components/cat_api/CatApiComponent.tsx). Here are some excerpts from
 this file.
 
 Here is a snippet that shows the use of `namespace` to encapsulate the details of accessing this web
@@ -1091,12 +1093,47 @@ when you use `create-react-app` (CRA).
    which CSS rules to use.
 2. CSS Modules (CSS in CSS) - This is where you leverage
    [CSS modules](https://css-tricks.com/css-modules-part-1-need/) which locally scope the styles to
-   prevent collisions w/ synonymous styles declared in other files. Here are the main differences
-   that you have to be aware of when compared to styled components:
-   1. Instead of using `XXX.css`, make `XXX.module.css` files. This tells CRA to use CSS modules.
-   2. Instead of importing the CSS file like you would for a styled component, do this instead
-      `import styles from './XXX.module.css'`.
-   3. Then use these styles in your JSX like this: `<Component className{styles.XYZ}/>`.
+   prevent collisions w/ synonymous styles declared in other files. Look
+   [below](#css-modules-example) for more details.
+
+### CSS Modules example
+
+The following are the main differences that you have to be aware of when compared to styled
+components:
+
+1. Instead of using `XXX.css`, make `XXX.module.css` files. This tells CRA to use CSS modules.
+2. Instead of importing the CSS file like you would for a styled component, do this instead
+   `import YYY from './XXX.module.css'`, where `YYY` is what you choose to call the variable holding
+   all the imported styles.
+3. Then use these styles in your JSX like this: `<Component className{YYY.XYZ}/>`.
+
+Here's a simple example that shows how to use CSS modules or CSS in CSS approach.
+
+> ⚡ Read the
+> [CRA official docs](https://create-react-app.dev/docs/adding-a-css-modules-stylesheet/) on using
+> CSS modules.
+
+Step 1 - Create a `XYZ.module.css` file, eg: `App.module.css` and not a `App.css` file.
+
+```css
+.container {
+  height: 100vw;
+  padding: 20px;
+  background: linear-gradient(to left, #b6fbff, #83a4d4);
+  color: #171212;
+}
+```
+
+Step 2 - In your JSX component, you have to do the following import to use the style.
+
+```typescript jsx
+import React from "react"
+import myStyles from "./App.module.css"
+
+const App: FC = () => <div className={myStyles.container}>Content</div>
+```
+
+> ⚠ Note how this is different from the usual `<div className="container">...</div>`.
 
 ### Styled component example - Tooltip
 
@@ -1108,6 +1145,8 @@ Here's the React code - The `useState` hook is essentially used to apply a "hove
 React elements that are children of a `Tooltip` component.
 
 ```typescript jsx
+import componentStyles from "./Tooltip.module.css"
+
 export type TooltipProps = {
   tooltipText: string
 }
@@ -1117,9 +1156,16 @@ export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltip
   const onMouseEnter = () => setShowTooltip(true)
   const onMouseLeave = () => setShowTooltip(false)
 
+  const styleVisible = componentStyles.tooltip + " " + componentStyles.visible
+  const styleInvisible = componentStyles.tooltip
+
   return (
-    <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} className={"tooltipContainer"}>
-      <span className={showTooltip ? "tooltip visible" : "tooltip"}>{tooltipText}</span>
+    <span
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={componentStyles.tooltipContainer}
+    >
+      <span className={showTooltip ? styleVisible : styleInvisible}>{tooltipText}</span>
       {children}
     </span>
   )
@@ -1164,7 +1210,7 @@ Here's the CSS - An empty parent container (`span`) is created so that its posit
 }
 ```
 
-> ⚡ [`Tooltip.css`](src/components/utils/Tooltip.css)
+> ⚡ [`Tooltip.css`](src/components/utils/Tooltip.module.css)
 
 You can see how the `Tooltip` component is used
 [here](src/components/list/ListOfStoriesComponent.tsx).
@@ -1173,34 +1219,6 @@ Here's more information on tooltips, CSS, and React.
 
 - [CSS example](https://stackoverflow.com/a/18359711/2085356)
 - [React example](https://www.30secondsofcode.org/react/s/tooltip)
-
-### CSS Modules example
-
-Here's a simple example that shows how to use CSS modules or CSS in CSS approach.
-
-Step 1 - Create a `XYZ.module.css` file, eg: `App.module.css` and not a `App.css` file.
-
-```css
-.container {
-  height: 100vw;
-  padding: 20px;
-  background: linear-gradient(to left, #b6fbff, #83a4d4);
-  color: #171212;
-}
-```
-
-Step 2 - In your JSX component, you have to do the following import to use the style.
-
-```typescript jsx
-import React from "react"
-import styles from "./App.module.css"
-
-const App: FC = () => <div className={styles.container}>Content</div>
-```
-
-> ⚡ Read the
-> [CRA official docs](https://create-react-app.dev/docs/adding-a-css-modules-stylesheet/) on using
-> CSS modules.
 
 ## React and SVG
 

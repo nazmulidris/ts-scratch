@@ -19,6 +19,7 @@ import ReactDOM from "react-dom"
 import React, { RefObject } from "react"
 import { Animator, Counter } from "./Animator"
 import { AnimationFramesProps } from "./types"
+import styles from "../../styles/App.module.css"
 
 /** Constants. */
 const MyConstants = {
@@ -72,7 +73,7 @@ export class ReactReplayClassComponent extends React.Component<AnimationFramesPr
 
   /** Initial state, before animation and updates the ref. */
   render = (): JSX.Element => (
-    <div className={"Container"} ref={this.myRef}>
+    <div className={styles.Container} ref={this.myRef}>
       {this.elementArray[0]}{" "}
     </div>
   )

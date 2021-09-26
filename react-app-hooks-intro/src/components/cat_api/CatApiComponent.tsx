@@ -2,8 +2,9 @@ import React, { Dispatch, FC, ReactElement, Reducer } from "react"
 import _ from "lodash"
 import axios from "axios"
 import { _also } from "r3bl-ts-utils"
-import "./CatApiComponent.css"
 import { Tooltip } from "../utils/Tooltip"
+import styles from "../../styles/App.module.css"
+import componentStyles from "./CatApiComponent.module.css"
 
 // TheCatApi - https://docs.thecatapi.com/api-reference/images/images-search
 export namespace TheCatApi {
@@ -121,7 +122,7 @@ export const CatApiComponent: FC = () => {
       cats.forEach((cat) =>
         it.push(
           <Tooltip key={cat.id} tooltipText={cat.id}>
-            <img className={"Image"} src={cat.url} />
+            <img className={componentStyles.Image} src={cat.url} />
           </Tooltip>
         )
       )
@@ -130,7 +131,7 @@ export const CatApiComponent: FC = () => {
 
   function render() {
     return (
-      <div className={"Container"}>
+      <div className={styles.Container}>
         {myState.isFetching && <p>Loading ...</p>}
         {myState.isError && <p>Error!{myState.error}</p>}
         {myState.isOk && renderCats(myState.catApiSearchResults)}

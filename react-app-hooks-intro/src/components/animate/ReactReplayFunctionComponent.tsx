@@ -19,6 +19,7 @@ import { Dispatch, FC, ReactElement, SetStateAction, useState } from "react"
 import { Animator } from "./Animator"
 import { AnimationFrames, AnimationFramesProps } from "./types"
 import { useAnimator } from "./hooks"
+import styles from "../../styles/App.module.css"
 
 /** AnimationConstants. */
 const AnimationConstants = {
@@ -54,6 +55,6 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
 
   function _render() {
     const currentFrame: ReactElement = animationFrames[frameIndex]
-    return <section className={"Container"}>{currentFrame}</section>
+    return <section className={styles.Container}>{currentFrame}</section>
   }
 }

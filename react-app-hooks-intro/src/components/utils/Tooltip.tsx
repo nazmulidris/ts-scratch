@@ -1,5 +1,5 @@
 import React, { FC, PropsWithChildren } from "react"
-import "./Tooltip.css"
+import componentStyles from "./Tooltip.module.css"
 
 /**
  * CSS example: https://stackoverflow.com/a/18359711/2085356
@@ -16,9 +16,16 @@ export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltip
   const onMouseEnter = () => setShowTooltip(true)
   const onMouseLeave = () => setShowTooltip(false)
 
+  const styleVisible = componentStyles.tooltip + " " + componentStyles.visible
+  const styleInvisible = componentStyles.tooltip
+
   return (
-    <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} className={"tooltipContainer"}>
-      <span className={showTooltip ? "tooltip visible" : "tooltip"}>{tooltipText}</span>
+    <span
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={componentStyles.tooltipContainer}
+    >
+      <span className={showTooltip ? styleVisible : styleInvisible}>{tooltipText}</span>
       {children}
     </span>
   )
