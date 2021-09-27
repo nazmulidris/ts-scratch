@@ -70,7 +70,8 @@ categories:
 - [Testing](#testing)
   - [Use RTL instead of Enzyme](#use-rtl-instead-of-enzyme)
   - [Initial setup before writing tests](#initial-setup-before-writing-tests)
-  - [🔥 TODO Writing simple tests](#-todo-writing-simple-tests)
+  - [Writing simple unit tests](#writing-simple-unit-tests)
+  - [Writing simple UI tests](#writing-simple-ui-tests)
   - [🔥 TODO Writing snapshot tests](#-todo-writing-snapshot-tests)
   - [Writing integration tests](#writing-integration-tests)
 
@@ -1573,7 +1574,44 @@ Next, modify your [`src/setupTests.ts`](src/setupTests.ts) file by adding this l
 import "@testing-library/jest-dom"
 ```
 
-### 🔥 TODO Writing simple tests
+### Writing simple unit tests
+
+Writing simple unit tests are no different in Jest than they are using Jasmine. Here's an example of
+a simple unit test that is self contained and doesn't really have a system under test. The system
+under test is the `MyMatcher` class which is declared in the test itself. This class is meant to
+mimic a Jasmine matcher. And the tests assert that it works as expected.
+
+```typescript
+import { _also } from "r3bl-ts-utils"
+
+class MyMatcher {
+  constructor(private _arg: boolean = false) {}
+
+  set arg(value: boolean) {
+    this._arg = value
+  }
+  get arg(): boolean {
+    return this._arg
+  }
+
+  isFalse = (): boolean => !this.arg
+
+  isTrue = (): boolean => this.arg
+
+  get not(): MyMatcher {
+    return new MyMatcher(!this.arg)
+  }
+}
+
+describe("MyMatcher -> myMatcher(arg)", () => {
+  const myMatcher: MyMatcher =
+    /* new MyMatcher(true) */
+    _also(new MyMatcher(), (it) => (it.arg = true))
+  test("myMatcher.isTrue() is true", () => expect(myMatcher.isTrue()).toBe(true))
+  test("myMatcher.isFalse() is false", () => expect(myMatcher.isFalse()).toBe(false))
+  test("myMatcher.not.isTrue() is false", () => expect(myMatcher.not.isTrue()).toBe(false))
+})
+```
 
 > 💡 Typescript has an awesome
 > ["escape-hatch"](https://github.com/microsoft/TypeScript/issues/19335) to allow private variables
@@ -1587,6 +1625,61 @@ import "@testing-library/jest-dom"
 > - Then you can access it w/ type safety in a test when using the array access syntax, eg:
 >   `new Clazz()[_x]`, which will be treated as a `number`.
 > - So you can assert `expect(typeof new Clazz()[_x]).toBe('number')`.
+
+### Writing simple UI tests
+
+In order to write UI tests we will be using a combination of APIs from:
+
+1. [RTL](https://testing-library.com/docs/react-testing-library/api) - APIs like
+   [`render()`](https://testing-library.com/docs/react-testing-library/api#render) will render your
+   component into a container that is appended to `document.body`. This container is
+   [automatically removed](https://testing-library.com/docs/react-testing-library/api#cleanup) from
+   when the test completes, so make sure to call `render()` at the start of each `it` or `test`
+   block.
+2. [dom-testing-library](https://testing-library.com/docs/queries/about) - APIs like
+   [`getByRole()`](https://testing-library.com/docs/queries/byrole) will allow you to interrogate
+   the JSDOM and assert things about it. Here's a list of
+   [HTML ARIA roles](https://www.w3.org/TR/html-aria/#docconformance) that are used to match DOM
+   elements.
+
+> ⚡ Here's an example of a simple UI tests
+> [`SimpleReduxCompoennt.test.tsx`](src/components/redux/__tests__/SimpleReduxComponent.test.tsx).
+
+The basic structure of the UI tests are very similar.
+
+1. Render some component that you are testing (the system under test).
+2. Wait for HTML element to be added to the DOM (via call to `screen`).
+3. Assert that the DOM looks the way you expect. Or fire an event here, and then check to see that
+   the DOM is what you expect.
+
+Here's the simplest test case.
+
+```typescript jsx
+test("displays few list items at start", async () => {
+  render(
+    <Provider store={store}>
+      <SimpleReduxComponent />
+    </Provider>
+  )
+  await waitFor(() => screen.getByRole("list"))
+  expect(screen.getByRole("list").children).toHaveLength(2)
+})
+```
+
+Here's a test case where an event is fired before the DOM is checked.
+
+```typescript jsx
+test("clicking item removes it", async () => {
+  render(
+    <Provider store={store}>
+      <SimpleReduxComponent />
+    </Provider>
+  )
+  await waitFor(() => screen.getByRole("list"))
+  fireEvent.click(screen.getByRole("list").children[0])
+  expect(screen.getByRole("list").children).toHaveLength(2)
+})
+```
 
 ### 🔥 TODO Writing snapshot tests
 
