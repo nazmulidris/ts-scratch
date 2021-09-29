@@ -24,6 +24,6 @@
   width: auto;
 }
 
-.tooltip.visible {
+.tooltipContainer:hover .tooltip {
   display: block;
 }

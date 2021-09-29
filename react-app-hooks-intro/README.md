@@ -60,7 +60,9 @@ categories:
   - [Imperative using useRef](#imperative-using-useref)
 - [React and CSS](#react-and-css)
   - [CSS Modules example](#css-modules-example)
-  - [Styled component example - Tooltip](#styled-component-example---tooltip)
+  - [Styled component example](#styled-component-example)
+    - [Tooltip w/ just CSS](#tooltip-w-just-css)
+    - [Tooltip w/ just React](#tooltip-w-just-react)
 - [React and SVG](#react-and-svg)
   - [References on SVG and React](#references-on-svg-and-react)
 - [Redux](#redux)
@@ -1136,11 +1138,81 @@ const App: FC = () => <div className={myStyles.container}>Content</div>
 
 > ⚠ Note how this is different from the usual `<div className="container">...</div>`.
 
-### Styled component example - Tooltip
+### Styled component example
 
-Here is an example of implementing a tooltip that uses CSS but is packaged as a React component.
-This example shows how these two technologies can work together, but also shows how React really
-abstracts itself away pretty heavily from DOM and CSS (for better and worse).
+#### Tooltip w/ just CSS
+
+It is actually very simple to implement a tooltip using just CSS. The key is using the `:hover`
+pseudo selector on the tooltip's parent container to display a tooltip.
+
+Here's an overview of what this CSS does:
+
+- An empty parent container (`span`) is created so that its position can be set to `relative`, so
+  that any child elements inside of it (other `span` elements) can be positioned as `absolute` w/ a
+  `z-index` of `1000`.
+- The `:hover` pseudo selector on the `.tooltipContainer` takes care of showing the `.tooltip` by
+  setting its `display` to `block`.
+
+> ⚡ [`Tooltip.module.css`](src/components/utils/Tooltip.module.css)
+
+```css
+.tooltipContainer {
+  position: relative;
+}
+
+.tooltip {
+  --radius: 5px;
+  --alpha: 0.8;
+  --fillColor: rgba(26, 31, 48, var(--alpha));
+  --borderColor: rgba(100, 149, 237, var(--alpha));
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+
+  padding: calc(var(--defaultPadding) * 0.5);
+  background: var(--fillColor);
+  border-radius: var(--radius);
+  border: 2px solid var(--borderColor);
+
+  /* This ensures that the tooltip does not obstruct the element that is being hovered */
+  top: 100%;
+  width: auto;
+}
+
+.tooltipContainer:hover .tooltip {
+  display: block;
+}
+```
+
+The (minimal) React component below uses the CSS above.
+
+> ⚡ [`Tooltip.tsx`](src/components/utils/Tooltip.tsx)
+
+```typescript jsx
+import React, { FC, PropsWithChildren } from "react"
+import componentStyles from "./Tooltip.module.css"
+
+export type TooltipProps = {
+  tooltipText: string
+}
+
+export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltipText }) => {
+  return (
+    <span className={componentStyles.tooltipContainer}>
+      <span className={componentStyles.tooltip}>{tooltipText}</span>
+      {children}
+    </span>
+  )
+}
+```
+
+#### Tooltip w/ just React
+
+Here is an example of implementing a tooltip that uses mostly React, and not much CSS as shown in
+the previous example.
 
 Here's the React code - The `useState` hook is essentially used to apply a "hover" effect on any
 React elements that are children of a `Tooltip` component.
@@ -1173,53 +1245,13 @@ export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltip
 }
 ```
 
-> ⚡ [`Tooltip.tsx`](src/components/utils/Tooltip.tsx)
-
-Here's the CSS - An empty parent container (`span`) is created so that its position can be set to
-`relative`, so that any child elements inside of it (other `span` elements) can be positioned as
-`absolute` w/ a `z-index` of `1000`.
+The CSS is the same as in the previous example, with the only following difference.
 
 ```css
-.tooltipContainer {
-  position: relative;
-}
-
-.tooltip {
-  --radius: 5px;
-  --alpha: 0.8;
-  --fillColor: rgba(26, 31, 48, var(--alpha));
-  --borderColor: rgba(100, 149, 237, var(--alpha));
-}
-
-.tooltip {
-  display: none;
-  position: absolute;
-  z-index: 1000;
-
-  padding: calc(var(--defaultPadding) * 0.5);
-  background: var(--fillColor);
-  border-radius: var(--radius);
-  border: 2px solid var(--borderColor);
-
-  /* This ensures that the tooltip does not obstruct the element that is being hovered */
-  top: 100%;
-  width: auto;
-}
-
 .tooltip.visible {
   display: block;
 }
 ```
-
-> ⚡ [`Tooltip.css`](src/components/utils/Tooltip.module.css)
-
-You can see how the `Tooltip` component is used
-[here](src/components/list/ListOfStoriesComponent.tsx).
-
-Here's more information on tooltips, CSS, and React.
-
-- [CSS example](https://stackoverflow.com/a/18359711/2085356)
-- [React example](https://www.30secondsofcode.org/react/s/tooltip)
 
 ## React and SVG
 
