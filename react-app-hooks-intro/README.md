@@ -22,20 +22,20 @@ categories:
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Introduction](#introduction)
+- [Data APIs for development](#data-apis-for-development)
+- [Debugging in Webstorm or IDEA Ultimate](#debugging-in-webstorm-or-idea-ultimate)
 - [Upgrade CRA itself to the latest version](#upgrade-cra-itself-to-the-latest-version)
-- [Test app live data APIs](#test-app-live-data-apis)
 - [Using CRA and environment variables](#using-cra-and-environment-variables)
 - [CSS Reset](#css-reset)
   - [What works](#what-works)
   - [What does not work](#what-does-not-work)
 - [Using CSS class pseudo selectors to style child elements of a parent](#using-css-class-pseudo-selectors-to-style-child-elements-of-a-parent)
-- [Callable](#callable)
 - [Composition over inheritance](#composition-over-inheritance)
-- [Debugging in Webstorm or IDEA Ultimate](#debugging-in-webstorm-or-idea-ultimate)
+- [Callable](#callable)
 - [Typescript namespaces](#typescript-namespaces)
 - [Typescript readonly vs ReadonlyArray](#typescript-readonly-vs-readonlyarray)
 - [Typescript prop and state types](#typescript-prop-and-state-types)
-- [Typescript and ReactNode, ReactElement, and JSX.Element](#typescript-and-reactnode-reactelement-and-jsxelement)
+- [Typescript and ReactNode, ReactElement, JSX.Element](#typescript-and-reactnode-reactelement-jsxelement)
 - [Typescript types in array and object destructuring](#typescript-types-in-array-and-object-destructuring)
 - [React](#react)
 - [React Hooks](#react-hooks)
@@ -45,9 +45,9 @@ categories:
   - [useEffect](#useeffect)
     - [First render and subsequent re-renders using useRef and useEffect](#first-render-and-subsequent-re-renders-using-useref-and-useeffect)
   - [useState](#usestate)
+    - [Example](#example)
     - [Shared stateful logic vs shared state](#shared-stateful-logic-vs-shared-state)
     - [Resources](#resources)
-    - [Example](#example)
   - [useReducer](#usereducer)
     - [Two examples (one w/out network, and one w/ network)](#two-examples-one-wout-network-and-one-w-network)
   - [useCallback and useMemo](#usecallback-and-usememo)
@@ -71,11 +71,17 @@ categories:
   - [🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)](#-todo-advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
 - [Testing](#testing)
   - [Use RTL instead of Enzyme](#use-rtl-instead-of-enzyme)
-  - [Initial setup before writing tests](#initial-setup-before-writing-tests)
+  - [Install the required packages for RTL](#install-the-required-packages-for-rtl)
   - [Writing simple unit tests](#writing-simple-unit-tests)
+    - [🔥 TODO More examples of unit tests](#-todo-more-examples-of-unit-tests)
   - [Writing simple UI tests](#writing-simple-ui-tests)
-  - [🔥 TODO Writing snapshot tests](#-todo-writing-snapshot-tests)
+  - [Writing more complex UI tests](#writing-more-complex-ui-tests)
+  - [Writing snapshot tests](#writing-snapshot-tests)
+    - [Install the required packages for react-test-renderer](#install-the-required-packages-for-react-test-renderer)
   - [Writing integration tests](#writing-integration-tests)
+    - [Install the required package msw](#install-the-required-package-msw)
+    - [Basic integration tests](#basic-integration-tests)
+    - [🔥 TODO Advanced integration tests](#-todo-advanced-integration-tests)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -96,6 +102,26 @@ React Hooks with Typescript.
 
 [gh-repo]: https://github.com/nazmulidris/ts-scratch/tree/main/react-app-hooks-intro
 
+## Data APIs for development
+
+Here are some data APIs that might be useful when building prototype apps.
+
+- [TheCatApi](https://docs.thecatapi.com/api-reference/)
+- [doc.ceo/dog-api](https://dog.ceo/dog-api/documentation/)
+- [Hacker News API](https://hn.algolia.com/api)
+
+## Debugging in Webstorm or IDEA Ultimate
+
+Use this [guide](https://blog.jetbrains.com/webstorm/2017/01/debugging-react-apps/) for
+`create-react-app`.
+
+1. Simply `package.json` and click on the green arrow beside the "run" script.
+2. In the tool window, press "Ctrl+Shift" and click on the `localhost:3000` hyperlink and that will
+   spawn a debugging session w/ a Chrome browser that is spawned just for this session!
+3. Save the run configurations produced by the steps above in the project file.
+4. Also now that the JavaScript debugging session run configuration is created, you can just use
+   `npm run start` to start the server in a terminal and still be able to debug it!
+
 ## Upgrade CRA itself to the latest version
 
 Follow instructions in the
@@ -114,14 +140,6 @@ You can upgrade any npm packages using the following.
 ```shell
 npm update
 ```
-
-## Test app live data APIs
-
-Here are some data APIs that might be useful when building prototype apps.
-
-- [TheCatApi](https://docs.thecatapi.com/api-reference/)
-- [doc.ceo/dog-api](https://dog.ceo/dog-api/documentation/)
-- [Hacker News API](https://hn.algolia.com/api)
 
 ## Using CRA and environment variables
 
@@ -176,6 +194,18 @@ flexbox.
 1. `.DottedBox { padding: 8pt; border: 4pt dotted cornflowerblue; }`
 2. `.DottedBox > * { /* this gets applied to all the children */ }`
 
+## Composition over inheritance
+
+Use [composition over inheritance](https://reactjs.org/docs/composition-vs-inheritance.html) to make
+components reusable.
+
+1. This happens when you think about a component as a "generic box" and simply pass other JSX
+   elements inside of them as `props.children`.
+2. You can see this in [`ComponentWithoutState`](src/components/basics/ComponentWithoutState.tsx).
+3. In order to get this to work with Typescript you have to make sure to add this to the props type
+   `childComp?: React.ReactNode`. For example, take a look at `MessagePropsWithChildren` in
+   [`types.tsx`](src/components/types.tsx)
+
 ## Callable
 
 `Callable` interfaces are great, and I've done an implementation of this in
@@ -195,30 +225,6 @@ included in [`r3bl-ts-utils`](https://www.npmjs.com/package/r3bl-ts-utils).
 - In this case, the getter simply returns the reference to the 'generatorImpl' method. So we can
   write things like `GenerateReactElement.generator(...)` instead of just
   `GenerateReactElement.generator` (which is the normal use of a getter).
-
-## Composition over inheritance
-
-Use [composition over inheritance](https://reactjs.org/docs/composition-vs-inheritance.html) to make
-components reusable.
-
-1. This happens when you think about a component as a "generic box" and simply pass other JSX
-   elements inside of them as `props.children`.
-2. You can see this in [`ComponentWithoutState`](src/components/basics/ComponentWithoutState.tsx).
-3. In order to get this to work with Typescript you have to make sure to add this to the props type
-   `childComp?: React.ReactNode`. For example, take a look at `MessagePropsWithChildren` in
-   [`types.tsx`](src/components/types.tsx)
-
-## Debugging in Webstorm or IDEA Ultimate
-
-Use this [guide](https://blog.jetbrains.com/webstorm/2017/01/debugging-react-apps/) for
-`create-react-app`.
-
-1. Simply `package.json` and click on the green arrow beside the "run" script.
-2. In the tool window, press "Ctrl+Shift" and click on the `localhost:3000` hyperlink and that will
-   spawn a debugging session w/ a Chrome browser that is spawned just for this session!
-3. Save the run configurations produced by the steps above in the project file.
-4. Also now that the JavaScript debugging session run configuration is created, you can just use
-   `npm run start` to start the server in a terminal and still be able to debug it!
 
 ## Typescript namespaces
 
@@ -421,7 +427,7 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
 }
 ```
 
-## Typescript and ReactNode, ReactElement, and JSX.Element
+## Typescript and ReactNode, ReactElement, JSX.Element
 
 This [SO thread](https://stackoverflow.com/a/58123882/2085356) has the answers. Basically,
 
@@ -649,6 +655,10 @@ export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): R
 }
 ```
 
+> ⚠ Beware the issue of ["stale closures"](https://dmitripavlutin.com/react-hooks-stale-closures/)
+> when using `useEffect()`. The stale closure problem occurs when a closure captures outdated
+> variables.
+
 #### First render and subsequent re-renders using useRef and useEffect
 
 Out of the box the callback that you pass to `useEffect()` can't tell the difference between first
@@ -708,6 +718,46 @@ const useMyLocalStorageHook = (key: string): MyLocalStorageHook => {
 Reusing _stateful logic_ isn't the same as _sharing state between functional components_. For the
 latter, `useContext` might be more appropriate.
 
+#### Example
+
+The following code uses the `useState` hook in a functional component.
+
+```typescript
+import { ReactElement } from "react"
+
+type IndexStateHookType = [number, Dispatch<SetStateAction<number>>]
+
+export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
+  /** State: currentAnimationFrameIndex (mutable). */
+  const [frameIndex, setFrameIndex]: IndexStateHookType = useState<number>(0)
+
+  /** State: animator (immutable). */
+  const [animator] = useState<Animator>(
+    new Animator(MyConstants.delayMs, tick, "[FunctionalComponentAnimator]")
+  )
+
+  /* snip */
+}
+```
+
+> ⚡ [ReactReplayFunctionComponent.tsx](src/components/animate/ReactReplayFunctionComponent.tsx)
+
+Here's the anatomy of each call to `useState`.
+
+1. On the _left hand side_ of the call to `useState` hook, it returns an array (of type
+   `IndexStateHookType`).
+
+   1. The first item is a reference to the state variable (of type `T`).
+   2. The second item is the setter function for it (of type `Dispatch<SetStateAction<T>>`). This
+      mutates the state and triggers are render of the functional component.
+
+2. It has to be initialized w/ whatever value is on the _right hand side_ expression. So it is a
+   pretty simple way of making functional components have initial state.
+
+> ⚠ Beware the issue of ["stale closures"](https://dmitripavlutin.com/react-hooks-stale-closures/)
+> when using `useState()`. The stale closure problem occurs when a closure captures outdated
+> variables.
+
 #### Shared stateful logic vs shared state
 
 Here's a [SO question about this](https://stackoverflow.com/a/53455474/2085356) that goes into quite
@@ -752,37 +802,6 @@ Here are some great resources on learning about `useState`.
 
 1. [Official docs](https://reactjs.org/docs/hooks-state.html)
 2. [Typescript and useState](https://www.carlrippon.com/typed-usestate-with-typescript/)
-
-#### Example
-
-The following code uses the `useState` hook in a functional component.
-
-```typescript
-import { ReactElement } from "react"
-
-export const ReactReplayFunctionComponent: FC<AnimationFramesProps> = (props): ReactElement => {
-  /** State: currentAnimationFrameIndex (mutable). */
-  const [currentAnimationFrameIndex, setCurrentAnimationFrameIndex] = useState<number>(0)
-
-  /** State: animator (immutable). */
-  const [animator] = useState<Animator>(
-    new Animator(MyConstants.delayMs, tick, "[FunctionalComponentAnimator]")
-  )
-
-  /* snip */
-}
-```
-
-Here's the anatomy of each call to `useState`.
-
-1. On the _left hand side_ of the call to `useState` hook, it returns an array.
-
-1. The first item is a reference to the state variable.
-1. The second item is the setter function for it. This mutates the state and triggers are render of
-   the functional component.
-
-1. It has to be initialized w/ whatever value is on the _right hand side_ expression. So it is a
-   pretty simple way of making functional components have initial state.
 
 ### useReducer
 
@@ -1108,6 +1127,9 @@ components:
 2. Instead of importing the CSS file like you would for a styled component, do this instead
    `import YYY from './XXX.module.css'`, where `YYY` is what you choose to call the variable holding
    all the imported styles.
+   > When using styled components you only have to import the CSS file once (eg: in `App.tsx`) and
+   > these are available (implicitly) to all the React components that are nested in it. But using
+   > modules you have to import them in each file that uses the style.
 3. Then use these styles in your JSX like this: `<Component className{YYY.XYZ}/>`.
 
 Here's a simple example that shows how to use CSS modules or CSS in CSS approach.
@@ -1590,7 +1612,7 @@ Here are some of the top benefits of using Jest & RTL:
 > 3. [Example in codesandbox.io](https://codesandbox.io/s/github/kentcdodds/react-testing-library-examples)
 > 4. [Cheatsheet](https://testing-library.com/docs/react-testing-library/cheatsheet)
 
-### Initial setup before writing tests
+### Install the required packages for RTL
 
 To get started you should install the RTL and `jest-dom` packages.
 
@@ -1646,7 +1668,7 @@ describe("MyMatcher -> myMatcher(arg)", () => {
 ```
 
 > 💡 Typescript has an awesome
-> ["escape-hatch"](https://github.com/microsoft/TypeScript/issues/19335) to allow private variables
+> ["escape hatch"](https://github.com/microsoft/TypeScript/issues/19335) to allow private variables
 > to be accessed in tests. Here's a detailed
 > [SO answer](https://stackoverflow.com/a/35991491/2085356) on this topic.
 >
@@ -1657,6 +1679,8 @@ describe("MyMatcher -> myMatcher(arg)", () => {
 > - Then you can access it w/ type safety in a test when using the array access syntax, eg:
 >   `new Clazz()[_x]`, which will be treated as a `number`.
 > - So you can assert `expect(typeof new Clazz()[_x]).toBe('number')`.
+
+#### 🔥 TODO More examples of unit tests
 
 ### Writing simple UI tests
 
@@ -1713,9 +1737,174 @@ test("clicking item removes it", async () => {
 })
 ```
 
-### 🔥 TODO Writing snapshot tests
+### Writing more complex UI tests
+
+In this section we will write a test that deals with resizing a browser window (such as what you
+would need to do to test media queries). Here are the key things that we will cover in this example:
+
+1. How to resize a JSDOM browser window (since an actual browser is not used).
+2. How to wrap React updates in
+   [`act()`](https://davidwcai.medium.com/react-testing-library-and-the-not-wrapped-in-act-errors-491a5629193b).
+
+Here's the system under test.
+
+> ⚡ [`ComponentWithoutState.tsx`](src/components/basics/ComponentWithoutState.tsx).
+
+```typescript jsx
+import { MessagePropsWithChildren } from "../types"
+import styles from "../../styles/App.module.css"
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { _let } from "r3bl-ts-utils"
+
+export const TestIdWindowSize = "test-id-window-size"
+
+const setWindowSize = (
+  setWidth: Dispatch<SetStateAction<number>>,
+  setHeight: Dispatch<SetStateAction<number>>
+) => {
+  setWidth(window.innerWidth)
+  setHeight(window.innerHeight)
+}
+
+type SizeStateHookType = [number, Dispatch<SetStateAction<number>>]
+
+export const ComponentWithoutState = (props: MessagePropsWithChildren) => {
+  const [width, setWidth]: SizeStateHookType = useState(0)
+  const [height, setHeight]: SizeStateHookType = useState(0)
+
+  useEffect(
+    () =>
+      _let(
+        (event: UIEvent) => setWindowSize(setWidth, setHeight),
+        (it) => {
+          window.addEventListener("resize", it)
+          return () => window.removeEventListener("resize", it)
+        }
+      ),
+    [] /* Run once, like componentDidMount. */
+  )
+
+  useEffect(() => setWindowSize(setWidth, setHeight), [] /* Run once, like componentDidMount. */)
+
+  const render = () => (
+    <section className={styles.Container}>
+      <code>{props.message}</code>
+      {props.children}
+      <div data-testid={TestIdWindowSize}>{`${width} x ${height}`}</div>
+    </section>
+  )
+
+  return render()
+}
+```
+
+And here's the test file itself. In this test, the window is resized after rendering the component.
+Then the component is checked to see whether it got this change in width and height. If you were
+using a media query then you would check the DOM to see whether the structure that you were
+expecting is actually present.
+
+> ⚡ [`MediaQueryTest.test.tsx`](src/__tests__/MediaQueryTest.test.tsx)
+
+```typescript jsx
+import { render, screen, waitFor } from "@testing-library/react"
+import React from "react"
+import { act } from "react-dom/test-utils"
+import { ComponentWithoutState, TestIdWindowSize } from "../components/basics/ComponentWithoutState"
+
+/** Get around `window.innerWidth` and `window.innerHeight` are readonly. */
+const resizeWindow = (x: number, y: number) => {
+  window = Object.assign(window, { innerWidth: x })
+  window = Object.assign(window, { innerHeight: y })
+  window.dispatchEvent(new Event("resize"))
+}
+
+describe("media query test", () => {
+  it("should be large window size", async () => {
+    render(
+      <div>
+        <ComponentWithoutState message={"test"} />
+      </div>
+    )
+
+    // Wrap any calls to React state changes in act().
+    // More info: https://davidwcai.medium.com/react-testing-library-and-the-not-wrapped-in-act-errors-491a5629193b
+    act(() => resizeWindow(2000, 1000))
+
+    await waitFor(() => screen.getByTestId(TestIdWindowSize))
+
+    const checkContent = screen.getByTestId(TestIdWindowSize)
+    expect(checkContent).toHaveTextContent("2000 x 1000")
+  })
+})
+```
+
+> 💡 Note the use of [`act()`](https://reactjs.org/docs/testing-recipes.html#act) to wrap the call
+> to `resizeWindow()`. This is necessary when you write code that mutates a component's state using
+> one of your functions. This ensures that all the required work has been done before you make your
+> DOM assertions.
+
+### Writing snapshot tests
+
+Snapshot testing was introduced in Jest around 2016, and it's meant to be a lightweight way to
+perform UI tests and it is meant to be a complement (not replacement) for unit and integration
+testing.
+
+> 💡 Here are some good reference guides on snapshot testing:
+>
+> - [Why use snapshot testing](https://benmccormick.org/2016/09/19/testing-with-jest-snapshots-first-impressions/).
+> - [Snapshot testing philosophy](https://jestjs.io/blog/2016/07/27/jest-14#why-snapshot-testing).
+> - [Snapshot testing official guide](https://jestjs.io/docs/snapshot-testing).
+
+The idea behind snapshot testing is that it should be easy to take a snapshot of what a component
+should look like, and then compare any future changes to a component to this snapshot. This is meant
+to be an easy way to do UI testing. There is no need to write any assertions for what is expected in
+the DOM. Simply save the "last known good" snapshot of a component, and when any changes are made to
+this component they will automatically be compared to the saved snapshot (when the tests are run).
+
+#### Install the required packages for react-test-renderer
+
+In order to write these tests we must use `react-test-renderer` and not the RTL or
+`dom-testing-library`. Here are the things you must install to get started.
+
+```shell
+# Install the package.
+npm install react-test-renderer
+# Get the Typescript bindings for your IDE.
+npm i --save-dev @types/react-test-renderer
+```
+
+Here's a simple snapshot test for the
+[`ComponentWithoutState.tsx`](src/components/basics/ComponentWithoutState.tsx).
+
+> 💡 Note that the first time you run this you will have to
+> [update the snapshot](https://jestjs.io/docs/snapshot-testing#updating-snapshots). You can do that
+> by doing any of the following:
+>
+> 1. Running the test in IDEA Ultimate or Webstorm.
+> 2. In a terminal by using `npm test -u`. You can also interactively update the snapshots if you
+>    run `npm test` in your terminal.
+
+```typescript jsx
+import React from "react"
+import renderer from "react-test-renderer"
+import { ComponentWithoutState } from "../ComponentWithoutState"
+
+it("ComponentWithoutState renders correctly", function () {
+  const tree = renderer.create(<ComponentWithoutState message={"snapshot test"} />).toJSON()
+  expect(tree).toMatchSnapshot()
+})
+```
+
+> ⚡
+> [ComponentWithoutState.snapshot.test.tsx](src/components/basics/__tests__/ComponentWithoutState.snapshot.test.tsx).
+
+When a snapshot is updated it will create a file that you should check into your version control.
+Here's an example of a snapshot file generated by the test above
+[`/__tests__/__snapshots__/ComponentWithoutState.snapshot.test.tsx.snap`](src/components/basics/__tests__/__snapshots__/ComponentWithoutState.snapshot.test.tsx.snap).
 
 ### Writing integration tests
+
+#### Install the required package msw
 
 In order to mock web services, you will need to install the
 [`msw` module](https://github.com/mswjs/msw) as a dev dependency.
@@ -1730,6 +1919,8 @@ npm i -D msw
 > ⚡ This is a great
 > [tutorial](https://dev.to/kettanaito/type-safe-api-mocking-with-mock-service-worker-and-typescript-21bf)
 > on using `msw` and Typescript.
+
+#### Basic integration tests
 
 Before we get started w/ the test, here are some supporting constants that are needed in the next
 steps.
@@ -1858,6 +2049,4 @@ Here are the steps that you need to take to create a test to mock the `TheCatApi
    })
    ```
 
-```
-
-```
+#### 🔥 TODO Advanced integration tests

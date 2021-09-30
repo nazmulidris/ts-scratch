@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SimpleReduxComponent user interactions" type="JavaScriptTestRunnerJest" nameIsGenerated="true">
+    <node-interpreter value="project" />
+    <node-options value="" />
+    <jest-package value="$PROJECT_DIR$/node_modules/react-scripts" />
+    <working-dir value="$PROJECT_DIR$" />
+    <envs />
+    <scope-kind value="SUITE" />
+    <test-file value="$PROJECT_DIR$/src/components/redux/__tests__/SimpleReduxComponent.test.tsx" />
+    <test-names>
+      <test-name value="SimpleReduxComponent user interactions" />
+    </test-names>
+    <method v="2" />
+  </configuration>
+</component>

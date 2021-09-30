@@ -17,12 +17,46 @@
 
 import { MessagePropsWithChildren } from "../types"
 import styles from "../../styles/App.module.css"
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { _let } from "r3bl-ts-utils"
+
+export const TestIdWindowSize = "test-id-window-size"
+
+const setWindowSize = (
+  setWidth: Dispatch<SetStateAction<number>>,
+  setHeight: Dispatch<SetStateAction<number>>
+) => {
+  setWidth(window.innerWidth)
+  setHeight(window.innerHeight)
+}
+
+type SizeStateHookType = [number, Dispatch<SetStateAction<number>>]
 
 export const ComponentWithoutState = (props: MessagePropsWithChildren) => {
-  return (
+  const [width, setWidth]: SizeStateHookType = useState(0)
+  const [height, setHeight]: SizeStateHookType = useState(0)
+
+  useEffect(
+    () =>
+      _let(
+        (event: UIEvent) => setWindowSize(setWidth, setHeight),
+        (it) => {
+          window.addEventListener("resize", it)
+          return () => window.removeEventListener("resize", it)
+        }
+      ),
+    [] /* Run once, like componentDidMount. */
+  )
+
+  useEffect(() => setWindowSize(setWidth, setHeight), [] /* Run once, like componentDidMount. */)
+
+  const render = () => (
     <section className={styles.Container}>
       <code>{props.message}</code>
       {props.children}
+      <div data-testid={TestIdWindowSize}>{`${width} x ${height}`}</div>
     </section>
   )
+
+  return render()
 }

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ComponentWithoutState renders correctly 1`] = `
+<section
+  className="Container"
+>
+  <code>
+    snapshot test
+  </code>
+  <div
+    data-testid="test-id-window-size"
+  >
+    0 x 0
+  </div>
+</section>
+`;

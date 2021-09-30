@@ -1,5 +1,5 @@
 import { SimpleReduxComponent, store } from "../SimpleReduxComponent"
-import { render, fireEvent, waitFor, screen } from "@testing-library/react"
+import { render, fireEvent, waitFor, screen, act } from "@testing-library/react"
 import { Provider } from "react-redux"
 import React from "react"
 
@@ -15,6 +15,7 @@ describe("SimpleReduxComponent user interactions", () => {
         <SimpleReduxComponent />
       </Provider>
     )
+
     await waitFor(() => screen.getByRole("list"))
     expect(screen.getByRole("list").children).toHaveLength(2)
   })
@@ -25,8 +26,10 @@ describe("SimpleReduxComponent user interactions", () => {
         <SimpleReduxComponent />
       </Provider>
     )
+
     await waitFor(() => screen.getByRole("button"))
     fireEvent.click(screen.getByRole("button"))
+
     expect(screen.getByRole("list").children).toHaveLength(3)
   })
 
@@ -36,8 +39,10 @@ describe("SimpleReduxComponent user interactions", () => {
         <SimpleReduxComponent />
       </Provider>
     )
+
     await waitFor(() => screen.getByRole("list"))
     fireEvent.click(screen.getByRole("list").children[0])
+
     expect(screen.getByRole("list").children).toHaveLength(2)
   })
 })
