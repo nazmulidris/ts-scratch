@@ -61,8 +61,8 @@ categories:
 - [React and CSS](#react-and-css)
   - [CSS Modules example](#css-modules-example)
   - [Styled component example](#styled-component-example)
-    - [Tooltip w/ just CSS](#tooltip-w-just-css)
-    - [Tooltip w/ just React](#tooltip-w-just-react)
+    - [TooltipOverlay w/ just CSS](#tooltipoverlay-w-just-css)
+    - [TooltipOverlay w/ just React](#tooltipoverlay-w-just-react)
 - [React and SVG](#react-and-svg)
   - [References on SVG and React](#references-on-svg-and-react)
 - [Redux](#redux)
@@ -404,18 +404,18 @@ you can use the destructuring syntax to get the required props out.
 Here's an example.
 
 ```typescript jsx
-export type TooltipProps = {
+export type TooltipOverlayProps = {
   text: string
 }
 
-export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, text }) => {
+export const TooltipOverlay: FC<PropsWithChildren<TooltipOverlayProps>> = ({ children, text }) => {
   /* snip */
 }
 ```
 
 > Note the use of the destructuring syntax to get the specific properties (`children`, `text`) out
-> of the passed `props` object. The types are defined in `TooltipProps` (`text` comes from this) and
-> `PropsWithChildren` (`children` comes from this).
+> of the passed `props` object. The types are defined in `TooltipOverlayProps` (`text` comes from
+> this) and `PropsWithChildren` (`children` comes from this).
 
 Here's an example for a functional component. Note the use of `FC` to specify that this is a
 functional component that takes a prop. Being a functional component, you can't declare any state
@@ -1162,7 +1162,7 @@ const App: FC = () => <div className={myStyles.container}>Content</div>
 
 ### Styled component example
 
-#### Tooltip w/ just CSS
+#### TooltipOverlay w/ just CSS
 
 It is actually very simple to implement a tooltip using just CSS. The key is using the `:hover`
 pseudo selector on the tooltip's parent container to display a tooltip.
@@ -1175,7 +1175,7 @@ Here's an overview of what this CSS does:
 - The `:hover` pseudo selector on the `.tooltipContainer` takes care of showing the `.tooltip` by
   setting its `display` to `block`.
 
-> ⚡ [`Tooltip.module.css`](src/components/utils/Tooltip.module.css)
+> ⚡ [`TooltipOverlay.module.css`](src/components/utils/Tooltip.module.css)
 
 ```css
 .tooltipContainer {
@@ -1211,17 +1211,20 @@ Here's an overview of what this CSS does:
 
 The (minimal) React component below uses the CSS above.
 
-> ⚡ [`Tooltip.tsx`](src/components/utils/Tooltip.tsx)
+> ⚡ [`TooltipOverlay.tsx`](src/components/utils/TooltipOverlay.tsx)
 
 ```typescript jsx
 import React, { FC, PropsWithChildren } from "react"
-import componentStyles from "./Tooltip.module.css"
+import componentStyles from "./TooltipOverlay.module.css"
 
-export type TooltipProps = {
+export type TooltipOverlayProps = {
   tooltipText: string
 }
 
-export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltipText }) => {
+export const TooltipOverlay: FC<PropsWithChildren<TooltipOverlayProps>> = ({
+  children,
+  tooltipText,
+}) => {
   return (
     <span className={componentStyles.tooltipContainer}>
       <span className={componentStyles.tooltip}>{tooltipText}</span>
@@ -1231,22 +1234,28 @@ export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltip
 }
 ```
 
-#### Tooltip w/ just React
+> ⚡ React bootstrap package has an example using this pattern
+> [here](https://react-bootstrap.github.io/components/overlays/).
+
+#### TooltipOverlay w/ just React
 
 Here is an example of implementing a tooltip that uses mostly React, and not much CSS as shown in
 the previous example.
 
 Here's the React code - The `useState` hook is essentially used to apply a "hover" effect on any
-React elements that are children of a `Tooltip` component.
+React elements that are children of a `TooltipOverlay` component.
 
 ```typescript jsx
-import componentStyles from "./Tooltip.module.css"
+import componentStyles from "./TooltipOverlay.module.css"
 
-export type TooltipProps = {
+export type TooltipOverlayProps = {
   tooltipText: string
 }
 
-export const Tooltip: FC<PropsWithChildren<TooltipProps>> = ({ children, tooltipText }) => {
+export const TooltipOverlay: FC<PropsWithChildren<TooltipOverlayProps>> = ({
+  children,
+  tooltipText,
+}) => {
   const [showTooltip, setShowTooltip] = React.useState(false)
   const onMouseEnter = () => setShowTooltip(true)
   const onMouseLeave = () => setShowTooltip(false)

@@ -2,7 +2,7 @@ import React, { Dispatch, FC, ReactElement, Reducer } from "react"
 import _ from "lodash"
 import axios from "axios"
 import { _also } from "r3bl-ts-utils"
-import { Tooltip } from "../utils/Tooltip"
+import { TooltipOverlay } from "../utils/TooltipOverlay"
 import styles from "../../styles/App.module.css"
 import componentStyles from "./CatApiComponent.module.css"
 
@@ -121,9 +121,9 @@ export const CatApiComponent: FC = () => {
     return _also(new Array<ReactElement>(), (it) => {
       cats.forEach((cat) =>
         it.push(
-          <Tooltip key={cat.id} tooltipText={cat.id}>
+          <TooltipOverlay key={cat.id} tooltipText={cat.id}>
             <img className={componentStyles.Image} src={cat.url} />
-          </Tooltip>
+          </TooltipOverlay>
         )
       )
     })

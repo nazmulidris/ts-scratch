@@ -3,7 +3,7 @@ import { LocalStorageHook, MyLocalStorageEvents, useLocalStorage } from "./hooks
 import { getAsyncStoriesWithSimulatedNetworkLag } from "./data"
 import { FnWithSingleArg, ListOfStoriesProps, Story } from "./types"
 import { ReducerHookType, ReducerType, storiesReducer } from "./reducer"
-import { Tooltip } from "../utils/Tooltip"
+import { TooltipOverlay } from "../utils/TooltipOverlay"
 import styles from "../../styles/App.module.css"
 
 type SearchProps = {
@@ -143,9 +143,9 @@ const SearchComponent: FC<SearchProps> = ({
           <input id="search" type="text" value={searchTerm} onChange={onSearchFn} ref={inputRef} />
         </>
       )}
-      <Tooltip tooltipText={tooltipText}>
+      <TooltipOverlay tooltipText={tooltipText}>
         <button onClick={onButtonClicked}>➕/➖</button>
-      </Tooltip>
+      </TooltipOverlay>
     </section>
   )
 }
