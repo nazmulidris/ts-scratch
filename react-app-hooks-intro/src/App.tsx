@@ -54,7 +54,7 @@ function App() {
       <ReactReplayClassComponent animationFrames={preGeneratedAnimationFrames} />
       <ReactReplayFunctionComponent animationFrames={preGeneratedAnimationFrames} />
       <ListOfStoriesComponent takeInitialKeyboardFocus={true} />
-      <CatApiComponent />
+      <CatApiComponent.FC />
       <Provider store={store}>
         <SimpleReduxComponent />
       </Provider>

@@ -1,7 +1,12 @@
-import { SimpleReduxComponent, store } from "../SimpleReduxComponent"
-import { render, fireEvent, waitFor, screen, act } from "@testing-library/react"
+import {
+  SimpleReduxComponent,
+  SimpleReduxComponentForTesting,
+  store,
+} from "../SimpleReduxComponent"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { Provider } from "react-redux"
 import React from "react"
+import { Reducer } from "@reduxjs/toolkit"
 
 /**
  * RTL - https://testing-library.com/docs/react-testing-library/api#render
@@ -44,5 +49,46 @@ describe("SimpleReduxComponent user interactions", () => {
     fireEvent.click(screen.getByRole("list").children[0])
 
     expect(screen.getByRole("list").children).toHaveLength(2)
+  })
+})
+
+describe("SimpleReduxComponent reducer function", () => {
+  type State = SimpleReduxComponentForTesting._State | undefined
+  type Action = SimpleReduxComponentForTesting._Action
+  const reducerFn: Reducer<State, Action> = SimpleReduxComponentForTesting._reducerFn
+
+  test("sets initial state", () => {
+    const ignoredAction: Action = { type: "add", content: "text" }
+    const state: State = reducerFn(undefined, ignoredAction)
+    console.log(state)
+    expect(state!!.textArray).toHaveLength(2)
+  })
+
+  test("dispatch add action works", () => {
+    const action: Action = { type: "add", content: "foo" }
+    const initialState: State = {
+      textArray: [
+        { id: "id4", content: "fffff" },
+        { id: "id5", content: "gggg" },
+      ],
+    }
+    const newState: State = reducerFn(initialState, action)
+    console.log(newState)
+    expect(newState!!.textArray).toHaveLength(3)
+    expect(newState!!.textArray[2]).toMatchObject({ content: "foo" })
+  })
+
+  test("dispatch remove action works", () => {
+    const action: Action = { type: "remove", id: "id4" }
+    const initialState: State = {
+      textArray: [
+        { id: "id4", content: "fffff" },
+        { id: "id5", content: "gggg" },
+      ],
+    }
+    const newState: State = reducerFn(initialState, action)
+    console.log(newState)
+    expect(newState!!.textArray).toHaveLength(1)
+    expect(newState!!.textArray[0]).toMatchObject({ content: "gggg" })
   })
 })

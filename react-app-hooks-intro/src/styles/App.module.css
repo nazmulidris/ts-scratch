@@ -18,8 +18,8 @@
 @import "reset.css";
 
 body {
-  --variableWidthFont: "Google Sans Display", serif;
-  --fixedWidthFont: Menlo, monospace;
+  --variableWidthFont: "Roboto Slab Regular", serif;
+  --fixedWidthFont: "Fira Mono Regular", monospace;
   --defaultPadding: 8px;
   --alpha: 0.8;
   --defaultVaribleFontSize: 1rem;

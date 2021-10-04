@@ -99,3 +99,10 @@ const reducerFn: Reducer<State | undefined, Action> = (state, action): State => 
 export const store = configureStore({
   reducer: reducerFn,
 })
+
+// Export namespace for testing.
+export namespace SimpleReduxComponentForTesting {
+  export const _reducerFn: Reducer<State | undefined, Action> = reducerFn
+  export type _State = State
+  export type _Action = Action
+}

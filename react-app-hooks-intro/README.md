@@ -72,16 +72,16 @@ categories:
 - [Testing](#testing)
   - [Use RTL instead of Enzyme](#use-rtl-instead-of-enzyme)
   - [Install the required packages for RTL](#install-the-required-packages-for-rtl)
-  - [Writing simple unit tests](#writing-simple-unit-tests)
-    - [🔥 TODO More examples of unit tests](#-todo-more-examples-of-unit-tests)
-  - [Writing simple UI tests](#writing-simple-ui-tests)
-  - [Writing more complex UI tests](#writing-more-complex-ui-tests)
-  - [Writing snapshot tests](#writing-snapshot-tests)
-    - [Install the required packages for react-test-renderer](#install-the-required-packages-for-react-test-renderer)
+  - [Basic unit tests](#basic-unit-tests)
+  - [Complex unit tests](#complex-unit-tests)
+  - [Basic UI tests](#basic-ui-tests)
+  - [Complex UI tests](#complex-ui-tests)
   - [Writing integration tests](#writing-integration-tests)
-    - [Install the required package msw](#install-the-required-package-msw)
-    - [Basic integration tests](#basic-integration-tests)
-    - [🔥 TODO Advanced integration tests](#-todo-advanced-integration-tests)
+    - [Install msw package](#install-msw-package)
+    - [Mocking the server (REST API endpoints)](#mocking-the-server-rest-api-endpoints)
+    - [Testing the mocked server (REST API endpoints) itself](#testing-the-mocked-server-rest-api-endpoints-itself)
+    - [Using the mocked server in a UI test](#using-the-mocked-server-in-a-ui-test)
+  - [Writing snapshot tests](#writing-snapshot-tests)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -254,44 +254,19 @@ export namespace TheCatApi {
 }
 ```
 
-It can be used in other files (eg a test like
-[this](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.ts)). Here's an excerpt from this
-file.
-
-```typescript
-import { TheCatApi } from "../CatApiComponent"
-
-const restHandlerSearchOk: RestHandler = rest.get(
-  TheCatApi.search.host + TheCatApi.search.endpoint,
-  (
-    req: RestRequest<DefaultRequestBody, RequestParams>,
-    res: ResponseComposition,
-    ctx: RestContext
-  ) => res(ctx.json(cannedResponseOk))
-)
-
-const makeGetRequest: () => Promise<any> = async () =>
-  _let(TheCatApi.search, async (it) => {
-    axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
-    const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
-    return payload
-  })
-```
-
 It is possible to import a symbol from one namespace, into another namespace, even in the same file.
-Here's an excerpt from the `CatApiComponent.tsx` file used above.
+Here's an excerpt from the [`CatApiComponent.tsx`](src/components/cat_api/CatApiComponent.tsx) file
+used above.
 
 ```typescript
 namespace MyActions {
-  import CatApiSearchResult = TheCatApi.SearchResults
-
   interface ActionFetchStart {
     type: "fetchStart"
   }
 
   interface ActionFetchOk {
     type: "fetchOk"
-    payload: CatApiSearchResult[]
+    payload: TheCatApi.SearchResults[]
   }
 
   interface ActionFetchError {
@@ -302,6 +277,36 @@ namespace MyActions {
   export type Action = ActionFetchStart | ActionFetchOk | ActionFetchError
 }
 ```
+
+The encapsulated `namespace` for this web API can then be used in other files (eg:
+[`TestUtils.ts`](src/components/cat_api/__tests__/TestUtils.ts)) and
+[`TheCatApiEndpointMock.test.tsx`](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.tsx).
+Here are some excerpts from these files.
+
+```typescript
+import { TheCatApi } from "../CatApiComponent"
+
+export const restHandlerSearchOk: RestHandler = rest.get(
+  TheCatApi.search.host + TheCatApi.search.endpoint,
+  (
+    req: RestRequest<DefaultRequestBody, RequestParams>,
+    res: ResponseComposition,
+    ctx: RestContext
+  ) => res(ctx.json(cannedResponseOk))
+)
+
+export const makeGetRequest: () => Promise<any> = async () =>
+  _let(TheCatApi.search, async (it) => {
+    axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+    const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
+    return payload
+  })
+```
+
+The following sections show different ways to use `namespace`.
+
+- [One way of using namespaces to encapsulate React components for testing](#using-the-mocked-server-in-a-ui-test).
+- [Another way of using namespaces to only export testing related symbols for testing](#complex-unit-tests)
 
 ## Typescript readonly vs ReadonlyArray
 
@@ -1528,7 +1533,7 @@ Here are the steps to using Redux.
    ```
 
 > ⚡ Here's the full example in a single source file
-> [`SimpleReduxComponent`](src/components/redux/SimpleReduxComponent.tsx).
+> [`SimpleReduxComponent.tsx`](src/components/redux/SimpleReduxComponent.tsx).
 
 ### Immutability
 
@@ -1572,6 +1577,13 @@ Here are some of the top benefits of using Jest & RTL:
 4. You can do blackbox and integration testing by
    [mocking web services](https://github.com/mswjs/msw).
 
+> ⚡ More information on RTL:
+>
+> 1. [Introduction](https://testing-library.com/docs/react-testing-library/intro/)
+> 2. [Example w/ explanation](https://testing-library.com/docs/react-testing-library/example-intro/)
+> 3. [Example in codesandbox.io](https://codesandbox.io/s/github/kentcdodds/react-testing-library-examples)
+> 4. [Cheatsheet](https://testing-library.com/docs/react-testing-library/cheatsheet)
+
 ### Use RTL instead of Enzyme
 
 1. RTL is a replacement for [`Enzyme`](http://airbnb.io/enzyme/).
@@ -1614,13 +1626,6 @@ Here are some of the top benefits of using Jest & RTL:
    calls.
    [Here is an example](https://testing-library.com/docs/react-testing-library/example-intro).
 
-> ⚡ More information on RTL:
->
-> 1. [Introduction](https://testing-library.com/docs/react-testing-library/intro/)
-> 2. [Example w/ explanation](https://testing-library.com/docs/react-testing-library/example-intro/)
-> 3. [Example in codesandbox.io](https://codesandbox.io/s/github/kentcdodds/react-testing-library-examples)
-> 4. [Cheatsheet](https://testing-library.com/docs/react-testing-library/cheatsheet)
-
 ### Install the required packages for RTL
 
 To get started you should install the RTL and `jest-dom` packages.
@@ -1637,7 +1642,7 @@ Next, modify your [`src/setupTests.ts`](src/setupTests.ts) file by adding this l
 import "@testing-library/jest-dom"
 ```
 
-### Writing simple unit tests
+### Basic unit tests
 
 Writing simple unit tests are no different in Jest than they are using Jasmine. Here's an example of
 a simple unit test that is self contained and doesn't really have a system under test. The system
@@ -1689,9 +1694,94 @@ describe("MyMatcher -> myMatcher(arg)", () => {
 >   `new Clazz()[_x]`, which will be treated as a `number`.
 > - So you can assert `expect(typeof new Clazz()[_x]).toBe('number')`.
 
-#### 🔥 TODO More examples of unit tests
+### Complex unit tests
 
-### Writing simple UI tests
+Let's write a test for the reducer function of
+[`SimpleReduxComponent.tsx`](src/components/redux/SimpleReduxComponent.tsx). The tests will be
+pretty simple, w/ the only complication being the way in which the function and types themselves are
+exported. The test needs to know some internals about the component which users of this component
+don't really need to know about (nor should they, since that would break encapsulation).
+
+In order to implement this, one approach is to use a namespace that simply exports only the required
+symbols for testing (this is done in the `SimpleReduxComponent.tsx` file). Here are the fewest
+symbols that need to be accessible by the test.
+
+```typescript jsx
+// Export namespace for testing.
+export namespace SimpleReduxComponentForTesting {
+  export const _reducerFn: Reducer<State | undefined, Action> = reducerFn
+  export type _State = State
+  export type _Action = Action
+}
+```
+
+> 💡 The symbols all have to be renamed for this namespace, otherwise, they would collide w/ their
+> original declarations.
+
+These symbols are then imported in the actual test, like this:
+
+```typescript jsx
+import { SimpleReduxComponentForTesting } from "../SimpleReduxComponent"
+type State = SimpleReduxComponentForTesting._State | undefined
+type Action = SimpleReduxComponentForTesting._Action
+const reducerFn: Reducer<State, Action> = SimpleReduxComponentForTesting._reducerFn
+```
+
+Now that the exports are complete, the test itself is pretty simple. Here's the
+[`SimpleReduxComponent.test.tsx`](src/components/redux/__tests__/SimpleReduxComponent.test.tsx). The
+test is pretty simple, it does the following things:
+
+1. Tests to see that the initial state is generated correctly by the reducer function.
+2. Tests to see whether dispatching an add action actually adds something to the state.
+3. Tests to see whether dispatching a remove action actually removes something from the state.
+
+```typescript jsx
+import { SimpleReduxComponentForTesting } from "../SimpleReduxComponent"
+import { Reducer } from "@reduxjs/toolkit"
+
+describe("SimpleReduxComponent reducer function", () => {
+  type State = SimpleReduxComponentForTesting._State | undefined
+  type Action = SimpleReduxComponentForTesting._Action
+  const reducerFn: Reducer<State, Action> = SimpleReduxComponentForTesting._reducerFn
+
+  test("sets initial state", () => {
+    const ignoredAction: Action = { type: "add", content: "text" }
+    const state: State = reducerFn(undefined, ignoredAction)
+    console.log(state)
+    expect(state!!.textArray).toHaveLength(2)
+  })
+
+  test("dispatch add action works", () => {
+    const action: Action = { type: "add", content: "foo" }
+    const initialState: State = {
+      textArray: [
+        { id: "id4", content: "fffff" },
+        { id: "id5", content: "gggg" },
+      ],
+    }
+    const newState: State = reducerFn(initialState, action)
+    console.log(newState)
+    expect(newState!!.textArray).toHaveLength(3)
+    expect(newState!!.textArray[2]).toMatchObject({ content: "foo" })
+  })
+
+  test("dispatch remove action works", () => {
+    const action: Action = { type: "remove", id: "id4" }
+    const initialState: State = {
+      textArray: [
+        { id: "id4", content: "fffff" },
+        { id: "id5", content: "gggg" },
+      ],
+    }
+    const newState: State = reducerFn(initialState, action)
+    console.log(newState)
+    expect(newState!!.textArray).toHaveLength(1)
+    expect(newState!!.textArray[0]).toMatchObject({ content: "gggg" })
+  })
+})
+```
+
+### Basic UI tests
 
 In order to write UI tests we will be using a combination of APIs from:
 
@@ -1746,7 +1836,7 @@ test("clicking item removes it", async () => {
 })
 ```
 
-### Writing more complex UI tests
+### Complex UI tests
 
 In this section we will write a test that deals with resizing a browser window (such as what you
 would need to do to test media queries). Here are the key things that we will cover in this example:
@@ -1852,6 +1942,237 @@ describe("media query test", () => {
 > one of your functions. This ensures that all the required work has been done before you make your
 > DOM assertions.
 
+### Writing integration tests
+
+#### Install msw package
+
+In order to mock web services, you will need to install the
+[`msw` module](https://github.com/mswjs/msw) as a dev dependency.
+
+```shell
+npm i -D msw
+```
+
+> ⚡ Learn more about mocking REST APIs (using `msw`)
+> [here](https://mswjs.io/docs/getting-started/mocks/rest-api).
+
+> ⚡ This is a great
+> [tutorial](https://dev.to/kettanaito/type-safe-api-mocking-with-mock-service-worker-and-typescript-21bf)
+> on using `msw` and Typescript.
+
+#### Mocking the server (REST API endpoints)
+
+Before we get started writing the test, here are some functions that need to be created in order to
+mock the search endpoint of the `TheCatApi.com`.
+
+> ⚡ Here's the full source file [`TestUtils.ts`](src/components/cat_api/__tests__/TestUtils.ts).
+
+1. **Setup and teardown** - Create the server and tie its start and stop w/ the lifecycle of the
+   tests.
+
+   ```typescript
+   export function setupAndTeardown(): SetupServerApi {
+     const server: SetupServerApi = setupServer()
+     beforeAll(() => server.listen())
+     afterEach(() => server.resetHandlers())
+     afterAll(() => server.close())
+     return server
+   }
+   ```
+
+   > ⚠ Make sure to call `setupAndTeardown()` at the start of your actual UI test.
+
+2. **[Define](https://stackoverflow.com/questions/1410563/what-is-the-difference-between-a-definition-and-a-declaration)
+   the data returned by the mock API** - Here are some supporting constants that are needed in the
+   next steps.
+
+   ```typescript
+   export const cannedResponseOk = [
+     {
+       breeds: [],
+       categories: [],
+       id: "jK5X2xGJ7",
+       url: "https://cdn2.thecatapi.com/images/jK5X2xGJ7.jpg",
+     },
+     {
+       breeds: [],
+       categories: [],
+       id: "9c6",
+       url: "https://cdn2.thecatapi.com/images/9c6.jpg",
+     },
+     {
+       breeds: [],
+       categories: [],
+       id: "ab8",
+       url: "https://cdn2.thecatapi.com/images/ab8.jpg",
+     },
+   ]
+   const TheCatApi = {
+     apiKey: process.env.REACT_APP_CAT_API_KEY,
+     search: {
+       host: "https://api.thecatapi.com",
+       endpoint: "/v1/images/search",
+       config: { params: { limit: 3, size: "full" } },
+     },
+   }
+   ```
+
+3. **Mock the REST API w/ handlers for the happy path** - Create the function that handles HTTP GET
+   requests that are made to `https://api.thecatapi.com/v1/images/search`.
+
+   ```typescript
+   // More info: https://mswjs.io/docs/getting-started/mocks/rest-api
+   export const restHandlerSearchOk: RestHandler = rest.get(
+     TheCatApi.search.host + TheCatApi.search.endpoint,
+     (
+       req: RestRequest<DefaultRequestBody, RequestParams>,
+       res: ResponseComposition,
+       ctx: RestContext
+     ) => {
+       console.log("restHandlerSearchOk.req", req)
+       // console.log("req.url.searchParams", req.url.searchParams)
+       // console.log("req.params", req.params)
+       return res(ctx.json(cannedResponseOk))
+     }
+   )
+   ```
+
+4. **Mock the REST API w/ handlers for the unhappy path** - Create a function that handles returning
+   a  
+   [`500` HTTP error code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) for HTTP
+   GET requests that are made to `https://api.thecatapi.com/v1/images/search`.
+
+   ```typescript
+   export const restHandlerSearchError: RestHandler = rest.get(
+     TheCatApi.search.host + TheCatApi.search.endpoint,
+     (
+       req: RestRequest<DefaultRequestBody, RequestParams>,
+       res: ResponseComposition,
+       ctx: RestContext
+     ) => {
+       console.log("restHandlerSearchError.req", req)
+       // console.log("req.url.searchParams", req.url.searchParams)
+       // console.log("req.params", req.params)
+       return res(ctx.status(500))
+     }
+   )
+   ```
+
+#### Testing the mocked server (REST API endpoints) itself
+
+Now w/ the setup and supporting functions out of the way, we can actually write the tests. The tests
+shown here actually don't have a React component under test, they're just tests that make `axios`
+calls to the mocked API endpoints.
+
+> ⚡ Here's the full source file
+> [`TheCatApiEndpointMock.test.tsx`](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.tsx).
+
+1. **Setup the server** - The first step is calling `setupAndTeardown()` at the start of your test.
+
+   ```typescript
+   const server: SetupServerApi = setupAndTeardown()
+   ```
+
+2. **Test the happy path mocked endpoint** - The test does quite a few things.
+
+   ```typescript
+   test("TheCatApi search endpoint works", async () => {
+     server.use(restHandlerSearchOk)
+     axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+     _also(TheCatApi.search, async (it) => {
+       const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
+       expect(payload).toHaveLength(3)
+     })
+   })
+   ```
+
+   1. First, it sets up the server to handle the search endpoint of the REST API.
+      - It binds the `restHandlerSearchOk` to the server via `server.use()`.
+      - All `RestHandlers` registered via `use()` will be torn down after each test in the
+        `afterEach()` call (declared in in the first step).
+   2. Then, it connects to the `msw` mock server and makes the GET request, gets the response, and
+      makes the assertion that 3 items are in the `payload`.
+
+      > ⚠ One thing to note is that the URL query params that are sent via HTTP GET (from the
+      > `axios` call in the following step) don't actually show up on the mocked server. However,
+      > the headers do show up.
+
+3. **Test the unhappy path mocked endpoint** - This test is very similar to the previous one, except
+   that the REST API is mocked to throw a
+   [`500` HTTP error code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500). It also
+   demonstrates how to detect errors for async functions.
+
+   ```typescript
+   // More info: https://stackoverflow.com/a/47887098/2085356
+   const makeGetRequest: () => Promise<any> = async () =>
+     _let(TheCatApi.search, async (it) => {
+       axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
+       const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
+       return payload
+     })
+
+   test("TheCatApi endpoint fails as expected", async () => {
+     server.use(restHandlerSearchError)
+     await expect(makeGetRequest()).rejects.toThrow(Error)
+   })
+   ```
+
+#### Using the mocked server in a UI test
+
+Now that we have the endpoints mocked and tested, we can write tests that renders a React component
+which uses these endpoints.
+
+> ⚡ Here's the full source file
+> [`TheCatApiEndpointMock.test.tsx`](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.tsx).
+
+We are going to write two tests. One that makes sure that the `CatApiComponent` renders a list of
+images when the search endpoint returns a valid result. Another that renders an error message when
+the search endpoint returns an error. Here's the `describe` block containing these which is simply
+added to our previous test.
+
+```typescript jsx
+import { CatApiComponent, TheCatApi } from "../CatApiComponent"
+
+describe("CatApiComponent works as expected ⤵", () => {
+  test("Component renders results with API happy path", async () => {
+    server.use(restHandlerSearchOk)
+    render(<CatApiComponent.FC />)
+    await waitFor(() => screen.getByRole("list"))
+    console.log(prettyDOM(screen.getByRole("list")))
+    expect(screen.getAllByRole("listitem").length).toBe(3)
+  })
+
+  test("Component renders error state with API unhappy path", async () => {
+    server.use(restHandlerSearchError)
+    render(<CatApiComponent.FC />)
+    await waitFor(() => screen.getByTestId(CatApiComponent.TestIds.fetchError))
+    console.log(prettyDOM(screen.getByTestId(CatApiComponent.TestIds.fetchError)))
+    expect(screen.getByRole("heading")).toHaveTextContent(
+      "Error: Request failed with status code 500"
+    )
+  })
+})
+```
+
+There are a couple of things to note in this test.
+
+1. You can use ARIA to search for components using `screen.getByRole()` or you can use the
+   `data-testid` / `screen.getByTestId()` mechanism. You can see the use of each one in the test
+   above.
+2. Since we are using test ids, we are wrapping the ids and the React component in the
+   `CatApiComponent` namespace. This allows us to have clean import statements that don't result in
+   collisions of this component's test ids w/ any other variables or imports.
+
+   1. We can access the test ids via `CatApiComponent.TestIds`.
+   2. We can access the React component via `CatApiComponent.FC`.
+
+3. The
+   [`prettyDOM()`](https://testing-library.com/docs/dom-testing-library/api-debugging/#prettydom)
+   function is really useful when trying to get a handle on the structure of the DOM for your
+   assertions.
+4. Since we are making async `axios` calls, we need to use `await waitFor(()=>screen.???)` so that
+   the DOM is actually populated before we make our assertions.
+
 ### Writing snapshot tests
 
 Snapshot testing was introduced in Jest around 2016, and it's meant to be a lightweight way to
@@ -1870,17 +2191,17 @@ to be an easy way to do UI testing. There is no need to write any assertions for
 the DOM. Simply save the "last known good" snapshot of a component, and when any changes are made to
 this component they will automatically be compared to the saved snapshot (when the tests are run).
 
-#### Install the required packages for react-test-renderer
-
-In order to write these tests we must use `react-test-renderer` and not the RTL or
-`dom-testing-library`. Here are the things you must install to get started.
-
-```shell
-# Install the package.
-npm install react-test-renderer
-# Get the Typescript bindings for your IDE.
-npm i --save-dev @types/react-test-renderer
-```
+> ⚡ Install the required packages for react-test-renderer
+>
+> In order to write these tests we must use `react-test-renderer` and not the RTL or
+> `dom-testing-library`. Here are the things you must install to get started.
+>
+> ```shell
+> # Install the package.
+> npm install react-test-renderer
+> # Get the Typescript bindings for your IDE.
+> npm i --save-dev @types/react-test-renderer
+> ```
 
 Here's a simple snapshot test for the
 [`ComponentWithoutState.tsx`](src/components/basics/ComponentWithoutState.tsx).
@@ -1910,152 +2231,3 @@ it("ComponentWithoutState renders correctly", function () {
 When a snapshot is updated it will create a file that you should check into your version control.
 Here's an example of a snapshot file generated by the test above
 [`/__tests__/__snapshots__/ComponentWithoutState.snapshot.test.tsx.snap`](src/components/basics/__tests__/__snapshots__/ComponentWithoutState.snapshot.test.tsx.snap).
-
-### Writing integration tests
-
-#### Install the required package msw
-
-In order to mock web services, you will need to install the
-[`msw` module](https://github.com/mswjs/msw) as a dev dependency.
-
-```shell
-npm i -D msw
-```
-
-> ⚡ Learn more about mocking REST APIs (using `msw`)
-> [here](https://mswjs.io/docs/getting-started/mocks/rest-api).
-
-> ⚡ This is a great
-> [tutorial](https://dev.to/kettanaito/type-safe-api-mocking-with-mock-service-worker-and-typescript-21bf)
-> on using `msw` and Typescript.
-
-#### Basic integration tests
-
-Before we get started w/ the test, here are some supporting constants that are needed in the next
-steps.
-
-> ⚡ Here's the full source file
-> [TheCatApiEndpointMock.test.ts](src/components/cat_api/__tests__/TheCatApiEndpointMock.test.ts).
-
-```typescript
-const cannedResponseOk = [
-  {
-    breeds: [],
-    categories: [],
-    id: "jK5X2xGJ7",
-    url: "https://cdn2.thecatapi.com/images/jK5X2xGJ7.jpg",
-  },
-  {
-    breeds: [],
-    categories: [],
-    id: "9c6",
-    url: "https://cdn2.thecatapi.com/images/9c6.jpg",
-  },
-  {
-    breeds: [],
-    categories: [],
-    id: "ab8",
-    url: "https://cdn2.thecatapi.com/images/ab8.jpg",
-  },
-]
-const TheCatApi = {
-  apiKey: process.env.REACT_APP_CAT_API_KEY,
-  search: {
-    host: "https://api.thecatapi.com",
-    endpoint: "/v1/images/search",
-    config: { params: { limit: 3, size: "full" } },
-  },
-}
-```
-
-Here are the steps that you need to take to create a test to mock the `TheCatApi.com`.
-
-1. **Setup and teardown** - Create the server and tie its start and stop w/ the lifecycle of the
-   tests.
-
-   ```typescript
-   const server: SetupServerApi = setupServer()
-   beforeAll(() => server.listen())
-   afterEach(() => server.resetHandlers())
-   afterAll(() => server.close())
-   ```
-
-2. **Mock the REST API w/ handlers** - Create the function that handles HTTP GET requests that are
-   made to `https://api.thecatapi.com/v1/images/search`.
-
-   ```typescript
-   // More info: https://mswjs.io/docs/getting-started/mocks/rest-api
-   const restHandlerSearchOk: RestHandler = rest.get(
-     TheCatApi.search.host + TheCatApi.search.endpoint,
-     (
-       req: RestRequest<DefaultRequestBody, RequestParams>,
-       res: ResponseComposition,
-       ctx: RestContext
-     ) => {
-       console.log("restHandlerSearchOk.req", req)
-       // console.log("req.url.searchParams", req.url.searchParams)
-       // console.log("req.params", req.params)
-       return res(ctx.json(cannedResponseOk))
-     }
-   )
-   ```
-
-3. **Test the mocked endpoint** - The test does quite a few things.
-
-   ```typescript
-   test("TheCatApi search endpoint works", async () => {
-     server.use(restHandlerSearchOk)
-     axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
-     _also(TheCatApi.search, async (it) => {
-       const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
-       expect(payload).toHaveLength(3)
-     })
-   })
-   ```
-
-   1. First, it sets up the server to handle the search endpoint of the REST API.
-      - It binds the `restHandlerSearchOk` to the server via `server.use()`.
-      - All `RestHandlers` registered via `use()` will be torn down after each test in the
-        `afterEach()` call (declared in in the first step).
-   2. Then, it connects to the `msw` mock server and makes the GET request, gets the response, and
-      makes the assertion that 3 items are in the `payload`.
-
-      > ⚠ One thing to note is that the URL query params that are sent via HTTP GET (from the
-      > `axios` call in the following step) don't actually show up on the mocked server. However,
-      > the headers do show up.
-
-4. **Test the mocked endpoint for errors** - This test is very similar to the previous one, except
-   that the REST API is mocked to throw a
-   [`500` HTTP error code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500). It also
-   demonstrates how to detect errors for async functions.
-
-   ```typescript
-   const restHandlerSearchError: RestHandler = rest.get(
-     TheCatApi.search.host + TheCatApi.search.endpoint,
-     (
-       req: RestRequest<DefaultRequestBody, RequestParams>,
-       res: ResponseComposition,
-       ctx: RestContext
-     ) => {
-       console.log("restHandlerSearchError.req", req)
-       // console.log("req.url.searchParams", req.url.searchParams)
-       // console.log("req.params", req.params)
-       return res(ctx.status(500))
-     }
-   )
-
-   // More info: https://stackoverflow.com/a/47887098/2085356
-   const makeGetRequest: () => Promise<any> = async () =>
-     _let(TheCatApi.search, async (it) => {
-       axios.defaults.headers.common["x-api-key"] = TheCatApi.apiKey
-       const { data: payload } = await axios.get(it.host + it.endpoint, it.config)
-       return payload
-     })
-
-   test("TheCatApi endpoint fails as expected", async () => {
-     server.use(restHandlerSearchError)
-     await expect(makeGetRequest()).rejects.toThrow(Error)
-   })
-   ```
-
-#### 🔥 TODO Advanced integration tests
