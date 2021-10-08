@@ -19,7 +19,7 @@
 
 body {
   --variableWidthFont: "Roboto Slab Regular", serif;
-  --fixedWidthFont: "Fira Mono Regular", monospace;
+  --fixedWidthFont: "Victor Mono Font", monospace;
   --defaultPadding: 8px;
   --alpha: 0.8;
   --defaultVaribleFontSize: 1rem;

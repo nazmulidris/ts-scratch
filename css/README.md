@@ -1,16 +1,16 @@
-## CSS Handbook
-
-Here are some tips and tricks used in this project.
+# CSS Handbook
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [Introduction](#introduction)
 - [Great CSS references](#great-css-references)
-- [Import normalize.css](#import-normalizecss)
+- [Use CSS Reset](#use-css-reset)
+- [Use normalize.css](#use-normalizecss)
 - [Difference between body and html (:root)](#difference-between-body-and-html-root)
 - [Local vs global scope CSS variables (custom properties)](#local-vs-global-scope-css-variables-custom-properties)
 - [Using CSS class pseudo selectors to style child elements of a parent](#using-css-class-pseudo-selectors-to-style-child-elements-of-a-parent)
-- [img vs CSS background-image](#img-vs-css-background-image)
+- [CSS background-image vs img tag](#css-background-image-vs-img-tag)
 - [SVG and CSS](#svg-and-css)
 - [CSS layouts](#css-layouts)
   - [Box model and CSS sizing](#box-model-and-css-sizing)
@@ -29,18 +29,22 @@ Here are some tips and tricks used in this project.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-### Great CSS references
+## Introduction
 
-Courses
+This handbook and its accompanying [code][gh-repo] is a reference guide on how to understand and use
+CSS to build web applications that incorporate responsive design using Grid, Flexbox, and media
+queries.
 
-- [educative.io: CSS, Flexbox, responsive design](https://www.educative.io/courses/web-layouts-css-and-flexbox/YMo5Wj21o4W)
+You can jump directly to any topic in the table of contents that you are curious about in this
+handbook, you don't have to read it from start to finish.
 
-> Note avoid [this course](https://www.educative.io/courses/the-complete-advanced-guide-to-css) as
-> it is total crap. Also avoid [this one](https://www.educative.
-> io/module/lesson/css-basics/B86K8q0DLzN) which is a mash up of random crap including
-> aforementioned bad course.
+> ⚡ The source code for this handbook can be found in this [github repo][gh-repo].
 
-Resources
+[gh-repo]: https://github.com/nazmulidris/ts-scratch/tree/main/css
+
+## Great CSS references
+
+The following references are really useful when working w/ CSS.
 
 - [Codrops](https://tympanus.net/codrops/css_reference/)
 - [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference)
@@ -48,10 +52,22 @@ Resources
 - [colorhunt.com](https://www.colorhunt.co/)
 - [freesvg.org](https://freesvg.org)
 
-### Import normalize.css
+## Use CSS Reset
 
-Here's the [github repo](https://github.com/necolas/normalize.css/) for Normalize.css. You can
-either:
+Browsers have defaults (the user agent stylesheet) and you can reset them using CSS Reset. Here's
+how you can use it in your React app.
+
+1. Copy the contents of this [CSS file](https://meyerweb.com/eric/tools/css/reset/reset.css) into a
+   file named `reset.css`. Feel free to modify this file to suit your needs.
+2. Then add `@import "reset.css";` to your app's main CSS file.
+3. You can also add entries for elements like `button` and `input` which are not explicitly set by
+   the default Reset CSS stylesheet (and thus end up using user agent stylesheet, which is the
+   default behavior that we don't want and why we are using Reset CSS in the first place).
+
+## Use normalize.css
+
+Instead of CSS Reset you can also use Normalize.css. Here's the
+[github repo](https://github.com/necolas/normalize.css/) for Normalize.css. You can either:
 
 1. Download the CSS file and import it.
 2. Import the CDN URLs (from the repo's README) which can be found
@@ -65,14 +81,19 @@ either:
 3. Or just get the latest version from the github repo itself:
    `https://necolas.github.io/normalize.css/latest/normalize.css`.
 
-### Difference between body and html (:root)
+Code example
 
-`html` and `:root` are the same. There are subtle differences between them and `body`. One manifests
-when we try to use `line-height` in `:root` / `html`. It simply does not work. But it does work when
-applied to `body`. Here's some [vague indication](https://css-tricks.com/html-vs-body-in-css/) as to
-why this might be happening.
+- [HTML](src/project-1/index.html)
+- [CSS](src/project-1/index.css)
 
-So this does not work.
+## Difference between body and html (:root)
+
+In CSS `html` and `:root` are the same. But, there are subtle differences between them and `body`.
+One manifests when we try to use `line-height` in `:root` / `html`. It simply does not work. But it
+does work when applied to `body`. Here's some
+[vague indication](https://css-tricks.com/html-vs-body-in-css/) as to why this might be happening.
+
+So the following doesn't work.
 
 ```css
 :root {
@@ -84,7 +105,7 @@ html {
 }
 ```
 
-This does.
+And the following does.
 
 ```css
 body {
@@ -92,7 +113,12 @@ body {
 }
 ```
 
-### Local vs global scope CSS variables (custom properties)
+Code example
+
+- [HTML](src/project-1/index.html)
+- [CSS](src/project-1/index.css)
+
+## Local vs global scope CSS variables (custom properties)
 
 CSS variables are actually called
 [`custom properties`](https://tympanus.net/codrops/css_reference/custom-properties/). Usually they
@@ -119,7 +145,12 @@ a:hover {
 > Please refer to the [responsive design](#media-queries--responsive-design) section to read about
 > best practices for using variables and CSS (flexbox, grid, etc).
 
-### Using CSS class pseudo selectors to style child elements of a parent
+Code example
+
+- [HTML](src/project-1/index.html)
+- [CSS](src/project-1/index.css)
+
+## Using CSS class pseudo selectors to style child elements of a parent
 
 Using CSS class pseudo selectors in order to style child elements of a parent (which has this style
 applied) w/out having to manually assign classes to each of these children. Let's say that the
@@ -129,11 +160,11 @@ parent element has a class `DottedBox`, which will do this, here's the CSS. Here
 1. `.DottedBox { padding: 8pt; border: 4pt dotted cornflowerblue; }`
 2. `.DottedBox > * { /* this gets applied to all the children */ }`
 
-### img vs CSS background-image
+## CSS background-image vs img tag
 
 Here's a great
 [SO thread](https://stackoverflow.com/questions/492809/when-to-use-img-vs-css-background-image) on
-this topic. To summarize:
+when to use CSS `background-image` vs using the `img` tag. To summarize:
 
 - Use `img` tag when the image is part of the content (foreground).
 - Use CSS `background-image` when:
@@ -145,7 +176,12 @@ this topic. To summarize:
      [`background`](https://developer.mozilla.org/en-US/docs/Web/CSS/background) shorthand (here's
      an example [index.css](src/project-2/index.css)).
 
-### SVG and CSS
+Code example
+
+- [HTML](src/project-3/index.html)
+- [CSS](src/project-3/index.css)
+
+## SVG and CSS
 
 It is possible to style SVG w/ CSS, just as you would HTML w/ CSS. However, there are some browser
 support issues. Not all the ways are supported by Chrome. There are various ways of importing the
@@ -154,9 +190,9 @@ CSS file into the SVG file which is where the browser support issues show up.
 So the most reliable way might be to use embedded SVG and then style it inline. Or use JS to set the
 style of SVG elements in the DOM.
 
-### CSS layouts
+## CSS layouts
 
-#### Box model and CSS sizing
+### Box model and CSS sizing
 
 There are 2 box sizing models. The `box-sizing` rule determines whether padding and margin are
 included when calculating the width and height of a "box" / element.
@@ -164,7 +200,7 @@ included when calculating the width and height of a "box" / element.
 1. By default it is set to `box-sizing: content-box;` which does not account for padding and margin.
 2. You can set it to `box-sizing: border-box;` which "includes" the padding and margins.
 
-#### Hiding things
+### Hiding things
 
 There are two approaches, here are [more details](https://stackoverflow.com/a/133064/2085356).
 
@@ -173,7 +209,7 @@ There are two approaches, here are [more details](https://stackoverflow.com/a/13
 2. `visibility:hidden` - The element is rendered and space is allocated on the page, but it is not
    shown.
 
-#### Flow layout - display: inline, block, inline-block
+### Flow layout - display: inline, block, inline-block
 
 The `display` rule determines whether an element is displayed in line or with a line break in a
 [`CSS flow layout`](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flow_Layout). By default
@@ -190,13 +226,13 @@ some elements are displayed inline (such as `button`). To change this you can sp
 The `display` rule can also be used to switch to `flex` and `grid` layouts, which also affect the
 positioning and sizing of their children elements.
 
-#### CSS Positioning
+### CSS Positioning
 
 > Use Grid and Flexbox instead of absolute positioning whenever possible.
 
 - [MDN guide](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Positioning)
 
-##### Absolute and relative positioning
+#### Absolute and relative positioning
 
 References and notes
 
@@ -212,7 +248,7 @@ References and notes
 - You can also use the `z-index` property in order to how the element "stacks up" when changing the
   default positioning of elements.
 
-##### Fixed positioning
+#### Fixed positioning
 
 - This works in exactly the same way as absolute positioning, with one key difference:
   - whereas absolute positioning fixes an element in place relative to its nearest positioned
@@ -220,20 +256,20 @@ References and notes
   - fixed positioning usually fixes an element in place relative to the visible portion of the
     viewport.
 
-##### Sticky positioning
+#### Sticky positioning
 
 - This is a hybrid between fixed and relative. It allows a positioned element to act like it's
   relatively positioned until it's scrolled to a certain threshold (e.g., 10px from the top of the
   viewport), after which it becomes fixed. This can be used, for example, to cause a navigation bar
   to scroll with the page until a certain point and then stick to the top of the page.
 
-#### CSS floats
+### CSS floats
 
 > Use Grid and Flexbox instead of this.
 
 - [MDN Guide](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Floats)
 
-#### Flex layout - display: flex
+### Flex layout - display: flex
 
 Code example
 
@@ -299,7 +335,7 @@ Here are some interesting things to note.
     `flex-basis` values in one go.
     - [Tutorial](https://css-tricks.com/understanding-flex-grow-flex-shrink-and-flex-basis/)
 
-#### Grid layout - display: grid
+### Grid layout - display: grid
 
 Code example
 
@@ -349,7 +385,7 @@ Future stuff
 
 - [masonry layout](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout/Masonry_Layout)
 
-### Media queries & responsive design
+## Media queries & responsive design
 
 - [MDN guide](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Media_queries)
 - Make sure the HTML has a
@@ -404,7 +440,7 @@ Future stuff
   }
   ```
 
-### Modal dialog using CSS
+## Modal dialog using CSS
 
 Code example
 
@@ -440,7 +476,7 @@ Notes
   is possible to simply close the dialog when _any_ click or key press occurs, but that seems janky,
   given `Esc` is already hooked up by default to do this.
 
-### How to add emoji to website in HTML, CSS, or JavaScript
+## How to add emoji to website in HTML, CSS, or JavaScript
 
 Reference
 

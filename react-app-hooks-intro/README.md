@@ -68,7 +68,7 @@ categories:
 - [Redux](#redux)
   - [Simple example (no async, thunks, or splitting reducers)](#simple-example-no-async-thunks-or-splitting-reducers)
   - [Immutability](#immutability)
-  - [🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)](#-todo-advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
+  - [Advanced example (using async, thunks, splitting reducers, and complex selectors)](#advanced-example-using-async-thunks-splitting-reducers-and-complex-selectors)
 - [Testing](#testing)
   - [Use RTL instead of Enzyme](#use-rtl-instead-of-enzyme)
   - [Install the required packages for RTL](#install-the-required-packages-for-rtl)
@@ -1555,7 +1555,14 @@ suffice for most situations.
 You can also use lodash [clone](https://lodash.com/docs#clone) instead of the idioms shown above.
 Yet another approach is to use the [immer](https://immerjs.github.io/immer/) library.
 
-### 🔥 TODO Advanced example (using async, thunks, splitting reducers, and complex selectors)
+### Advanced example (using async, thunks, splitting reducers, and complex selectors)
+
+🔥 TODO
+
+- use redux fundamentals tutorial
+- selectors
+- async
+- middleware
 
 ## Testing
 
