@@ -74,6 +74,7 @@ describe("SimpleReduxComponent reducer function", () => {
     }
     const newState: State = reducerFn(initialState, action)
     console.log(newState)
+    expect(initialState).not.toEqual(newState)
     expect(newState!!.textArray).toHaveLength(3)
     expect(newState!!.textArray[2]).toMatchObject({ content: "foo" })
   })
@@ -88,6 +89,7 @@ describe("SimpleReduxComponent reducer function", () => {
     }
     const newState: State = reducerFn(initialState, action)
     console.log(newState)
+    expect(initialState).not.toEqual(newState)
     expect(newState!!.textArray).toHaveLength(1)
     expect(newState!!.textArray[0]).toMatchObject({ content: "gggg" })
   })

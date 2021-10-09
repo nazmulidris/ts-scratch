@@ -1374,6 +1374,13 @@ npm install @reduxjs/toolkit react-redux
 > [section](#usereducer). It is an easy way to understand the fundamentals of Redux which is
 > actions, state, reducer functions, and immutable state.
 
+While Redux helps you deal with shared state management, it has tradeoffs. You have to buy into its
+mental model, and structure your code and thoughts in a Redux-compliant way. As a developer you are
+used to modifying state imperatively, and the notion of having to request changes to be made
+declaratively might be something you've not seen before. It also adds some indirection to your code,
+and asks you to follow certain restrictions. It's a trade-off between short term and long term
+productivity.
+
 ### Simple example (no async, thunks, or splitting reducers)
 
 > 💡 We will use a Typescript feature called
@@ -1768,6 +1775,7 @@ describe("SimpleReduxComponent reducer function", () => {
     }
     const newState: State = reducerFn(initialState, action)
     console.log(newState)
+    expect(initialState).not.toEqual(newState)
     expect(newState!!.textArray).toHaveLength(3)
     expect(newState!!.textArray[2]).toMatchObject({ content: "foo" })
   })
@@ -1782,6 +1790,7 @@ describe("SimpleReduxComponent reducer function", () => {
     }
     const newState: State = reducerFn(initialState, action)
     console.log(newState)
+    expect(initialState).not.toEqual(newState)
     expect(newState!!.textArray).toHaveLength(1)
     expect(newState!!.textArray[0]).toMatchObject({ content: "gggg" })
   })
