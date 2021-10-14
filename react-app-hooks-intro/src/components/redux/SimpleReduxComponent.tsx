@@ -12,8 +12,28 @@ export const SimpleReduxComponent: FC = () => {
   const state: DefaultRootState = useSelector((state) => state)
   const myState = state as State
 
-  const addListItem = () =>
-    _also(
+  return render()
+
+  function render() {
+    return (
+      <div className={styles.Container}>
+        <strong>SimpleReduxComponent</strong>
+        <button id={MyAddButtonId} onClick={addListItem}>
+          Add ➕
+        </button>
+        <ol>
+          {myState.textArray.map((text) => (
+            <li key={text.id} onClick={() => removeListItem(text.id)}>
+              {text.content}
+            </li>
+          ))}
+        </ol>
+      </div>
+    )
+  }
+
+  function addListItem() {
+    return _also(
       {
         type: "add",
         content: "NazmulMaretIdris".substring(Math.floor(Math.random() * 15)),
@@ -22,29 +42,13 @@ export const SimpleReduxComponent: FC = () => {
         store.dispatch(it)
       }
     )
+  }
 
-  const removeListItem = (it: string) =>
-    _also({ type: "remove", id: it } as ActionRemove, (it) => {
+  function removeListItem(it: string) {
+    return _also({ type: "remove", id: it } as ActionRemove, (it) => {
       store.dispatch(it)
     })
-
-  const render = () => (
-    <div className={styles.Container}>
-      <strong>SimpleReduxComponent</strong>
-      <button id={MyAddButtonId} onClick={addListItem}>
-        Add ➕
-      </button>
-      <ol>
-        {myState.textArray.map((text) => (
-          <li key={text.id} onClick={() => removeListItem(text.id)}>
-            {text.content}
-          </li>
-        ))}
-      </ol>
-    </div>
-  )
-
-  return render()
+  }
 }
 
 // Types.

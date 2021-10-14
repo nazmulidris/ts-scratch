@@ -96,6 +96,8 @@ namespace MyReducers {
 
 // Functional component.
 export namespace CatApiComponent {
+  import SearchResults = TheCatApi.SearchResults
+
   export enum TestIds {
     fetchError,
     fetchOk,
@@ -125,9 +127,9 @@ export namespace CatApiComponent {
       // Note when returning an array, make sure that each item has a unique key prop.
       return (
         <ul data-testid={TestIds.fetchOk}>
-          {_also(new Array<ReactElement>(), (it) => {
+          {_also(new Array<ReactElement>(), (elem) => {
             cats.forEach((cat) =>
-              it.push(
+              elem.push(
                 <li key={cat.id}>
                   <TooltipOverlay tooltipText={cat.id}>
                     <img className={componentStyles.Image} src={cat.url} />
