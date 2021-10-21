@@ -1,0 +1,13 @@
+{
+  "extends": "@sindresorhus/tsconfig",
+  "compilerOptions": {
+    "module": "ES2020", // Generate ECMAScript modules.
+    "moduleResolution": "Node", // Module resolution for Node.
+    "allowSyntheticDefaultImports": true, // Allow legacy CommonJS modules to be imported.
+    "strict": true, // Enable strict mode in TypeScript.
+    "jsx": "react",
+    "esModuleInterop": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
