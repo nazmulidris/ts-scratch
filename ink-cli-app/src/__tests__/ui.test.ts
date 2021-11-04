@@ -16,7 +16,7 @@ describe("my test suite", () => {
 describe("ink test suite", () => {
   test("greet unknown user", () => {
     const { lastFrame } = render(React.createElement(App, null))
-    expect(lastFrame()).toEqual(chalk`Hello, {green Stranger}`)
+    expect(lastFrame()).toEqual("Hello, \u001b[32mStranger\u001b[39m")
   })
 
   test("greet user with a name", () => {
