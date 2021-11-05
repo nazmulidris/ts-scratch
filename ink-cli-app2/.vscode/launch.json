@@ -1,0 +1,18 @@
+{
+  // Debug launch.json for Node.js app written in TypeScript.
+  // Mode info: https://code.visualstudio.com/docs/typescript/typescript-debugging
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug CLI app",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeArgs": ["run-script", "build-and-run"],
+      "runtimeExecutable": "npm",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/cli.tsx",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+    }
+  ]
+}
