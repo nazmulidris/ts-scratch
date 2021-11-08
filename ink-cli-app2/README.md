@@ -29,10 +29,33 @@ $ chmod +x /dist/cli.js
 $ npm link
 ```
 
-## Watch mode
+## npm scripts
 
-You can execute the following independent of each other.
+There are two sets of scripts, ones that just run a command once, and others that start them in
+watch mode (very mich like webpack hot-reload).
 
-1. Compiling - `npm run build-watch` starts `tsc` and watches for changes.
-2. Running - `npm run dev` starts `nodemon` to watch for changes in `ts`, `tsx`, and `json` files
-   and runs `npm run build-and-run` when they do.
+- To run any of the following scripts you can execute `npm run <SCRIPT_NAME>`.
+- However, to run the `run.fish` script, you have to just execute it using `./run.fish`.
+
+### One off scripts
+
+| Task                     | Script          | Notes                                                  |
+| ------------------------ | --------------- | ------------------------------------------------------ |
+| Compiling                | `build`         | run`tsc` to generate JS files in the `dist` folder.    |
+| Running (no compilation) | `start`         | run the `dist/cli.js` file (make sure its executable). |
+| Compiling and running    | `build-and-run` | run the `build` script, then the `dist/cli.js` file.   |
+| Run tests                | `test`          | run all the Jest tests (no need for compiling).        |
+
+Notes about `start` script:
+
+1. Make sure to mark `dist/cli.js` file as executable so that this self executing module can run.
+2. To pass command line arguments you can use `npm run start -- --name=Grogu`.
+3. You can also run `npm exec -c 'ink-cli-app --name=Grogu'`.
+
+### Watch mode scripts (hot-reload)
+
+| Task                          | Script        | Notes                                                                                          |
+| ----------------------------- | ------------- | ---------------------------------------------------------------------------------------------- |
+| Compiling                     | `build-watch` | run`tsc` and watch for changes.                                                                |
+| Compiling and running         | `dev`         | run `nodemon` & watch for changes in `ts`, `tsx`, `json` files; run `build-and-run` on change. |
+| Compiling and running forever | `run.fish`    | run `forever` to run the `dev` script & restart it when it fails.                              |

@@ -13,7 +13,7 @@
     "start": "dist/cli.js",
     "pretest": "npm run build",
     "test": "jest",
-    "dev": "nodemon -e ts,tsx,json --exec 'npm run build-and-run'",
+    "dev": "nodemon --exitcrash -e ts,tsx,json --exec 'npm run build-and-run'",
     "build-and-run": "npm run build && dist/cli.js"
   },
   "files": [
@@ -33,6 +33,7 @@
     "eslint-config-xo-react": "^0.25.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "forever": "^4.0.1",
     "ink-testing-library": "^2.1.0",
     "jest": "^27.3.1",
     "nodemon": "^2.0.14",
