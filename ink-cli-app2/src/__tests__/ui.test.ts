@@ -16,7 +16,7 @@
 
 import React from "react"
 import { render } from "ink-testing-library"
-import App from "../App.js"
+import { App } from "../components/App.js"
 
 /**
  * ink-testing-library: https://github.com/vadimdemedes/ink-testing-library/blob/master/readme.md

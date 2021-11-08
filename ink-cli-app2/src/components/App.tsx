@@ -18,7 +18,7 @@ import React, { FC } from "react"
 import { Box, Text } from "ink"
 import { ComponentWithInterval } from "./ComponentWithInterval.js"
 
-const App: FC<{ name?: string }> = ({ name = "Stranger" }) => (
+export const App: FC<{ name?: string }> = ({ name = "Stranger" }) => (
   <Box
     borderStyle={"round"}
     borderColor={Style.brandColor}
@@ -40,5 +40,3 @@ const Style = {
   textColor: "#e6e6e6",
   brandColor: "#2f9ece",
 } as const
-
-export default App

@@ -16,9 +16,9 @@
 
 import React, { Dispatch, FC, SetStateAction } from "react"
 import { Text } from "ink"
-import { Animator } from "./utils/Animator.js"
+import { Animator } from "../utils/Animator.js"
 import { _also } from "r3bl-ts-utils"
-import { _withRef, ReactRef, StateHook, useForceUpdateFn } from "./utils/hook-utils.js"
+import { _withRef, ReactRef, StateHook, useForceUpdateFn } from "../utils/hook-utils.js"
 
 const DEBUG = false
 
