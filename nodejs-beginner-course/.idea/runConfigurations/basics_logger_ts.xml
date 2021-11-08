@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="basics/logger.ts" type="NodeJSConfigurationType" path-to-node="/usr/bin/ts-node-dev" path-to-js-file="src/basics/console-log-to-file.ts" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="basics/logger.ts" type="NodeJSConfigurationType" path-to-node="$PROJECT_DIR$/../../ts-node-dev-template/node_modules/.bin/ts-node-dev" path-to-js-file="src/basics/console-log-to-file.ts" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>
