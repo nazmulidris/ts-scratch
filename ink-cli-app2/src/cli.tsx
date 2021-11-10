@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2021 Google Inc. All rights reserved.
+ * Copyright 2021 Nazmul Idris All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,15 @@
 
 import React from "react"
 import { render } from "ink"
-import meow from "meow"
+import { Command } from "commander"
 import { App } from "./components/App.js"
+import { _let } from "r3bl-ts-utils"
 
-const cli = meow(
-  `
-  Usage
-    $ ink-cli-app2
+const name: string = _let(new Command(), (command) => {
+  command.option("-n, --name <name>", "name to display")
+  command.parse(process.argv)
+  const options = command.opts()
+  return options.name
+})
 
-  Options
-    --name  Your name
-
-  Examples
-    $ ink-cli-app2 --name=Grogu
-    Hello, Grogu
-`,
-  {
-    importMeta: import.meta,
-    flags: {
-      name: {
-        type: "string",
-      },
-    },
-  }
-)
-
-render(<App name={cli.flags.name} />)
+render(<App name={name} />)

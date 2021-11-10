@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google Inc. All rights reserved.
+ * Copyright 2021 Nazmul Idris All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import React, { FC } from "react"
 import { Box, Text } from "ink"
-import { ComponentWithInterval } from "./ComponentWithInterval.js"
+import { ComponentWithTimer } from "./ComponentWithTimer.js"
 
 export const App: FC<{ name?: string }> = ({ name = "Stranger" }) => (
   <Box
@@ -31,7 +31,7 @@ export const App: FC<{ name?: string }> = ({ name = "Stranger" }) => (
     <Text bold color={Style.textColor} backgroundColor={Style.brandColor}>
       {name}
     </Text>
-    <ComponentWithInterval />
+    <ComponentWithTimer />
   </Box>
 )
 
