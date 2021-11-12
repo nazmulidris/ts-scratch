@@ -26,7 +26,7 @@ const name: string = _let(new Command(), (command) => {
   command.option("-n, --name <name>", "name to display")
   command.parse(process.argv)
   const options = command.opts()
-  return options.name
+  return options["name"]
 })
 
 render(<App name={name} />)

@@ -29,7 +29,7 @@ const DEBUG = false
  * - https://stackoverflow.com/a/68602854/2085356
  */
 function useForceUpdateFn(): () => void {
-  const [value, setValue]: StateHook<boolean> = React.useState<boolean>(false)
+  const [_, setValue]: StateHook<boolean> = React.useState<boolean>(false)
   return () => setValue((value) => !value)
 }
 
