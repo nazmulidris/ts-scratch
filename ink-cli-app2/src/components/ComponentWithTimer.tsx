@@ -16,22 +16,9 @@
 
 import React, { FC } from "react"
 import { Text } from "ink"
-import { _also, _withRef, ReactRef, StateHook, Timer } from "r3bl-ts-utils"
+import { _also, _withRef, ReactRef, StateHook, Timer, useForceUpdateFn } from "r3bl-ts-utils"
 
 const DEBUG = false
-
-/**
- * Note - Do not import this function from `r3bl-ts-utils` as that fails due to ESM and CommonJS
- * issues. More on this in README:
- * - https://github.com/nazmulidris/ts-scratch/blob/main/ink-cli-app2/README.md#esm-r3bl-ts-utils-and-react
- *
- * Forcing React re-render:
- * - https://stackoverflow.com/a/68602854/2085356
- */
-function useForceUpdateFn(): () => void {
-  const [_, setValue]: StateHook<boolean> = React.useState<boolean>(false)
-  return () => setValue((value) => !value)
-}
 
 export const ComponentWithTimer: FC = () => {
   const myTimerRef: ReactRef<Timer> = React.useRef<Timer>()

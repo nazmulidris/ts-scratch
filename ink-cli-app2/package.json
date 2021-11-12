@@ -23,7 +23,7 @@
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "ink": "^3.2.0",
-    "r3bl-ts-utils": "^1.0.3",
+    "r3bl-ts-utils": "^1.0.5",
     "react": "^17.0.2",
     "tslib": "^2.3.1"
   },
@@ -31,7 +31,7 @@
     "@sindresorhus/tsconfig": "^2.0.0",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.34",
-    "eslint-plugin-react": "^7.26.1",
+    "eslint-plugin-react": "^7.27.0",
     "eslint-plugin-react-hooks": "^4.3.0",
     "ink-testing-library": "^2.1.0",
     "jest": "^27.3.1",
