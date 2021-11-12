@@ -19,7 +19,7 @@
 import React from "react"
 import { render } from "ink"
 import { Command } from "commander"
-import { App } from "./components/App.js"
+import { App } from "./components/App"
 import { _let } from "r3bl-ts-utils"
 
 const name: string = _let(new Command(), (command) => {

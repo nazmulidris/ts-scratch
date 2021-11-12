@@ -12,7 +12,8 @@
     "start": "dist/cli.js",
     "build-and-start": "npm run build && dist/cli.js",
     "pretest": "npm run build",
-    "test": "jest",
+    "test": "jest --config jestconfig.json",
+    "test-watch": "jest --config jestconfig.json --watch",
     "start-watch": "nodemon --exitcrash -e ts,tsx,js,jsx --exec 'node dist/cli.js || exit 1'",
     "dev": "npm-run-all -p -r build-watch start-watch"
   },
@@ -23,7 +24,7 @@
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "ink": "^3.2.0",
-    "r3bl-ts-utils": "^1.0.5",
+    "r3bl-ts-utils": "^1.0.6",
     "react": "^17.0.2",
     "tslib": "^2.3.1"
   },

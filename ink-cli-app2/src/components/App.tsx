@@ -16,14 +16,14 @@
 
 import React, { FC } from "react"
 import { Box, Text } from "ink"
-import { ComponentWithTimer } from "./ComponentWithTimer.js"
+import { ComponentWithTimer } from "./ComponentWithTimer"
 
 export const App: FC<{ name?: string }> = ({ name = "Stranger" }) => (
   <Box
-    borderStyle={"round"}
+    borderStyle="round"
     borderColor={Style.brandColor}
-    flexDirection={"column"}
-    alignItems={"center"}
+    flexDirection="column"
+    alignItems="center"
   >
     <Text color={Style.textColor} backgroundColor={Style.backgroundColor}>
       {`👋 Hello 👋`}

@@ -16,19 +16,19 @@
 
 import React from "react"
 import { render } from "ink-testing-library"
-import { App } from "../components/App.js"
+import { App } from "../components/App"
 
 /**
  * ink-testing-library: https://github.com/vadimdemedes/ink-testing-library/blob/master/readme.md
  */
 
-describe("ink test suite", () => {
-  test("greet unknown user", () => {
+describe("App", () => {
+  test("renders w/ no props", () => {
     const { lastFrame } = render(React.createElement(App, null))
     expect(lastFrame()).toContain("Stranger")
   })
 
-  test("greet user with a name", () => {
+  test("renders w/ name props", () => {
     const { lastFrame } = render(React.createElement(App, { name: "Grogu" }))
     expect(lastFrame()).toContain("Grogu")
   })
