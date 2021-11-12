@@ -1,7 +1,6 @@
 {
-  "type": "module",
   "name": "ink-cli-app",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "Apache 2.0",
   "bin": "dist/cli.js",
   "engines": {
@@ -9,28 +8,35 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && dist/cli.js",
+    "build-watch": "tsc --watch",
+    "start": "dist/cli.js",
+    "build-and-start": "npm run build && dist/cli.js",
     "pretest": "npm run build",
-    "test": "jest"
+    "test": "jest",
+    "start-watch": "nodemon --exitcrash -e ts,tsx,js,jsx --exec 'node dist/cli.js || exit 1'",
+    "dev": "npm-run-all -p -r build-watch start-watch"
   },
   "files": [
     "dist/cli.js"
   ],
   "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^8.3.0",
     "ink": "^3.2.0",
-    "meow": "^10.0.0",
-    "react": "^17.0.2"
+    "r3bl-ts-utils": "^1.0.5",
+    "react": "^17.0.2",
+    "tslib": "^2.3.1"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^2.0.0",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.34",
-    "chalk": "^4.1.2",
-    "eslint-config-xo-react": "^0.25.0",
-    "eslint-plugin-react": "^7.26.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-react": "^7.27.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "ink-testing-library": "^2.1.0",
     "jest": "^27.3.1",
+    "nodemon": "^2.0.15",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",
