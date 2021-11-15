@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import React, { FC } from "react"
+import React, { Dispatch, FC, Reducer } from "react"
 import { Text } from "ink"
-import { _also, _withRef, ReactRef, StateHook, Timer, useForceUpdateFn } from "r3bl-ts-utils"
+import { _also, _withRef, ReactRef, Timer } from "r3bl-ts-utils"
+import _ from "lodash"
 
 const DEBUG = false
 
-export const ComponentWithTimer: FC = () => {
-  const myTimerRef: ReactRef<Timer> = React.useRef<Timer>()
-  const [count, setCount]: StateHook<number> = React.useState<number>(0)
-  const forceUpdateFn = useForceUpdateFn()
+// Functional component.
 
+export const ComponentWithTimer: FC = () => {
+  const [myState, myStateDispatcher]: MyReducer.ReducerHookType =
+    React.useReducer<MyReducer.ReducerType>(MyReducer.reducerFn, MyReducer.initialState)
+  const myTimerRef: ReactRef<Timer> = React.useRef<Timer>()
   React.useEffect(startTimerEffect, [] /* componentDidMount */)
   React.useEffect(checkToStopTimerEffect)
 
@@ -36,6 +38,7 @@ export const ComponentWithTimer: FC = () => {
       (timer) => {
         myTimerRef.current = timer
         timer.start()
+        myStateDispatcher({ type: "startTimer" })
       }
     )
 
@@ -50,28 +53,31 @@ export const ComponentWithTimer: FC = () => {
       if (timer.isStarted) {
         if (timer.counter.value >= TimerCounterConfig.maxCounter) {
           timer.stop()
-          forceUpdateFn() // Force a re-render after timer has stopped, to show the skull.
+          myStateDispatcher({ type: "stopTimer" })
         }
       }
     })
   }
 
   function tick(timer: Timer): void {
-    setCount(timer.counter.value)
+    myStateDispatcher({
+      type: "setCount",
+      payload: timer.counter.value,
+    })
     DEBUG && console.log(`"${timer.name}"`, timer.isStarted, timer.counter.value)
   }
 
   function render() {
     return (
       <Text color={"green"}>
-        [{count} tests passed]
+        [{myState.count} tests passed]
         {showSkullIfTimerIsStopped()}
       </Text>
     )
   }
 
   function showSkullIfTimerIsStopped() {
-    return !myTimerRef.current?.isStarted ? "💀" : null
+    return !myState.run ? "💀" : null
   }
 }
 
@@ -80,3 +86,55 @@ const TimerCounterConfig = {
   updateIntervalMs: 1000,
   maxCounter: 5,
 } as const
+
+// Reducer.
+
+namespace MyReducer {
+  type State = {
+    count: number
+    run: boolean
+  }
+  export const initialState: Readonly<State> = {
+    count: 0,
+    run: false,
+  }
+
+  interface ActionStartTimer {
+    type: "startTimer"
+  }
+  interface ActionStopTimer {
+    type: "stopTimer"
+  }
+  interface ActionSetCount {
+    type: "setCount"
+    payload: number
+  }
+  type Action = ActionStartTimer | ActionStopTimer | ActionSetCount
+
+  export type ReducerType = Reducer<State, Action>
+  export type ReducerHookType = [State, Dispatch<Action>]
+
+  export function reducerFn(current: State, action: Action): State {
+    // Initial state.
+    if (!action) {
+      return {
+        count: 0,
+        run: false,
+      }
+    }
+
+    let currentCopy: State = _.clone(current)
+    switch (action.type) {
+      case "setCount":
+        currentCopy.count = action.payload
+        break
+      case "startTimer":
+        currentCopy.run = true
+        break
+      case "stopTimer":
+        currentCopy.run = false
+        break
+    }
+    return currentCopy
+  }
+}

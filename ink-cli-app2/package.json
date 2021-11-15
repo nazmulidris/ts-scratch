@@ -24,6 +24,7 @@
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "ink": "^3.2.0",
+    "lodash": "^4.17.21",
     "r3bl-ts-utils": "^1.0.6",
     "react": "^17.0.2",
     "tslib": "^2.3.1"
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@sindresorhus/tsconfig": "^2.0.0",
     "@types/jest": "^27.0.2",
+    "@types/lodash": "^4.14.177",
     "@types/react": "^17.0.34",
     "eslint-plugin-react": "^7.27.0",
     "eslint-plugin-react-hooks": "^4.3.0",
