@@ -19,24 +19,27 @@ import { EnhancedStore } from "@reduxjs/toolkit"
 
 const DEBUG = false
 
-const config = {
+const { maxCounter, name, updateIntervalMs } = {
   name: "Timer in App, count from 0 to 5, at 1s interval",
   updateIntervalMs: 1000,
   maxCounter: 5,
 }
 
 export class ReduxTimerAdapter {
-  constructor(
-    readonly store: EnhancedStore,
-    readonly timer: Timer = new Timer(config.name, config.updateIntervalMs)
-  ) {}
+  readonly store: EnhancedStore
+  readonly timer: Timer
+
+  constructor(store: EnhancedStore, timer?: Timer) {
+    this.store = store
+    this.timer = timer ?? new Timer(name, updateIntervalMs)
+  }
 
   startTimerEffectOnComponentMount = () => {
     const { timer, store, tickFn, endTimerEffectOnComponentUnmount } = this
 
-    if (!timer.tickFn) timer.tickFn = tickFn
+    if (!timer.tickFn) timer.onTick = tickFn
     if (!timer.isStarted) {
-      timer.start()
+      timer.startTicking()
       store.dispatch({ type: "startTimer" })
     }
     return endTimerEffectOnComponentUnmount
@@ -45,7 +48,7 @@ export class ReduxTimerAdapter {
   endTimerEffectOnComponentUnmount = () => {
     const { timer } = this
 
-    if (timer.isStarted) timer.stop()
+    if (timer.isStarted) timer.stopTicking()
     DEBUG && console.log(`😵 unmount`, timer)
   }
 
@@ -62,8 +65,8 @@ export class ReduxTimerAdapter {
   checkToStopTimerEffectOnRerender = () => {
     const { timer, store } = this
 
-    if (timer.isStarted && timer.currentCount >= config.maxCounter) {
-      timer.stop()
+    if (timer.isStarted && timer.currentCount >= maxCounter) {
+      timer.stopTicking()
       store.dispatch({ type: "stopTimer" })
     }
   }
