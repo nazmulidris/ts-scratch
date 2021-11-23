@@ -19,35 +19,29 @@ import { EnhancedStore } from "@reduxjs/toolkit"
 
 const DEBUG = false
 
-const { maxCounter, name, updateIntervalMs } = {
-  name: "Timer in App, count from 0 to 5, at 1s interval",
-  updateIntervalMs: 1000,
-  maxCounter: 5,
-}
-
 export class ReduxTimerAdapter {
-  readonly store: EnhancedStore
-  readonly timer: Timer
-
-  constructor(store: EnhancedStore, timer?: Timer) {
-    this.store = store
-    this.timer = timer ?? new Timer(name, updateIntervalMs)
-  }
+  constructor(
+    readonly store: EnhancedStore,
+    readonly maxCounter?: number,
+    readonly timer?: Timer
+  ) {}
 
   startTimerEffectOnComponentMount = () => {
-    const { timer, store, tickFn, endTimerEffectOnComponentUnmount } = this
+    const { timer, store, tickFn } = this
+
+    if (!timer) return
 
     if (!timer.tickFn) timer.onTick = tickFn
     if (!timer.isStarted) {
       timer.startTicking()
       store.dispatch({ type: "startTimer" })
     }
-    return endTimerEffectOnComponentUnmount
+    return () => {
+      this.endTimerEffectOnComponentUnmount(timer)
+    }
   }
 
-  endTimerEffectOnComponentUnmount = () => {
-    const { timer } = this
-
+  endTimerEffectOnComponentUnmount = (timer: Timer) => {
     if (timer.isStarted) timer.stopTicking()
     DEBUG && console.log(`😵 unmount`, timer)
   }
@@ -55,19 +49,26 @@ export class ReduxTimerAdapter {
   tickFn = () => {
     const { timer, store } = this
 
+    if (!timer) return
+
     store.dispatch({
       type: "setCount",
       payload: timer.currentCount,
     })
-    DEBUG && console.log(`"${timer.name}"`, timer.isStarted, timer.currentCount)
+    DEBUG && console.log(`🕛 "${timer.name}"`, timer.isStarted, timer.currentCount)
   }
 
   checkToStopTimerEffectOnRerender = () => {
-    const { timer, store } = this
+    const { timer, store, maxCounter } = this
 
-    if (timer.isStarted && timer.currentCount >= maxCounter) {
-      timer.stopTicking()
-      store.dispatch({ type: "stopTimer" })
+    if (!timer || !maxCounter) return
+
+    if (timer.currentCount >= maxCounter) {
+      if (timer.isRunning) {
+        timer.stop()
+        store.dispatch({ type: "stopTimer" })
+        DEBUG && console.log(`⛔ effect to stop timer`, timer)
+      }
     }
   }
 }

@@ -21,6 +21,7 @@ import { Provider } from "react-redux"
 import { configureStore, EnhancedStore } from "@reduxjs/toolkit"
 import * as TimerReducer from "./TimerReducer"
 import { ReduxTimerAdapter } from "./ReduxTimerAdapter"
+import { Timer } from "r3bl-ts-utils"
 
 // Create Redux store.
 const store = configureStore<TimerReducer.ReducerType>({
@@ -28,7 +29,11 @@ const store = configureStore<TimerReducer.ReducerType>({
 }) as EnhancedStore<TimerReducer.ReducerType, TimerReducer.Action, any>
 
 // Create Timer.
-const timerAdapter = new ReduxTimerAdapter(store)
+const timerAdapter = new ReduxTimerAdapter(
+  store,
+  5,
+  new Timer("Timer in App, count from 0 to 5, at 1s interval", 1000)
+)
 
 // App functional component.
 const Style = {
