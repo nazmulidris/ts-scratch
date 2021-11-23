@@ -16,24 +16,8 @@
 
 import React, { FC } from "react"
 import { Box, Text } from "ink"
-import { ComponentToDisplayTimer } from "./ComponentToDisplayTimer"
+import { TimerDisplayComponent, effectFn, store } from "./timer-component"
 import { Provider } from "react-redux"
-import { configureStore, EnhancedStore } from "@reduxjs/toolkit"
-import * as TimerReducer from "./TimerReducer"
-import { ReduxTimerAdapter } from "./ReduxTimerAdapter"
-import { Timer } from "r3bl-ts-utils"
-
-// Create Redux store.
-const store = configureStore<TimerReducer.ReducerType>({
-  reducer: TimerReducer.reducerFn,
-}) as EnhancedStore<TimerReducer.ReducerType, TimerReducer.Action, any>
-
-// Create Timer.
-const timerAdapter = new ReduxTimerAdapter(
-  store,
-  5,
-  new Timer("Timer in App, count from 0 to 5, at 1s interval", 1000)
-)
 
 // App functional component.
 const Style = {
@@ -59,7 +43,7 @@ export const App: FC<PropTypes> = ({ name = "Stranger" }) => {
         {name}
       </Text>
       <Provider store={store}>
-        <ComponentToDisplayTimer timerAdapter={timerAdapter} />
+        <TimerDisplayComponent onComponentMountEffect={effectFn} />
       </Provider>
     </Box>
   )

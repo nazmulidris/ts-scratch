@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import React, { FC } from "react"
+import React, { EffectCallback, FC } from "react"
 import { Text } from "ink"
 import { useSelector } from "react-redux"
-import * as TimerReducer from "./TimerReducer"
-import { ReduxTimerAdapter } from "./ReduxTimerAdapter"
+import { State } from "./timer-reducer"
 
 type PropType = {
-  timerAdapter: ReduxTimerAdapter
+  onComponentMountEffect: EffectCallback
 }
-export const ComponentToDisplayTimer: FC<PropType> = ({ timerAdapter }) => {
-  const state = useSelector((state) => state) as TimerReducer.State
 
-  React.useEffect(timerAdapter.startTimerEffectOnComponentMount, [] /* componentDidMount */)
-  React.useEffect(timerAdapter.checkToStopTimerEffectOnRerender)
+export const TimerDisplayComponent: FC<PropType> = ({ onComponentMountEffect }) => {
+  const state = useSelector((state) => state) as State
+
+  React.useEffect(onComponentMountEffect, [] /* componentDidMount */)
 
   return render()
 

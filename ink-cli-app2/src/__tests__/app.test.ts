@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright 2021 Nazmul Idris All rights reserved.
  *
@@ -17,16 +15,21 @@
  */
 
 import React from "react"
-import { render } from "ink"
-import { Command } from "commander"
-import { App } from "./components/app"
-import { _let } from "r3bl-ts-utils"
+import { render } from "ink-testing-library"
+import { App } from "../components/app"
 
-const name: string = _let(new Command(), (command) => {
-  command.option("-n, --name <name>", "name to display")
-  command.parse(process.argv)
-  const options = command.opts()
-  return options["name"]
+/**
+ * ink-testing-library: https://github.com/vadimdemedes/ink-testing-library/blob/master/readme.md
+ */
+
+describe("App", () => {
+  test("renders w/ no props", () => {
+    const { lastFrame } = render(React.createElement(App, null))
+    expect(lastFrame()).toContain("Stranger")
+  })
+
+  test("renders w/ name props", () => {
+    const { lastFrame } = render(React.createElement(App, { name: "Grogu" }))
+    expect(lastFrame()).toContain("Grogu")
+  })
 })
-
-render(<App name={name} />)

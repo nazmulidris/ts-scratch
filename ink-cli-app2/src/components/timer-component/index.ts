@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright 2021 Nazmul Idris All rights reserved.
  *
@@ -16,17 +14,7 @@
  * limitations under the License.
  */
 
-import React from "react"
-import { render } from "ink"
-import { Command } from "commander"
-import { App } from "./components/app"
-import { _let } from "r3bl-ts-utils"
-
-const name: string = _let(new Command(), (command) => {
-  command.option("-n, --name <name>", "name to display")
-  command.parse(process.argv)
-  const options = command.opts()
-  return options["name"]
-})
-
-render(<App name={name} />)
+export * from "./store"
+export * from "./TimerDisplayComponent"
+export * from "./timer-reducer"
+export * from "./timer-redux-connector"

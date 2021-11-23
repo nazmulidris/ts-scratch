@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-import React from "react"
-import { render } from "ink-testing-library"
-import { App } from "../components/App"
+import { EffectCallback } from "react"
+import { configureStore, EnhancedStore } from "@reduxjs/toolkit"
+import { Action, reducerFn, ReducerType } from "./timer-reducer"
+import { createAndManageTimer } from "./timer-redux-connector"
 
-/**
- * ink-testing-library: https://github.com/vadimdemedes/ink-testing-library/blob/master/readme.md
- */
+// Create Redux store.
+export type TimerStore = EnhancedStore<ReducerType, Action, any>
+export const store = configureStore<ReducerType>({
+  reducer: reducerFn,
+}) as TimerStore
 
-describe("App", () => {
-  test("renders w/ no props", () => {
-    const { lastFrame } = render(React.createElement(App, null))
-    expect(lastFrame()).toContain("Stranger")
-  })
-
-  test("renders w/ name props", () => {
-    const { lastFrame } = render(React.createElement(App, { name: "Grogu" }))
-    expect(lastFrame()).toContain("Grogu")
-  })
-})
+// Create Timer and connect it to the Redux store.
+export const effectFn: EffectCallback = createAndManageTimer()

@@ -1,22 +1,38 @@
+/*
+ * Copyright 2021 Nazmul Idris All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { Provider } from "react-redux"
-import { ComponentToDisplayTimer } from "../ComponentToDisplayTimer"
+import {
+  Action,
+  TimerDisplayComponent,
+  reducerFn,
+  ReducerType,
+  TimerStore,
+} from "../timer-component"
 import React from "react"
 import { render } from "ink-testing-library"
 import { configureStore, EnhancedStore } from "@reduxjs/toolkit"
-import * as TimerReducer from "../TimerReducer"
-import { ReduxTimerAdapter } from "../ReduxTimerAdapter"
 
-let store: EnhancedStore<TimerReducer.ReducerType, TimerReducer.Action, any>
-let timerAdapter: ReduxTimerAdapter
+let store: TimerStore
 
 beforeEach(() => {
   // Create Redux store.
-  store = configureStore<TimerReducer.ReducerType>({
-    reducer: TimerReducer.reducerFn,
-  }) as EnhancedStore<TimerReducer.ReducerType, TimerReducer.Action, any>
-
-  // Create TimerAdapter.
-  timerAdapter = new ReduxTimerAdapter(store)
+  store = configureStore<ReducerType>({
+    reducer: reducerFn,
+  }) as EnhancedStore<ReducerType, Action, any>
 })
 
 describe("ComponentToDisplayTimer", () => {
@@ -43,6 +59,6 @@ describe("ComponentToDisplayTimer", () => {
 
 const TestFC = () => (
   <Provider store={store}>
-    <ComponentToDisplayTimer timerAdapter={timerAdapter} />
+    <TimerDisplayComponent onComponentMountEffect={() => {}} />
   </Provider>
 )
