@@ -45,7 +45,7 @@ export function reducerFn(current: State | undefined, action: Action): State {
     }
   }
 
-  let currentCopy: State = _.clone(current)
+  const currentCopy: State = _.clone(current)
   switch (action.type) {
     case "setCount":
       currentCopy.count = action.payload

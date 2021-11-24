@@ -17,7 +17,7 @@
 import React, { EffectCallback, FC } from "react"
 import { Text } from "ink"
 import { useSelector } from "react-redux"
-import { State } from "./timer-reducer"
+import { State } from "./reducer"
 
 type PropType = {
   onComponentMountEffect: EffectCallback

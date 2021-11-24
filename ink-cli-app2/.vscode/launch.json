@@ -7,7 +7,7 @@
       "name": "Debug CLI app",
       "type": "pwa-node",
       "request": "launch",
-      "runtimeArgs": ["run-script", "build-and-run"],
+      "runtimeArgs": ["run-script", "start"],
       "runtimeExecutable": "npm",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/src/cli.tsx",

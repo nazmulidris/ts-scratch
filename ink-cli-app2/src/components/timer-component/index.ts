@@ -15,6 +15,6 @@
  */
 
 export * from "./store"
-export * from "./TimerDisplayComponent"
-export * from "./timer-reducer"
-export * from "./timer-redux-connector"
+export * from "./component"
+export * from "./reducer"
+export * from "./timer-store-connector"

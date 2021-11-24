@@ -16,8 +16,8 @@
 
 import { EffectCallback } from "react"
 import { configureStore, EnhancedStore } from "@reduxjs/toolkit"
-import { Action, reducerFn, ReducerType } from "./timer-reducer"
-import { createAndManageTimer } from "./timer-redux-connector"
+import { Action, reducerFn, ReducerType } from "./reducer"
+import { createAndManageTimer } from "./timer-store-connector"
 
 // Create Redux store.
 export type TimerStore = EnhancedStore<ReducerType, Action, any>
@@ -26,4 +26,4 @@ export const store = configureStore<ReducerType>({
 }) as TimerStore
 
 // Create Timer and connect it to the Redux store.
-export const effectFn: EffectCallback = createAndManageTimer()
+export const effectFn: EffectCallback = createAndManageTimer(store)
