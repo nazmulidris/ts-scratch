@@ -1,3 +1,5 @@
 {
-  "jest.jestCommandLine": "jest --config jestconfig.json"
-}
+  "jest.jestCommandLine": "npx jest --watchAll",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+}}
