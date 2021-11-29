@@ -1,0 +1,11 @@
+{
+  "extends": "@sindresorhus/tsconfig",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "target": "ESNext", // https://stackoverflow.com/a/62837086/2085356
+    "module": "CommonJS"
+  },
+  "include": ["src"]
+}
