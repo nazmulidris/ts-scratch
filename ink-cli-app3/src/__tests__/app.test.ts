@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-import React from "react"
 import { render } from "ink-testing-library"
-import { App } from "../components/app"
+import { TimerRegistry } from "r3bl-ts-utils"
+import React from "react"
+import { appFn } from "../components/app"
 
 /**
  * ink-testing-library: https://github.com/vadimdemedes/ink-testing-library/blob/master/readme.md
  */
 
-describe("App", () => {
-  test("renders w/ no props", () => {
-    const { lastFrame } = render(React.createElement(App, null))
-    expect(lastFrame()).toContain("Stranger")
-  })
+afterEach(() => {
+  TimerRegistry.killAll()
+})
 
-  test("renders w/ name props", () => {
-    const { lastFrame } = render(React.createElement(App, { name: "Grogu" }))
-    expect(lastFrame()).toContain("Grogu")
-  })
+test("renders w/ name props", () => {
+  const { lastFrame } = render(React.createElement(appFn, { name: "Grogu" }))
+  expect(lastFrame()).toContain("Grogu")
 })

@@ -14,8 +14,46 @@
  * limitations under the License.
  */
 
+import { Text } from "ink"
+import React from "react"
+
 export const Style = {
   backgroundColor: "#161b22",
   textColor: "#e6e6e6",
   brandColor: "#2f9ece",
+  column1Width: "35%",
+  appWidth: "90%",
+}
+
+// eslint-disable-next-line
+export namespace TextStyle {
+  export const subHeading = (text: string): JSX.Element => (
+    <Text
+      wrap="truncate-middle"
+      bold
+      color={Style.brandColor}
+      backgroundColor={Style.backgroundColor}
+    >
+      {" " + text + " "}
+    </Text>
+  )
+
+  export const heading = (text: string): JSX.Element => (
+    <Text
+      wrap="truncate-middle"
+      bold
+      color={Style.backgroundColor}
+      backgroundColor={Style.brandColor}
+    >
+      {" " + text + " "}
+    </Text>
+  )
+
+  export const emphasis = (text: string): JSX.Element => (
+    <Text bold italic color={Style.textColor}>
+      {text}
+    </Text>
+  )
+
+  export const styleNormal = (text: string) => <Text color={Style.textColor}>{text}</Text>
 }
