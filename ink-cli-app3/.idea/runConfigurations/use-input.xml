@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="use-input.tsx" type="NodeJSConfigurationType" 
+       node-parameters="-r tsm src/examples/use-input.tsx" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

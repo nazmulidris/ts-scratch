@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration 
+      default="false" name="cli.tsx" type="NodeJSConfigurationType" 
+      node-parameters="-r tsm src/cli.tsx" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
