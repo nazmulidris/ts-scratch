@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { FC } from "react"
 import { Box, Text } from "ink"
-import { TimerDisplayComponent, effectFn, store } from "./timer-component"
+import React, { FC } from "react"
 import { Provider } from "react-redux"
+import { effectFn, store, TimerDisplayComponent } from "./timer-component"
 
-// App functional component.
+// App function component.
 const Style = {
   backgroundColor: "#161b22",
   textColor: "#e6e6e6",

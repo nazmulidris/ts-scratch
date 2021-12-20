@@ -8,7 +8,7 @@ import {
 } from "r3bl-ts-utils"
 import React, { FC } from "react"
 
-//#region Main functional component.
+//#region Main function component.
 const UseFocusExample: FC = function (): JSX.Element {
   const [keyPress, inRawMode] = useKeyboard(
     onKeyPress.bind({ app: useApp(), focusManager: useFocusManager() })

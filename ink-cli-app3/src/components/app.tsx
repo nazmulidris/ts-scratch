@@ -30,7 +30,7 @@ import React, { FC } from "react"
 import { Style, TextStyle } from "./global-style"
 //#endregion
 
-//#region App functional component.
+//#region App function component.
 export const appFn: FC<{ name: string }> = ({ name }) => render(runHooks(name))
 
 function runHooks(name: string): LocalVars {
